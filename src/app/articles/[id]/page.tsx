@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar } from 'lucide-react';
+import { Calendar, Info } from 'lucide-react';
 import type { Metadata, ResolvingMetadata } from 'next'
 import ShareButtons from '@/components/share-buttons';
 import RelatedArticles from '@/components/related-articles';
@@ -99,6 +99,16 @@ export default async function ArticlePage({ params }: { params: { id: string } }
                     priority
                     />
                 </div>
+                
+                {article.aiSummary && (
+                  <div className="mb-8 p-4 bg-muted/50 border-l-4 border-primary rounded-r-lg">
+                      <h3 className="font-semibold flex items-center gap-2 mb-2">
+                        <Info className="h-5 w-5 text-primary" />
+                        একনজরে
+                      </h3>
+                      <p className="text-muted-foreground italic">{article.aiSummary}</p>
+                  </div>
+                )}
 
                 <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-foreground/90">
                     {article.content.map((paragraph, index) => (
