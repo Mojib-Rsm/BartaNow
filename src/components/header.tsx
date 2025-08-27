@@ -124,7 +124,9 @@ export default function Header() {
                           </nav>
                           <div className="p-4 border-t">
                               <Button variant="outline" className="w-full mb-2">ই-পেপার</Button>
-                              <Button className="w-full">Login</Button>
+                               <Button asChild className="w-full">
+                                <Link href="/login">লগইন করুন</Link>
+                              </Button>
                           </div>
                       </div>
                   </SheetContent>
@@ -171,8 +173,8 @@ export default function Header() {
                 <SearchInput />
                 <ThemeToggle />
                 <Button variant="outline" size="sm" className="hidden md:inline-flex">ই-পেপার</Button>
-                 <Button variant="ghost" size="sm" className="hidden md:inline-flex items-center gap-1.5">
-                    লগইন
+                 <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex items-center gap-1.5">
+                    <Link href="/login">লগইন</Link>
                 </Button>
             </div>
         </div>

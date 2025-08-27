@@ -5,6 +5,7 @@ import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useState } from 'react';
+import Link from 'next/link';
 
 type Comment = {
   id: number;
@@ -52,7 +53,15 @@ export default function CommentsSection({ articleId }: { articleId: string }) {
                 onChange={(e) => setNewComment(e.target.value)}
                 disabled={!isLoggedIn}
             />
-             {!isLoggedIn && <p className="text-xs text-muted-foreground">মতামত জানাতে অনুগ্রহ করে লগইন করুন।</p>}
+             {!isLoggedIn && (
+                <p className="text-xs text-muted-foreground">
+                    মতামত জানাতে অনুগ্রহ করে{' '}
+                    <Link href="/login" className="text-primary hover:underline">
+                         লগইন করুন
+                    </Link>
+                    ।
+                </p>
+             )}
         </div>
         <div className="flex justify-end">
             <Button onClick={handlePostComment} disabled={!isLoggedIn || !newComment.trim()}>
