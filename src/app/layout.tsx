@@ -20,6 +20,11 @@ export const metadata: Metadata = {
     locale: 'bn_BD',
     type: 'website',
   },
+  twitter: {
+    card: 'summary',
+    title: 'বার্তা নাও - সর্বশেষ সংবাদ ও বিশ্লেষণ',
+    description: 'রাজনীতি, প্রযুক্তি, খেলা, বিনোদন, এবং আরও অনেক কিছুর উপর সর্বশেষ খবর ও আপডেট পান।',
+  },
   manifest: '/manifest.json',
 };
 
