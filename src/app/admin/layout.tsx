@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -43,6 +44,7 @@ export default function AdminLayout({
     }
   }, []);
 
+  const hasAccessToUsers = user?.role === 'admin' || user?.role === 'editor';
 
   const isActive = (path: string) => {
     if (path === '/admin') return pathname === '/admin';
@@ -77,14 +79,16 @@ export default function AdminLayout({
                     </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
-                 <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/users')}>
-                    <Link href="/admin/users">
-                        <Users />
-                        ব্যবহারকারীগণ
-                    </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
+                 {hasAccessToUsers && (
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive('/admin/users')}>
+                        <Link href="/admin/users">
+                            <Users />
+                            ব্যবহারকারীগণ
+                        </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                 )}
                 </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>

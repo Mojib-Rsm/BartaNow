@@ -134,12 +134,20 @@ export const columns: ColumnDef<User>[] = [
     header: "রোল",
     cell: ({ row }) => {
         const role = row.getValue("role") as string;
+        
+        const roleVariantMap: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
+            admin: 'destructive',
+            editor: 'default',
+            reporter: 'secondary',
+            user: 'outline',
+        };
+
         return (
             <Badge 
-                variant={role === 'admin' ? 'default' : 'secondary'}
-                className={cn(role === 'admin' && 'bg-primary/80')}
+                variant={roleVariantMap[role] || 'outline'}
+                className={cn(role === 'editor' && 'bg-blue-600 hover:bg-blue-700 text-white')}
             >
-                {role}
+                {role.charAt(0).toUpperCase() + role.slice(1)}
             </Badge>
         )
     },

@@ -26,12 +26,34 @@ const users: User[] = [
         id: 'user-2', 
         name: 'Regular User', 
         email: 'user@bartanow.com', 
-        password: 'password123', 
+        password: 'password123',         
         role: 'user',
         avatarUrl: 'https://i.pravatar.cc/150?u=regular-user',
         bio: 'আমি একজন সাধারণ পাঠক। খেলা এবং বিনোদনের খবর পড়তে ভালোবাসি।',
         bloodGroup: 'O+',
         preferredTopics: ['খেলা', 'বিনোদন'],
+    },
+    { 
+        id: 'user-3', 
+        name: 'Editor User', 
+        email: 'editor@bartanow.com', 
+        password: 'password123', 
+        role: 'editor',
+        avatarUrl: 'https://i.pravatar.cc/150?u=editor-user',
+        bio: 'বার্তা নাও এর একজন সম্পাদক। আমি সংবাদ সম্পাদনা এবং গুণমান নিশ্চিত করতে কাজ করি।',
+        bloodGroup: 'B+',
+        preferredTopics: ['জাতীয়', 'আন্তর্জাতিক'],
+    },
+    { 
+        id: 'user-4', 
+        name: 'Reporter User', 
+        email: 'reporter@bartanow.com', 
+        password: 'password123', 
+        role: 'reporter',
+        avatarUrl: 'https://i.pravatar.cc/150?u=reporter-user',
+        bio: 'আমি একজন প্রতিবেদক। মাঠ থেকে সরাসরি খবর সংগ্রহ এবং রিপোর্ট করাই আমার কাজ।',
+        bloodGroup: 'AB+',
+        preferredTopics: ['বিশেষ-কভারেজ', 'স্বাস্থ্য'],
     },
 ];
 
@@ -543,5 +565,3 @@ export const mockDb = {
   ],
   memeNews,
 };
-
-    

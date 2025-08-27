@@ -24,7 +24,7 @@ const formSchema = z.object({
   id: z.string(),
   name: z.string().min(3, { message: "নাম কমপক্ষে ৩ অক্ষরের হতে হবে।" }),
   email: z.string().email(),
-  role: z.enum(['admin', 'user']),
+  role: z.enum(['admin', 'editor', 'reporter', 'user']),
   avatarUrl: z.string().optional().or(z.literal('')),
   bio: z.string().max(300, { message: "বায়ো ৩০০ অক্ষরের মধ্যে হতে হবে।" }).optional(),
   bloodGroup: z.string().optional(),
@@ -189,12 +189,14 @@ export default function UserEditPage({ params }: PageProps) {
             </div>
              <div className="grid gap-2">
                 <Label htmlFor="role">রোল</Label>
-                <Select onValueChange={(value) => form.setValue('role', value as 'admin' | 'user')} defaultValue={form.getValues('role')}>
+                <Select onValueChange={(value) => form.setValue('role', value as 'admin' | 'editor' | 'reporter' | 'user')} defaultValue={form.getValues('role')}>
                     <SelectTrigger id="role">
                         <SelectValue placeholder="রোল নির্বাচন করুন" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="reporter">Reporter</SelectItem>
+                        <SelectItem value="editor">Editor</SelectItem>
                         <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                 </Select>
@@ -220,4 +222,3 @@ export default function UserEditPage({ params }: PageProps) {
     </Card>
   );
 }
-
