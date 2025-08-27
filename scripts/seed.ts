@@ -55,8 +55,10 @@ export async function seedDatabase() {
         console.error("Error seeding database:", error);
         let errorMessage = "An unknown error occurred during seeding.";
         if (error instanceof Error) {
-            // Check for common AWS credential errors
-            if (error.name === 'UnrecognizedClientException' || error.message.includes('Invalid security token')) {
+            // Check for specific, common errors to provide better user feedback
+            if (error.name === 'ResourceNotFoundException') {
+                errorMessage = `Error seeding database: The table '${tableName}' was not found. Please create the DynamoDB table first. Refer to the README.md for setup instructions.`;
+            } else if (error.name === 'UnrecognizedClientException' || error.message.includes('Invalid security token')) {
                 errorMessage = "Error seeding database: The security token included in the request is invalid. Please check your AWS credentials in the .env file.";
             } else {
                 errorMessage = `Error seeding database: ${error.message}`;

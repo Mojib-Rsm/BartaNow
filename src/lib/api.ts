@@ -16,7 +16,13 @@ let docClient: DynamoDBDocumentClient;
 const tableName = process.env.DYNAMODB_TABLE_NAME || 'BartaNow_News';
 
 if (!useMockData) {
-    const client = new DynamoDBClient({ region: process.env.AWS_REGION });
+    const client = new DynamoDBClient({ 
+        region: process.env.AWS_REGION,
+        credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+        }
+    });
     docClient = DynamoDBDocumentClient.from(client);
 }
 
@@ -46,22 +52,22 @@ export async function getArticles({ page = 1, limit = 6 }: { page?: number; limi
     if (useMockData) {
         return getMockArticles({ page, limit });
     }
-
-    // A full implementation would require another query to get the total count
-    // for simplicity, we'll estimate total pages, but this is not robust for production.
-    // A better approach is to store the total count separately or accept an approximation.
-    const DUMMY_TOTAL_ARTICLES = 100; // Placeholder
-    const totalPages = Math.ceil(DUMMY_TOTAL_ARTICLES / limit);
-
-    // DynamoDB pagination is complex. A real implementation would store and pass
-    // the `LastEvaluatedKey` between page loads. For this starter, we'll
-    // simulate basic pagination by repeating the query and relying on client-side page numbers,
-    // which is not efficient for deep pagination.
     
-    let allItems: Article[] = [];
-    let lastEvaluatedKey: Record<string, any> | undefined = undefined;
-
     try {
+        // A full implementation would require another query to get the total count
+        // for simplicity, we'll estimate total pages, but this is not robust for production.
+        // A better approach is to store the total count separately or accept an approximation.
+        const DUMMY_TOTAL_ARTICLES = 100; // Placeholder
+        const totalPages = Math.ceil(DUMMY_TOTAL_ARTICLES / limit);
+
+        // DynamoDB pagination is complex. A real implementation would store and pass
+        // the `LastEvaluatedKey` between page loads. For this starter, we'll
+        // simulate basic pagination by repeating the query and relying on client-side page numbers,
+        // which is not efficient for deep pagination.
+        
+        let allItems: Article[] = [];
+        let lastEvaluatedKey: Record<string, any> | undefined = undefined;
+
         // This loop is for demonstration. For a real app, you would fetch only up to the requested page.
         for (let i = 0; i < page; i++) {
             const command = new QueryCommand({
@@ -112,7 +118,7 @@ export async function getArticleById(id: string): Promise<Article | undefined> {
     });
 
     try {
-        const { Item } = await doc.send(command);
+        const { Item } = await docClient.send(command);
         return Item as Article | undefined;
     } catch(error) {
         console.error(`Error fetching article ${id} from DynamoDB:`, error);
