@@ -1,15 +1,14 @@
 import { getArticles } from '@/lib/api';
 import ArticleCard from '@/components/article-card';
-import Pagination from '@/components/pagination';
 import SeedButton from '@/components/seed-button';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import type { Article } from '@/lib/types';
 import { ArrowRight, PlayCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import PollSection from '@/components/poll-section';
+import LoadMore from '@/components/load-more';
 
 
 type HomePageProps = {
@@ -31,7 +30,12 @@ const SectionHeader = ({ title, href }: { title: string, href: string }) => (
 
 export default async function Home({ searchParams }: HomePageProps) {
   const page = searchParams?.page ? parseInt(searchParams.page, 10) : 1;
-  const { articles, totalPages } = await getArticles({ page, limit: 12 });
+  // Fetch initial articles for the grid, not for the "Load More" list
+  const { articles, totalPages } = await getArticles({ page: 1, limit: 13 });
+  
+  // Fetch a separate set of articles for the "Load More" section
+  const latestArticlesResult = await getArticles({ page: 1, limit: 6 });
+
 
   if (articles.length === 0) {
     return (
@@ -244,10 +248,15 @@ export default async function Home({ searchParams }: HomePageProps) {
         </section>
       )}
 
+      {/* Latest News with Load More */}
+      <section>
+        <SectionHeader title="সর্বশেষ" href="/latest" />
+        <LoadMore 
+          initialArticles={latestArticlesResult.articles} 
+          totalPages={latestArticlesResult.totalPages}
+        />
+      </section>
 
-      {totalPages > 1 && (
-        <Pagination currentPage={page} totalPages={totalPages} />
-      )}
     </div>
   );
 }
