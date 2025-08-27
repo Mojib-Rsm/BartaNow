@@ -11,6 +11,7 @@ import CommentsSection from '@/components/comments-section';
 import { Badge } from '@/components/ui/badge';
 import AdSpot from '@/components/ad-spot';
 import TrendingSidebar from '@/components/trending-sidebar';
+import AudioPlayer from '@/components/audio-player';
  
 type Props = {
   params: { id: string }
@@ -71,7 +72,7 @@ export default async function ArticlePage({ params }: { params: { id: string } }
                     <h1 className="text-3xl md:text-5xl font-bold font-headline text-primary mb-4">
                     {article.title}
                     </h1>
-                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground text-sm">
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground text-sm mb-4">
                         <Link href={`/authors/${article.authorId}`} className="flex items-center gap-2 hover:text-primary">
                             <Avatar className="h-8 w-8">
                                 <AvatarImage src={article.authorAvatarUrl} alt={article.authorName} />
@@ -84,6 +85,7 @@ export default async function ArticlePage({ params }: { params: { id: string } }
                             <time dateTime={article.publishedAt}>{publishedDate}</time>
                         </div>
                     </div>
+                    <AudioPlayer articleId={article.id} />
                 </header>
 
                 <div className="relative w-full h-64 md:h-96 mb-8 rounded-lg overflow-hidden">
