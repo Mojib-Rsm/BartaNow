@@ -13,6 +13,7 @@ import LoadMore from '@/components/load-more';
 import AdSpot from '@/components/ad-spot';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import TrendingSidebar from '@/components/trending-sidebar';
+import FactCheckSidebar from '@/components/fact-check-sidebar';
 
 
 type HomePageProps = {
@@ -46,6 +47,7 @@ export default async function Home({ searchParams }: HomePageProps) {
     editorsPicksResult,
     videoArticlesResult,
     islamicLifeResult,
+    factCheckResult,
   ] = await Promise.all([
     getArticles({ page: 1, limit: 13 }),
     getArticles({ page: 1, limit: 6 }),
@@ -57,6 +59,7 @@ export default async function Home({ searchParams }: HomePageProps) {
     getArticles({ editorsPick: true, limit: 4 }),
     getArticles({ hasVideo: true, limit: 5 }),
     getArticles({ category: 'ইসলামী জীবন', limit: 4 }),
+    getArticles({ category: 'তথ্য যাচাই', limit: 4 }),
   ]);
   
   const { articles, totalPages } = initialArticles;
@@ -83,6 +86,7 @@ export default async function Home({ searchParams }: HomePageProps) {
   const { articles: entertainmentArticles } = entertainmentResult;
   const { articles: techArticles } = techResult;
   const { articles: islamicLifeArticles } = islamicLifeResult;
+  const { articles: factCheckArticles } = factCheckResult;
   
   return (
     <div className="space-y-12">
@@ -348,6 +352,7 @@ export default async function Home({ searchParams }: HomePageProps) {
         </div>
         <aside className="md:col-span-1 space-y-8">
             <PollSection />
+            {factCheckArticles.length > 0 && <FactCheckSidebar articles={factCheckArticles} />}
             <TrendingSidebar articles={trendingArticles} />
             <AdSpot className="h-96" />
         </aside>
