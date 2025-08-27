@@ -4,6 +4,7 @@ import Header from '@/components/header';
 import Footer from '@/components/footer';
 import './globals.css';
 import PushNotificationManager from '@/components/push-notification-manager';
+import { ThemeProvider } from '@/components/theme-provider';
 
 
 export const metadata: Metadata = {
@@ -28,20 +29,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="bn" className="h-full">
+    <html lang="bn" className="h-full" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&family=Playfair+Display:wght@700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased flex flex-col min-h-screen bg-background">
-        <PushNotificationManager />
-        <Header />
-        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children}
-        </main>
-        <Footer />
-        <Toaster />
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+            <PushNotificationManager />
+            <Header />
+            <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {children}
+            </main>
+            <Footer />
+            <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
