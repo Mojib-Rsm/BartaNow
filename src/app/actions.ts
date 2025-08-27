@@ -8,6 +8,7 @@ import type { Article, User } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
+import { uploadImage } from '@/lib/imagekit';
 
 export async function seedAction() {
   const result = await seedDatabase();
@@ -121,11 +122,16 @@ export async function updateUserAction(data: UpdateUserFormValues) {
     try {
         const updateData: Partial<User> = {
             name: data.name,
-            avatarUrl: data.avatarUrl,
             bio: data.bio,
             bloodGroup: data.bloodGroup,
             role: data.role,
         };
+
+        if (data.avatarUrl && data.avatarUrl.startsWith('data:image')) {
+            updateData.avatarUrl = await uploadImage(data.avatarUrl, `${data.id}-avatar.png`);
+        } else {
+            updateData.avatarUrl = data.avatarUrl;
+        }
 
         if (data.password) {
             updateData.password = data.password;
@@ -177,11 +183,16 @@ export async function updateArticleAction(data: ArticleFormValues) {
             return { success: false, message: 'লেখক খুঁজে পাওয়া যায়নি।' };
         }
 
+        let finalImageUrl = data.imageUrl;
+        if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
+            finalImageUrl = await uploadImage(data.imageUrl, `article-${data.id}.png`);
+        }
+
         const articleToUpdate: Partial<Article> = {
             title: data.title,
             content: data.content.split('\n').filter(p => p.trim() !== ''),
             category: data.category,
-            imageUrl: data.imageUrl,
+            imageUrl: finalImageUrl,
             authorId: author.id,
             authorName: author.name,
             authorAvatarUrl: author.avatarUrl,
@@ -223,13 +234,18 @@ export async function createArticleAction(data: CreateArticleFormValues) {
         if (!author) {
             return { success: false, message: 'লেখক খুঁজে পাওয়া যায়নি।' };
         }
+
+        let finalImageUrl = data.imageUrl || 'https://picsum.photos/seed/placeholder/800/600';
+        if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
+            finalImageUrl = await uploadImage(data.imageUrl, `article-${Date.now()}.png`);
+        }
         
         const newArticleData: Omit<Article, 'id' | 'publishedAt' | 'aiSummary'> = {
             title: data.title,
             slug: '', // Will be generated in createArticle
             content: data.content.split('\n').filter(p => p.trim() !== ''),
             category: data.category,
-            imageUrl: data.imageUrl || 'https://picsum.photos/seed/placeholder/800/600',
+            imageUrl: finalImageUrl,
             authorId: author.id,
             authorName: author.name,
             authorAvatarUrl: author.avatarUrl,
