@@ -1,8 +1,8 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Article } from '@/lib/types';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 
@@ -11,11 +11,6 @@ type ArticleCardProps = {
 };
 
 export default function ArticleCard({ article }: ArticleCardProps) {
-  const authorInitials = article.authorName
-    .split(' ')
-    .map((n) => n[0])
-    .join('');
-  
   const formattedDate = format(new Date(article.publishedAt), "d MMMM, yyyy", { locale: bn });
 
   return (
@@ -39,23 +34,12 @@ export default function ArticleCard({ article }: ArticleCardProps) {
               </Link>
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-grow p-0">
+        <CardContent className="flex-grow p-0 mt-2">
           <p className="text-muted-foreground line-clamp-3 text-sm">{article.aiSummary}</p>
         </CardContent>
-        <CardFooter className="p-0 pt-4 mt-auto">
-           <div className="flex items-center gap-3 w-full">
-            <Link href={`/authors/${article.authorId}`} className="flex items-center gap-3 hover:opacity-80">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={article.authorAvatarUrl} alt={article.authorName} />
-                <AvatarFallback>{authorInitials}</AvatarFallback>
-              </Avatar>
-              <div className='text-xs'>
-                <p className="font-semibold text-foreground">{article.authorName}</p>
-                <p className="text-muted-foreground">{formattedDate}</p>
-              </div>
-            </Link>
-            </div>
-        </CardFooter>
+        <div className="p-0 pt-4 mt-auto">
+            <p className="text-xs text-muted-foreground">{formattedDate}</p>
+        </div>
       </div>
     </Card>
   );
