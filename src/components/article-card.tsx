@@ -1,10 +1,10 @@
-
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Article } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
+import { Badge } from './ui/badge';
 
 type ArticleCardProps = {
   article: Article;
@@ -24,6 +24,14 @@ export default function ArticleCard({ article }: ArticleCardProps) {
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             data-ai-hint={article.imageHint}
             />
+            {article.sponsored && (
+                 <Badge 
+                    variant="destructive" 
+                    className="absolute top-2 right-2 bg-yellow-500 text-black hover:bg-yellow-600"
+                >
+                    স্পনসরড
+                </Badge>
+            )}
         </div>
       </Link>
       <div className="p-4 flex flex-col flex-grow">

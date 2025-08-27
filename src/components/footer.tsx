@@ -20,6 +20,7 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-lg text-primary font-headline mb-2">গুরুত্বপূর্ণ লিংক</h3>
             <ul className="space-y-2 text-sm">
+              <li><Link href="/archive" className="text-muted-foreground hover:text-primary">আর্কাইভ</Link></li>
               <li><Link href="#" className="text-muted-foreground hover:text-primary">আমাদের সম্পর্কে</Link></li>
               <li><Link href="#" className="text-muted-foreground hover:text-primary">যোগাযোগ করুন</Link></li>
               <li><Link href="#" className="text-muted-foreground hover:text-primary">গোপনীয়তা নীতি</Link></li>
@@ -46,7 +47,9 @@ export default function Footer() {
             <p className="text-muted-foreground text-sm mb-2">সর্বশেষ খবর সরাসরি আপনার ইনবক্সে পেতে সাবস্ক্রাইব করুন।</p>
             <form className="flex gap-2">
                 <Input type="email" placeholder="আপনার ইমেইল" className="flex-grow" aria-label="Email for newsletter"/>
-                <Button type="submit">সাবস্ক্রাইব</Button>
+                <Button asChild>
+                  <Link href="/subscribe">সাবস্ক্রাইব</Link>
+                </Button>
             </form>
           </div>
         </div>

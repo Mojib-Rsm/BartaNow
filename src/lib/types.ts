@@ -34,4 +34,5 @@ export interface Article {
   badge?: 'নতুন' | 'জনপ্রিয়';
   videoUrl?: string;
   editorsPick?: boolean;
+  sponsored?: boolean;
 }
