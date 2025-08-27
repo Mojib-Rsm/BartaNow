@@ -48,7 +48,15 @@ export default async function Home({ searchParams }: HomePageProps) {
   const politicsArticles = articles.filter(a => a.category === 'রাজনীতি').slice(0, 4);
   const sportsArticles = articles.filter(a => a.category === 'খেলা').slice(0, 4);
   const entertainmentArticles = articles.filter(a => a.category === 'বিনোদন').slice(0, 4);
+  const technologyArticles = articles.filter(a => a.category === 'প্রযুক্তি').slice(0, 1);
 
+
+  const categoryHighlights = [
+    ...politicsArticles.slice(0,1), 
+    ...technologyArticles.slice(0,1),
+    ...sportsArticles.slice(0,1),
+    ...entertainmentArticles.slice(0,1),
+  ];
 
   return (
     <div className="space-y-12">
@@ -134,6 +142,32 @@ export default async function Home({ searchParams }: HomePageProps) {
           ))}
 
         </div>
+      </section>
+
+      {/* Category Highlight Scroll Section */}
+      <section className="border-t border-b py-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {categoryHighlights.map((article) => (
+                  <Link key={article.id} href={`/articles/${article.id}`} className="block group relative overflow-hidden rounded-md">
+                      <div className="relative h-40">
+                          <Image
+                              src={article.imageUrl}
+                              alt={article.title}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-300"
+                              data-ai-hint={article.imageHint}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                      </div>
+                      <div className="absolute bottom-0 left-0 p-3">
+                         <span className="text-sm bg-primary text-primary-foreground px-2 py-1 rounded-sm font-semibold">{article.category}</span>
+                          <h3 className="text-white text-md font-bold font-headline mt-2 leading-tight">
+                              {article.title}
+                          </h3>
+                      </div>
+                  </Link>
+              ))}
+          </div>
       </section>
 
       {/* Category Sections */}
