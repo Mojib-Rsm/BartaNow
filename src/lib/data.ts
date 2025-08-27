@@ -101,6 +101,118 @@ const articles: Article[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-17T18:00:00Z',
     aiSummary: 'New space telescopes are revolutionizing astronomy, providing unprecedented views of the early universe and exoplanets, heralding a new era of cosmic discovery.',
+  },
+  {
+    id: '7',
+    title: 'Quantum Computing: The Next Technological Leap',
+    content: [
+        "Quantum computing promises to revolutionize industries from medicine to finance by solving problems currently intractable for even the most powerful supercomputers. Unlike classical computers that use bits, quantum computers use qubits, which can exist in multiple states at once.",
+        "This property, known as superposition, along with entanglement, allows quantum machines to perform complex calculations at incredible speeds. Researchers are racing to build stable, large-scale quantum computers, though significant engineering challenges remain.",
+        "The potential applications are vast, including designing new materials, discovering novel drugs, and breaking current encryption standards. The quantum era is approaching, and it will redefine our technological landscape."
+    ],
+    imageUrl: 'https://picsum.photos/600/400',
+    imageHint: 'quantum computer',
+    authorId: 'author-1',
+    authorName: 'Jane Doe',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
+    publishedAt: '2024-07-16T11:00:00Z',
+    aiSummary: 'Quantum computing, with its use of qubits and superposition, is set to solve complex problems beyond classical computers, promising major breakthroughs in various fields.'
+  },
+  {
+    id: '8',
+    title: 'Sustainable Architecture: Building for a Better Future',
+    content: [
+        "Sustainable architecture, or 'green building,' is a design philosophy that seeks to minimize the negative environmental impact of buildings. This is achieved through efficiency and moderation in the use of materials, energy, and development space.",
+        "Key principles include using renewable materials, designing for energy efficiency with passive solar and natural ventilation, and integrating buildings with the natural landscape. Green roofs, rainwater harvesting systems, and living walls are becoming common features.",
+        "These buildings are not only better for the planet but also healthier for their occupants, offering improved air quality and a greater connection to nature. As climate change accelerates, sustainable design is no longer a niche, but a necessity."
+    ],
+    imageUrl: 'https://picsum.photos/600/400',
+    imageHint: 'green building',
+    authorId: 'author-2',
+    authorName: 'John Smith',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
+    publishedAt: '2024-07-15T16:20:00Z',
+    aiSummary: 'Sustainable architecture minimizes environmental impact through renewable materials and energy-efficient design, creating healthier buildings for people and the planet.'
+  },
+  {
+    id: '9',
+    title: 'The History and Future of the Internet',
+    content: [
+      "From its origins as a military project called ARPANET to the global network of today, the internet has transformed society in just a few decades. It has democratized information, connected billions of people, and created entirely new economies.",
+      "The early web was a decentralized, text-based world. The dot-com boom of the late 90s brought commercialization and the graphical web, followed by the rise of social media and the mobile internet.",
+      "Looking ahead, the internet's future may involve even greater decentralization with technologies like blockchain, more immersive experiences through the metaverse, and a stronger emphasis on privacy and digital rights. Its evolution is far from over."
+    ],
+    imageUrl: 'https://picsum.photos/600/400',
+    imageHint: 'network cables',
+    authorId: 'author-1',
+    authorName: 'Jane Doe',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
+    publishedAt: '2024-07-14T09:00:00Z',
+    aiSummary: 'From its ARPANET origins to a global phenomenon, the internet has reshaped society. Its future points towards decentralization, the metaverse, and a focus on digital privacy.'
+  },
+  {
+    id: '10',
+    title: 'The Global Supply Chain: Strengths and Vulnerabilities',
+    content: [
+      "The modern global supply chain is a marvel of logistics, enabling products to be sourced, manufactured, and distributed across the world with incredible efficiency. This complex network has lowered consumer prices and fueled global economic growth.",
+      "However, recent events have exposed its vulnerabilities. The COVID-19 pandemic, geopolitical tensions, and natural disasters have caused significant disruptions, leading to shortages and delays.",
+      "Companies are now rethinking their supply chain strategies, moving towards greater resilience through diversification, regionalization, and increased investment in technology for better visibility and risk management. The era of pure cost optimization may be giving way to one of strategic resilience."
+    ],
+    imageUrl: 'https://picsum.photos/600/400',
+    imageHint: 'cargo ship',
+    authorId: 'author-2',
+    authorName: 'John Smith',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
+    publishedAt: '2024-07-13T12:00:00Z',
+    aiSummary: 'While the global supply chain is a model of efficiency, recent disruptions have revealed its weaknesses, pushing companies to prioritize resilience over pure cost savings.'
+  },
+  {
+    id: '11',
+    title: 'Mindfulness and Meditation: A Path to Mental Clarity',
+    content: [
+      "In an age of constant distraction, the practices of mindfulness and meditation are gaining mainstream acceptance as powerful tools for improving mental well-being. Mindfulness is the practice of being present and fully aware of the current moment.",
+      "Meditation, often a formal practice of mindfulness, involves setting aside time to train the mind, often by focusing on the breath or bodily sensations. Studies have shown it can reduce stress, improve focus, and even lead to structural changes in the brain associated with self-awareness and compassion.",
+      "You don't need to be a monk to reap the benefits. Even a few minutes of daily practice can help calm the nervous system and provide a sense of inner peace and clarity."
+    ],
+    imageUrl: 'https://picsum.photos/600/400',
+    imageHint: 'person meditating',
+    authorId: 'author-1',
+    authorName: 'Jane Doe',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
+    publishedAt: '2024-07-12T08:30:00Z',
+    aiSummary: 'Mindfulness and meditation are gaining recognition as effective methods for reducing stress and enhancing mental clarity, with even brief daily practice offering significant benefits.'
+  },
+  {
+    id: '12',
+    title: 'The Comeback of Vinyl: A Return to Analog Sound',
+    content: [
+      "In a digital world dominated by streaming, an old format is making a surprising comeback: the vinyl record. Music lovers are drawn to its warm, rich sound and the tangible experience of owning and playing a physical album.",
+      "Album art, liner notes, and the ritual of placing a needle on a record offer a deeper connection to the music and the artist, something often lost in the convenience of digital playlists.",
+      "This resurgence is not just about nostalgia; a new generation is discovering the unique audio fidelity and a more intentional way of listening. Record stores are thriving, and artists are increasingly releasing their music on vinyl, signaling that analog has a firm place in the digital age."
+    ],
+    imageUrl: 'https://picsum.photos/600/400',
+    imageHint: 'vinyl record',
+    authorId: 'author-2',
+    authorName: 'John Smith',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
+    publishedAt: '2024-07-11T17:00:00Z',
+    aiSummary: 'Vinyl records are experiencing a major resurgence, attracting listeners with their warm analog sound and the tangible experience of physical media in a digital-first world.'
+  },
+  {
+    id: '13',
+    title: 'The Intricate World of Honey Bees',
+    content: [
+      "Honey bees are vital pollinators, crucial for the reproduction of many plants, including a large portion of the food we eat. Their complex social structure and communication methods, like the famous 'waggle dance,' have fascinated scientists for centuries.",
+      "Within a hive, each bee has a specific role, from the queen who lays eggs to the worker bees who forage for nectar and pollen. Their collective efforts ensure the survival and prosperity of the colony.",
+      "Unfortunately, bee populations are facing threats from habitat loss, pesticides, and climate change. Conservation efforts are essential to protect these indispensable insects and the ecosystems that depend on them."
+    ],
+    imageUrl: 'https://picsum.photos/600/400',
+    imageHint: 'honey bee',
+    authorId: 'author-1',
+    authorName: 'Jane Doe',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
+    publishedAt: '2024-07-10T10:45:00Z',
+    aiSummary: 'Honey bees are essential pollinators with a complex social system. Facing threats from environmental changes, their protection is crucial for our ecosystems and food supply.'
   }
 ];
 
