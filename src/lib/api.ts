@@ -225,7 +225,14 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
     // Since this starter doesn't have one, we'll use the mock data approach for all environments
     // to avoid a costly and slow Scan operation on the live DynamoDB table.
     await generateSummariesForMockData();
-    return mockDb.articles.find((article) => article.slug === slug);
+    const article = mockDb.articles.find((article) => article.slug === slug);
+    if (article) {
+        return article;
+    }
+    // If not found, it might be a newly created article that is not in the initial mockDb import.
+    // This is a workaround for the mock data setup.
+    const { articles: allArticles } = await getArticles({ limit: 1000 }); // fetch all
+    return allArticles.find((a) => a.slug === slug);
 }
 
 async function getMockUserById(id: string): Promise<User | undefined> {
