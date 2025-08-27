@@ -19,7 +19,7 @@ export default function RelatedArticles({ articles }: RelatedArticlesProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {articles.map((article) => (
-          <Link key={article.id} href={`/${article.category}/${article.slug}`} className="flex items-center gap-4 group">
+          <Link key={article.id} href={`/articles/${article.id}`} className="flex items-center gap-4 group">
             <div className="relative w-20 h-16 shrink-0">
               <Image
                 src={article.imageUrl}

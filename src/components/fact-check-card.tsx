@@ -23,7 +23,7 @@ export default function FactCheckCard({ article }: FactCheckCardProps) {
   const verdictInfo = verdictMap[article.factCheck.verdict];
   const Icon = verdictInfo.icon;
   const formattedDate = format(new Date(article.publishedAt), "d MMMM, yyyy", { locale: bn });
-  const articleUrl = `/${article.category}/${article.slug}`;
+  const articleUrl = `/articles/${article.id}`;
 
   return (
     <Card className={cn(

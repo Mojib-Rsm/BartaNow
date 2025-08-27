@@ -24,23 +24,23 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 
 const topNavLinks = [
-    { title: 'যেভাবে তৈরি হয় রংবেরঙের চুড়ি', image: 'https://picsum.photos/seed/bangles/50/50', href: '/story/bangles' },
-    { title: 'মিথিলার গর্ব: পেলেন \'ডক্টর\' উপাধি', image: 'https://picsum.photos/seed/mithila/50/50', href: '/story/mithila' },
-    { title: 'আগুন নেভানোর জন্য পানি আনতে গিয়ে পুকুরেই ডুবল...', image: 'https://picsum.photos/seed/firefighter/50/50', href: '/story/firefighter' },
+    { title: 'যেভাবে তৈরি হয় রংবেরঙের চুড়ি', image: 'https://picsum.photos/seed/bangles/50/50', href: '/articles/1' },
+    { title: 'মিথিলার গর্ব: পেলেন \'ডক্টর\' উপাধি', image: 'https://picsum.photos/seed/mithila/50/50', href: '/articles/2' },
+    { title: 'আগুন নেভানোর জন্য পানি আনতে গিয়ে পুকুরেই ডুবল...', image: 'https://picsum.photos/seed/firefighter/50/50', href: '/articles/3' },
 ];
 
 const mainNavLinks = [
-    { name: 'সর্বশেষ', href: '/latest' },
-    { name: 'জাতীয়', href: '/national' },
-    { name: 'রাজনীতি', href: '/politics' },
-    { name: 'খেলা', href: '/sports' },
-    { name: 'বিনোদন', href: '/entertainment' },
-    { name: 'প্রযুক্তি', href: '/tech' },
-    { name: 'আন্তর্জাতিক', href: '/international' },
-    { name: 'ইসলামী জীবন', href: '/islamic-life' },
+    { name: 'সর্বশেষ', href: '/category/সর্বশেষ' },
+    { name: 'জাতীয়', href: '/category/জাতীয়' },
+    { name: 'রাজনীতি', href: '/category/রাজনীতি' },
+    { name: 'খেলা', href: '/category/খেলা' },
+    { name: 'বিনোদন', href: '/category/বিনোদন' },
+    { name: 'প্রযুক্তি', href: '/category/প্রযুক্তি' },
+    { name: 'আন্তর্জাতিক', href: '/category/আন্তর্জাতিক' },
+    { name: 'ইসলামী জীবন', href: '/category/ইসলামী-জীবন' },
     { name: 'বিশেষ কভারেজ', href: '/special-coverage' },
-    { name: 'ভিডিও', href: '/videos' },
-    { name: 'মিম নিউজ', href: '/memes' },
+    { name: 'ভিডিও', href: '/category/videos' },
+    { name: 'মিম নিউজ', href: '/category/মিম-নিউজ' },
 ];
 
 export default function Header() {

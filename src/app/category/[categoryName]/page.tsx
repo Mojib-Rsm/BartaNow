@@ -10,23 +10,8 @@ type CategoryPageProps = {
   };
 };
 
-const CATEGORY_MAP: { [key: string]: string } = {
-    politics: 'রাজনীতি',
-    national: 'জাতীয়',
-    sports: 'খেলা',
-    tech: 'প্রযুক্তি',
-    entertainment: 'বিনোদন',
-    international: 'আন্তর্জাতিক',
-    latest: 'সর্বশেষ',
-    'editors-pick': 'সম্পাদকের পছন্দ',
-    videos: 'ভিডিও',
-    polls: 'মতামত জরিপ',
-    'islamic-life': 'ইসলামী জীবন'
-};
-
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const categoryName = decodeURI(params.categoryName);
-  const displayName = CATEGORY_MAP[categoryName.toLowerCase()] || categoryName;
+  const displayName = decodeURIComponent(params.categoryName);
 
   return {
     title: `${displayName} বিষয়ক সকল খবর`,
@@ -35,8 +20,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const categoryName = decodeURI(params.categoryName);
-  const displayName = CATEGORY_MAP[categoryName.toLowerCase()] || categoryName;
+  const displayName = decodeURIComponent(params.categoryName);
   
   const { articles, totalPages } = await getArticles({ 
       category: displayName as any, 

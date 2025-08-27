@@ -20,26 +20,11 @@ import { useEffect, useState } from 'react';
 import Autoplay from "embla-carousel-autoplay";
 import SocialFollow from './social-follow';
 
-const categoryMap: { [key: string]: string } = {
-    'সর্বশেষ': '/latest',
-    'রাজনীতি': '/politics',
-    'খেলা': '/sports',
-    'বিনোদন': '/entertainment',
-    'প্রযুক্তি': '/tech',
-    'আন্তর্জাতিক': '/international',
-    'ইসলামী-জীবন': '/islamic-life',
-    'বিশেষ-কভারেজ': '/special-coverage',
-    'ভিডিও': '/videos',
-    'সম্পাদকের-পছন্দ': '/editors-pick',
-    'তথ্য-যাচাই': '/fact-check',
-    'মিম-নিউজ': '/memes'
-};
-
 const SectionHeader = ({ title, categorySlug }: { title: string, categorySlug: string }) => (
   <div className="flex items-center justify-between border-b-2 border-primary mb-4 pb-2">
     <h2 className="text-2xl font-bold font-headline text-primary">{title}</h2>
     <Button asChild variant="link" className="text-primary pr-0">
-      <Link href={`/${categorySlug}`}>
+      <Link href={`/category/${categorySlug}`}>
         সব দেখুন <ArrowRight className="ml-1 h-4 w-4" />
       </Link>
     </Button>
@@ -184,7 +169,7 @@ export default function HomePageClient({
               <CarouselContent>
                 {trendingArticles.map((article) => (
                   <CarouselItem key={article.id} className="basis-auto">
-                     <Link href={`/${article.category}/${article.slug}`} className="group">
+                     <Link href={`/articles/${article.id}`} className="group">
                         <div className="flex items-center gap-2">
                             {article.badge && <Badge variant="default">{article.badge}</Badge>}
                             <p className="font-semibold group-hover:text-primary whitespace-nowrap text-sm">
@@ -209,7 +194,7 @@ export default function HomePageClient({
         </div>
         <div className="md:col-span-1 space-y-4">
           {heroSideArticles.map(article => (
-            <Link key={article.id} href={`/${article.category}/${article.slug}`} className="block group border-b pb-4 last:border-b-0">
+            <Link key={article.id} href={`/articles/${article.id}`} className="block group border-b pb-4 last:border-b-0">
                 <h3 className="font-headline text-lg font-bold leading-snug group-hover:text-primary transition-colors">
                   {article.title}
                 </h3>
@@ -239,7 +224,7 @@ export default function HomePageClient({
             </div>
             <div className="md:col-span-1 space-y-4">
                 {videoArticles.slice(1).map(video => (
-                    <Link key={video.id} href={`/${video.category}/${video.slug}`} className="flex items-center gap-4 group">
+                    <Link key={video.id} href={`/articles/${video.id}`} className="flex items-center gap-4 group">
                         <div className="relative w-24 h-16 shrink-0 rounded-md overflow-hidden">
                             <Image 
                                 src={video.imageUrl}
@@ -266,7 +251,7 @@ export default function HomePageClient({
       {/* Politics Section - Style 1 (Standard Grid) */}
       {politicsArticles.length > 0 && (
         <section>
-          <SectionHeader title="রাজনীতি" categorySlug="politics" />
+          <SectionHeader title="রাজনীতি" categorySlug="রাজনীতি" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {politicsArticles.map((article) => (
               <ArticleCard key={article.id} article={article} />
@@ -278,7 +263,7 @@ export default function HomePageClient({
       {/* National Section - Style 2 (1 Large, 2 Small) */}
       {nationalArticles.length > 0 && (
         <section>
-            <SectionHeader title="জাতীয়" categorySlug="national" />
+            <SectionHeader title="জাতীয়" categorySlug="জাতীয়" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-1">
                     <ArticleCard article={nationalArticles[0]} />
@@ -286,7 +271,7 @@ export default function HomePageClient({
                 <div className="md:col-span-1 space-y-4">
                     {nationalArticles.slice(1).map((article) => (
                          <Card key={article.id} className="flex items-center group overflow-hidden">
-                            <Link href={`/${article.category}/${article.slug}`} className='flex w-full'>
+                            <Link href={`/articles/${article.id}`} className='flex w-full'>
                                 <div className="relative w-1/3 aspect-square">
                                     <Image
                                         src={article.imageUrl}
@@ -313,10 +298,10 @@ export default function HomePageClient({
       {/* Sports Section - Style 3 (List View) */}
       {sportsArticles.length > 0 && (
         <section>
-          <SectionHeader title="খেলা" categorySlug="sports" />
+          <SectionHeader title="খেলা" categorySlug="খেলা" />
            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             {sportsArticles.map((article) => (
-              <Link key={article.id} href={`/${article.category}/${article.slug}`} className="flex items-center gap-4 group">
+              <Link key={article.id} href={`/articles/${article.id}`} className="flex items-center gap-4 group">
                   <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden">
                       <Image 
                           src={article.imageUrl}
@@ -336,10 +321,10 @@ export default function HomePageClient({
       {/* Entertainment Section - Style 4 (Image-centric) */}
       {entertainmentArticles.length > 0 && (
         <section>
-          <SectionHeader title="বিনোদন" categorySlug="entertainment" />
+          <SectionHeader title="বিনোদন" categorySlug="বিনোদন" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {entertainmentArticles.map((article) => (
-              <Link key={article.id} href={`/${article.category}/${article.slug}`} className="block group">
+              <Link key={article.id} href={`/articles/${article.id}`} className="block group">
                   <Card className="overflow-hidden">
                       <div className="relative aspect-square w-full">
                           <Image
@@ -364,7 +349,7 @@ export default function HomePageClient({
       {/* Islamic Life Section - Standard Grid */}
       {islamicLifeArticles.length > 0 && (
         <section>
-          <SectionHeader title="ইসলামী জীবন" categorySlug="islamic-life" />
+          <SectionHeader title="ইসলামী জীবন" categorySlug="ইসলামী-জীবন" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {islamicLifeArticles.map((article) => (
               <ArticleCard key={article.id} article={article} />
@@ -376,7 +361,7 @@ export default function HomePageClient({
       {/* Tech Section - Standard Grid */}
       {techArticles.length > 0 && (
         <section>
-          <SectionHeader title="প্রযুক্তি" categorySlug="tech" />
+          <SectionHeader title="প্রযুক্তি" categorySlug="প্রযুক্তি" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {techArticles.map((article) => (
               <ArticleCard key={article.id} article={article} />
@@ -388,7 +373,7 @@ export default function HomePageClient({
       {/* Editor's Pick Section */}
       {editorsPicks.length > 0 && (
         <section>
-          <SectionHeader title="সম্পাদকের পছন্দ" categorySlug="editors-pick" />
+          <SectionHeader title="সম্পাদকের পছন্দ" categorySlug="সম্পাদকের-পছন্দ" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {editorsPicks.map((article) => (
               <ArticleCard key={article.id} article={article} />
@@ -401,7 +386,7 @@ export default function HomePageClient({
         <div className="md:col-span-2">
             {/* Latest News with Load More */}
             <section>
-              <SectionHeader title="সর্বশেষ" categorySlug="latest" />
+              <SectionHeader title="সর্বশেষ" categorySlug="সর্বশেষ" />
               <LoadMore 
                 initialArticles={latestArticlesResult.articles} 
                 totalPages={latestArticlesResult.totalPages}
@@ -420,7 +405,7 @@ export default function HomePageClient({
        {/* Meme News Section */}
       {memeNewsResult.length > 0 && (
         <section>
-          <SectionHeader title="মিম নিউজ" categorySlug="memes" />
+          <SectionHeader title="মিম নিউজ" categorySlug="মিম-নিউজ" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {memeNewsResult.slice(0,3).map((meme) => (
               <MemeCard key={meme.id} meme={meme} />
