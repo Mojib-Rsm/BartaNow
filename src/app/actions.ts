@@ -286,3 +286,31 @@ export async function deleteUserAction(userId: string) {
         return { success: false, message: errorMessage };
     }
 }
+
+export async function sendNotificationAction(payload: { title: string; body: string; url?: string }) {
+  // This is a server action. It's safe to use fetch here.
+  // It calls our own API route to trigger the web push.
+  try {
+    // Construct the absolute URL for the API endpoint
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002';
+    const response = await fetch(`${baseUrl}/api/push/notify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to send notification');
+    }
+
+    const data = await response.json();
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error('Send Notification Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'বিজ্ঞপ্তি পাঠাতে একটি সমস্যা হয়েছে।';
+    return { success: false, message: errorMessage };
+  }
+}

@@ -12,6 +12,7 @@ import {
   Megaphone,
   Image as ImageIcon,
   MessagesSquare,
+  BellRing,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -129,6 +130,14 @@ export default function AdminLayout({
                         <Link href="/admin/ads">
                             <Megaphone />
                             বিজ্ঞাপন
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/admin/notifications')}>
+                        <Link href="/admin/notifications">
+                            <BellRing />
+                            নোটিফিকেশন
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
