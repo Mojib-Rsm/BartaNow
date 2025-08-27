@@ -12,7 +12,7 @@ type ArticleCardProps = {
 
 export default function ArticleCard({ article }: ArticleCardProps) {
   const formattedDate = format(new Date(article.publishedAt), "d MMMM, yyyy", { locale: bn });
-  const articleUrl = `/${article.category}/${article.slug}`;
+  const articleUrl = `/${encodeURIComponent(article.category)}/${article.slug}`;
 
   return (
     <Card className="flex flex-col overflow-hidden bg-card rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 group border">
