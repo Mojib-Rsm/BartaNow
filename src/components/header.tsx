@@ -190,6 +190,12 @@ export default function Header() {
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
+                             <DropdownMenuItem asChild>
+                                <Link href="/profile">
+                                    <User className="mr-2 h-4 w-4" />
+                                    <span>প্রোফাইল</span>
+                                </Link>
+                            </DropdownMenuItem>
                             {user.role === 'admin' && (
                                 <DropdownMenuItem asChild>
                                     <Link href="/admin">
