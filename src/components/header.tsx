@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -59,14 +57,26 @@ export default function Header() {
         setUser(JSON.parse(storedUser));
     }
 
+    // Listen for storage changes to sync across tabs
+    const handleStorageChange = (event: StorageEvent) => {
+        if (event.key === 'bartaNowUser') {
+            const newUser = event.newValue ? JSON.parse(event.newValue) : null;
+            setUser(newUser);
+        }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('bartaNowUser');
     setUser(null);
+    window.dispatchEvent(new Event('storage')); // Notify other tabs
     window.location.href = '/'; // Redirect to home page
   };
 

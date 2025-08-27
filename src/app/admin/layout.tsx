@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import Link from 'next/link';
@@ -25,6 +23,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import type { User } from '@/lib/types';
 
 export default function AdminLayout({
   children,
@@ -33,6 +33,16 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const logoUrl = "https://bartanow.com/wp-content/uploads/2025/04/BartaNow.png";
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Check for user in localStorage
+    const storedUser = localStorage.getItem('bartaNowUser');
+    if (storedUser) {
+        setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
 
   const isActive = (path: string) => pathname === path || (path !== '/admin' && pathname.startsWith(path));
 
@@ -92,14 +102,16 @@ export default function AdminLayout({
                 <SidebarTrigger className="md:hidden" />
                 <div className="w-full flex-1">
                 </div>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                <img
-                    src="https://i.pravatar.cc/150?u=admin"
-                    alt="Admin"
-                    className="h-8 w-8 rounded-full"
-                />
-                <span className="sr-only">Toggle user menu</span>
-                </Button>
+                {user && (
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                    <img
+                        src={`https://i.pravatar.cc/150?u=${user.id}`}
+                        alt={user.name}
+                        className="h-8 w-8 rounded-full"
+                    />
+                    <span className="sr-only">Toggle user menu</span>
+                    </Button>
+                )}
             </header>
             <main className="flex-1 p-4 sm:px-6 sm:py-6">
                 {children}
