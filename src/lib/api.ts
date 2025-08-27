@@ -5,7 +5,12 @@ import { DynamoDBDocumentClient, QueryCommand, GetCommand } from "@aws-sdk/lib-d
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
 
-const useMockData = !process.env.AWS_REGION;
+const useMockData = !process.env.AWS_REGION || 
+                    process.env.AWS_REGION === 'your_aws_region' ||
+                    !process.env.AWS_ACCESS_KEY_ID ||
+                    process.env.AWS_ACCESS_KEY_ID === 'your_access_key' ||
+                    !process.env.AWS_SECRET_ACCESS_KEY ||
+                    process.env.AWS_SECRET_ACCESS_KEY === 'your_secret_key';
 
 let docClient: DynamoDBDocumentClient;
 const tableName = process.env.DYNAMODB_TABLE_NAME || 'Oftern_News';
@@ -66,13 +71,19 @@ export async function getArticles({ page = 1, limit = 6 }: { page?: number; limi
             ExclusiveStartKey: lastEvaluatedKey,
         });
 
-        const { Items, LastEvaluatedKey } = await docClient.send(command);
-        if (Items) {
-            allItems = Items as Article[]; // For the current page
-        }
-        lastEvaluatedKey = LastEvaluatedKey;
-        if (!LastEvaluatedKey) {
-            break; 
+        try {
+            const { Items, LastEvaluatedKey } = await docClient.send(command);
+            if (Items) {
+                allItems = Items as Article[]; // For the current page
+            }
+            lastEvaluatedKey = LastEvaluatedKey;
+            if (!LastEvaluatedKey) {
+                break; 
+            }
+        } catch (error) {
+            console.error("Error fetching articles from DynamoDB:", error);
+            // Fallback to mock data in case of a runtime error with DynamoDB
+            return getArticles({ page, limit });
         }
     }
 
@@ -84,12 +95,20 @@ export async function getArticleById(id: string): Promise<Article | undefined> {
         await generateSummariesForMockData();
         return mockDb.articles.find((article) => article.id === id);
     }
+
     const command = new GetCommand({
         TableName: tableName,
         Key: {
           id: id,
         },
     });
-    const { Item } = await docClient.send(command);
-    return Item as Article | undefined;
+
+    try {
+        const { Item } = await docClient.send(command);
+        return Item as Article | undefined;
+    } catch(error) {
+        console.error(`Error fetching article ${id} from DynamoDB:`, error);
+        // Fallback to mock data in case of a runtime error with DynamoDB
+        return getArticleById(id);
+    }
 }
