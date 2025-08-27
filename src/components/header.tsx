@@ -24,6 +24,7 @@ const mainNavLinks = [
     { name: 'প্রযুক্তি', href: '/category/tech' },
     { name: 'বিনোদন', href: '/category/entertainment' },
     { name: 'আন্তর্জাতিক', href: '/category/international' },
+    { name: 'বিশেষ কভারেজ', href: '/special-coverage' },
     { name: 'ভিডিও', href: '/category/videos' },
     { name: 'মতামত জরিপ', href: '/polls' },
 ];

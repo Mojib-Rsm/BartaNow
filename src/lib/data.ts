@@ -1,4 +1,4 @@
-import type { Article, Author } from './types';
+import type { Article, Author, Poll } from './types';
 
 const authors: Author[] = [
   { id: 'author-1', name: 'জান্নাতুল ফেরদৌস', avatarUrl: 'https://i.pravatar.cc/150?u=author-1', bio: 'জান্নাতুল ফেরদৌস একজন অভিজ্ঞ সাংবাদিক যিনি প্রযুক্তি এবং রাজনীতি বিষয়ে লেখেন। তিনি জটিল বিষয় সহজভাবে উপস্থাপন করতে পারদর্শী।' },
@@ -179,10 +179,57 @@ const articles: Article[] = [
     aiSummary: 'সুন্দরবনে বাঘের সংখ্যা বৃদ্ধি পেয়েছে, যা সরকারের চোরাচালান দমন এবং সচেতনতামূলক কার্যক্রমের ফল বলে মনে করছেন বিশেষজ্ঞরা।',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     editorsPick: true,
+  },
+  {
+    id: '11',
+    title: 'বিশেষ কভারেজ: জাতীয় নির্বাচন ২০২৪',
+    category: 'বিশেষ কভারেজ',
+    content: [
+      "আসন্ন ২০২৪ সালের জাতীয় নির্বাচনকে সামনে রেখে সারাদেশে রাজনৈতিক উত্তেজনা বাড়ছে। প্রধান দলগুলো তাদের প্রার্থী তালিকা চূড়ান্ত করতে ব্যস্ত এবং নির্বাচনী ইশতেহার তৈরির কাজ চলছে।",
+      "নির্বাচন কমিশন একটি অবাধ, সুষ্ঠু ও নিরপেক্ষ নির্বাচন অনুষ্ঠানের জন্য সব ধরনের প্রস্তুতি গ্রহণ করছে বলে জানিয়েছে। আন্তর্জাতিক পর্যবেক্ষকরাও এই নির্বাচনের দিকে নজর রাখছেন।"
+    ],
+    imageUrl: 'https://picsum.photos/seed/election/800/600',
+    imageHint: 'election campaign',
+    authorId: 'author-1',
+    authorName: 'জান্নাতুল ফেরদৌস',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
+    publishedAt: '2024-07-23T08:00:00Z',
+    aiSummary: 'জাতীয় নির্বাচন ২০২৪ ঘিরে রাজনৈতিক দলগুলো প্রস্তুতি নিচ্ছে এবং নির্বাচন কমিশন একটি সুষ্ঠু নির্বাচনের আশ্বাস দিচ্ছে।',
+    badge: 'জনপ্রিয়',
+    editorsPick: true,
   }
 ];
 
 export const mockDb = {
   authors,
   articles,
+  polls: [
+    {
+      id: 'poll-1',
+      question: 'আগামী নির্বাচনে কোন দল জিতবে বলে আপনার মনে হয়?',
+      options: [
+        { id: 'option1', label: 'দল ক', votes: 42 },
+        { id: 'option2', label: 'দল খ', votes: 35 },
+        { id: 'option3', label: 'অন্যান্য', votes: 23 },
+      ],
+    },
+    {
+        id: 'poll-2',
+        question: 'আপনি কি শহরের যানজট কমাতে পাবলিক ট্রান্সপোর্ট ব্যবহারে আগ্রহী?',
+        options: [
+            { id: 'option4', label: 'হ্যাঁ, আগ্রহী', votes: 88 },
+            { id: 'option5', label: 'না, আগ্রহী নই', votes: 12 },
+            { id: 'option6', label: 'মন্তব্য নেই', votes: 5 },
+        ],
+    },
+     {
+      id: 'poll-3',
+      question: 'অনলাইন শিক্ষার কার্যকারিতা নিয়ে আপনার মতামত কী?',
+      options: [
+        { id: 'option7', label: 'খুবই কার্যকর', votes: 55 },
+        { id: 'option8', label: 'মোটামুটি কার্যকর', votes: 30 },
+        { id: 'option9', label: 'কার্যকর নয়', votes: 15 },
+      ],
+    },
+  ]
 };
