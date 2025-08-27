@@ -169,7 +169,7 @@ export default function HomePageClient({
               <CarouselContent>
                 {trendingArticles.map((article) => (
                   <CarouselItem key={article.id} className="basis-auto">
-                     <Link href={`/articles/${article.id}`} className="group">
+                     <Link href={`/articles/${article.slug}`} className="group">
                         <div className="flex items-center gap-2">
                             {article.badge && <Badge variant="default">{article.badge}</Badge>}
                             <p className="font-semibold group-hover:text-primary whitespace-nowrap text-sm">
@@ -194,7 +194,7 @@ export default function HomePageClient({
         </div>
         <div className="md:col-span-1 space-y-4">
           {heroSideArticles.map(article => (
-            <Link key={article.id} href={`/articles/${article.id}`} className="block group border-b pb-4 last:border-b-0">
+            <Link key={article.id} href={`/articles/${article.slug}`} className="block group border-b pb-4 last:border-b-0">
                 <h3 className="font-headline text-lg font-bold leading-snug group-hover:text-primary transition-colors">
                   {article.title}
                 </h3>
@@ -224,7 +224,7 @@ export default function HomePageClient({
             </div>
             <div className="md:col-span-1 space-y-4">
                 {videoArticles.slice(1).map(video => (
-                    <Link key={video.id} href={`/articles/${video.id}`} className="flex items-center gap-4 group">
+                    <Link key={video.id} href={`/articles/${video.slug}`} className="flex items-center gap-4 group">
                         <div className="relative w-24 h-16 shrink-0 rounded-md overflow-hidden">
                             <Image 
                                 src={video.imageUrl}
@@ -271,7 +271,7 @@ export default function HomePageClient({
                 <div className="md:col-span-1 space-y-4">
                     {nationalArticles.slice(1).map((article) => (
                          <Card key={article.id} className="flex items-center group overflow-hidden">
-                            <Link href={`/articles/${article.id}`} className='flex w-full'>
+                            <Link href={`/articles/${article.slug}`} className='flex w-full'>
                                 <div className="relative w-1/3 aspect-square">
                                     <Image
                                         src={article.imageUrl}
@@ -301,7 +301,7 @@ export default function HomePageClient({
           <SectionHeader title="খেলা" categorySlug="খেলা" />
            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             {sportsArticles.map((article) => (
-              <Link key={article.id} href={`/articles/${article.id}`} className="flex items-center gap-4 group">
+              <Link key={article.id} href={`/articles/${article.slug}`} className="flex items-center gap-4 group">
                   <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden">
                       <Image 
                           src={article.imageUrl}
@@ -324,7 +324,7 @@ export default function HomePageClient({
           <SectionHeader title="বিনোদন" categorySlug="বিনোদন" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {entertainmentArticles.map((article) => (
-              <Link key={article.id} href={`/articles/${article.id}`} className="block group">
+              <Link key={article.id} href={`/articles/${article.slug}`} className="block group">
                   <Card className="overflow-hidden">
                       <div className="relative aspect-square w-full">
                           <Image

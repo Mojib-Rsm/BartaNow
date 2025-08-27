@@ -23,7 +23,7 @@ export default function TrendingSidebar({ articles }: TrendingSidebarProps) {
           {articles.map((article, index) => (
             <li key={article.id} className="flex items-start gap-4">
               <span className="text-2xl font-bold text-primary/50 w-6 text-center">{new Intl.NumberFormat('bn-BD').format(index + 1)}.</span>
-              <Link href={`/articles/${article.id}`} className="group">
+              <Link href={`/articles/${article.slug}`} className="group">
                 <h3 className="font-semibold text-sm leading-snug group-hover:text-primary transition-colors">
                   {article.title}
                 </h3>

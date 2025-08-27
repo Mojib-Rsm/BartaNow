@@ -18,7 +18,7 @@ export default function MemeCard({ meme }: MemeCardProps) {
     return null;
   }
   
-  const articleUrl = `/articles/${article.id}`;
+  const articleUrl = `/articles/${article.slug}`;
 
   return (
     <Link href={articleUrl} className="block group">
