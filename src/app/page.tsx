@@ -41,6 +41,7 @@ export default async function Home({ searchParams }: HomePageProps) {
     politicsResult,
     sportsResult,
     entertainmentResult,
+    techResult,
     editorsPicksResult,
     videoArticlesResult
   ] = await Promise.all([
@@ -49,6 +50,7 @@ export default async function Home({ searchParams }: HomePageProps) {
     getArticles({ category: 'রাজনীতি', limit: 4 }),
     getArticles({ category: 'খেলা', limit: 4 }),
     getArticles({ category: 'বিনোদন', limit: 4 }),
+    getArticles({ category: 'প্রযুক্তি', limit: 4 }),
     getArticles({ editorsPick: true, limit: 4 }),
     getArticles({ hasVideo: true, limit: 5 })
   ]);
@@ -74,6 +76,7 @@ export default async function Home({ searchParams }: HomePageProps) {
   const { articles: politicsArticles } = politicsResult;
   const { articles: sportsArticles } = sportsResult;
   const { articles: entertainmentArticles } = entertainmentResult;
+  const { articles: techArticles } = techResult;
   
   return (
     <div className="space-y-12">
@@ -220,6 +223,17 @@ export default async function Home({ searchParams }: HomePageProps) {
           <SectionHeader title="বিনোদন" href="/category/entertainment" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {entertainmentArticles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {techArticles.length > 0 && (
+        <section>
+          <SectionHeader title="প্রযুক্তি" href="/category/tech" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {techArticles.map((article) => (
               <ArticleCard key={article.id} article={article} />
             ))}
           </div>
