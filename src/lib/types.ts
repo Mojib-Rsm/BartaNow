@@ -5,6 +5,19 @@ export interface Author {
   bio?: string;
 }
 
+export interface PollOption {
+  id: string;
+  label: string;
+  votes: number;
+}
+
+export interface Poll {
+  id: string;
+  question: string;
+  options: PollOption[];
+}
+
+
 export interface Article {
   id: string;
   title: string;

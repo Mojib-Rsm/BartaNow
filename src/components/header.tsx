@@ -17,14 +17,14 @@ const topNavLinks = [
 ];
 
 const mainNavLinks = [
-    { name: 'সর্বশেষ', href: '#' },
-    { name: 'রাজনীতি', href: '#' },
-    { name: 'খেলা', href: '#' },
-    { name: 'প্রযুক্তি', href: '#' },
-    { name: 'বিনোদন', href: '#' },
-    { name: 'অর্থনীতি', href: '#' },
-    { name: 'আন্তর্জাতিক', href: '#' },
-    { name: 'মতামত', href: '#' },
+    { name: 'সর্বশেষ', href: '/latest' },
+    { name: 'রাজনীতি', href: '/category/politics' },
+    { name: 'খেলা', href: '/category/sports' },
+    { name: 'প্রযুক্তি', href: '/category/tech' },
+    { name: 'বিনোদন', href: '/category/entertainment' },
+    { name: 'আন্তর্জাতিক', href: '/category/international' },
+    { name: 'ভিডিও', href: '/category/videos' },
+    { name: 'মতামত জরিপ', href: '/polls' },
 ];
 
 export default function Header() {
