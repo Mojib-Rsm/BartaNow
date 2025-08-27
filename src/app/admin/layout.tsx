@@ -44,7 +44,10 @@ export default function AdminLayout({
   }, []);
 
 
-  const isActive = (path: string) => pathname === path || (path !== '/admin' && pathname.startsWith(path));
+  const isActive = (path: string) => {
+    if (path === '/admin') return pathname === '/admin';
+    return pathname.startsWith(path);
+  }
 
   return (
     <div lang="en" dir="ltr">
