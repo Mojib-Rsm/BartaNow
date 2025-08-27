@@ -13,7 +13,7 @@ const useMockData = !process.env.AWS_REGION ||
                     process.env.AWS_SECRET_ACCESS_KEY === 'your_secret_key';
 
 let docClient: DynamoDBDocumentClient;
-const tableName = process.env.DYNAMODB_TABLE_NAME || 'Oftern_News';
+const tableName = process.env.DYNAMODB_TABLE_NAME || 'BartaNow_News';
 
 if (!useMockData) {
     const client = new DynamoDBClient({ region: process.env.AWS_REGION });

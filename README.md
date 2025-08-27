@@ -1,6 +1,6 @@
-# Oftern News - Next.js Starter Project
+# BartaNow - Next.js Starter Project
 
-Welcome to Oftern News, a professional starter project for a modern news website. This project is built with Next.js and Tailwind CSS, demonstrating best practices for server-side rendering (SSR), API design, and component architecture.
+Welcome to BartaNow, a professional starter project for a modern news website. This project is built with Next.js and Tailwind CSS, demonstrating best practices for server-side rendering (SSR), API design, and component architecture.
 
 ## Table of Contents
 
@@ -81,7 +81,7 @@ Here's a high-level overview of the key files and directories:
 1.  Clone the repository:
     ```bash
     git clone <repository-url>
-    cd oftern-news
+    cd bartanow
     ```
 2.  Install dependencies:
     ```bash
@@ -109,7 +109,7 @@ AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_REGION=your_aws_region
 
 # DynamoDB Table Name
-DYNAMODB_TABLE_NAME=Oftern_News
+DYNAMODB_TABLE_NAME=BartaNow_News
 ```
 
 ## Connecting to a Real Database (DynamoDB)

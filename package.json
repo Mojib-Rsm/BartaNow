@@ -1,5 +1,5 @@
 {
-  "name": "nextn",
+  "name": "bartanow",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -67,7 +67,7 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   },
-  "description": "Welcome to Oftern News, a professional starter project for a modern news website. This project is built with Next.js and Tailwind CSS, demonstrating best practices for server-side rendering (SSR), API design, and component architecture.",
+  "description": "Welcome to BartaNow, a professional starter project for a modern news website. This project is built with Next.js and Tailwind CSS, demonstrating best practices for server-side rendering (SSR), API design, and component architecture.",
   "main": "index.js",
   "directories": {
     "doc": "docs"
