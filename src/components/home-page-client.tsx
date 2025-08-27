@@ -18,6 +18,7 @@ import MemeCard from '@/components/meme-card';
 import type { Article, MemeNews } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import Autoplay from "embla-carousel-autoplay";
+import SocialFollow from './social-follow';
 
 const categoryMap: { [key: string]: string } = {
     'সর্বশেষ': '/latest',
@@ -408,6 +409,7 @@ export default function HomePageClient({
             </section>
         </div>
         <aside className="md:col-span-1 space-y-8">
+            <SocialFollow />
             <PollSection />
             {factCheckArticles.length > 0 && <FactCheckSidebar articles={factCheckArticles} />}
             <TrendingSidebar articles={trendingArticles} />
