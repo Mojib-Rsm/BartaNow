@@ -126,12 +126,13 @@ export default async function Home({ searchParams }: HomePageProps) {
                 </CardContent>
             </Card>
 
-            <div className="bg-card p-4 rounded-lg shadow-sm text-center">
-                <p className="text-muted-foreground text-sm">বিজ্ঞাপন স্পট</p>
-                <div className="bg-muted h-40 mt-2 flex items-center justify-center rounded-md">
+            <Card className="bg-card p-4 rounded-lg shadow-sm text-center">
+                 <h3 className="font-headline text-lg text-primary mb-2">সদস্য হোন</h3>
+                 <p className="text-muted-foreground text-sm mb-4">সদস্য হোন এবং প্রতিদিন সংবাদ পান</p>
+                 <div className="bg-muted h-40 mt-2 flex items-center justify-center rounded-md">
                      <p className="text-muted-foreground text-xs">Ad Banner</p>
                 </div>
-            </div>
+            </Card>
         </aside>
       </div>
     </div>

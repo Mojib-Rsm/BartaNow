@@ -1,4 +1,3 @@
-
 import type { Article, Author } from './types';
 
 const authors: Author[] = [

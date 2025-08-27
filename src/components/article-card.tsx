@@ -3,6 +3,7 @@ import Image from 'next/image';
 import type { Article } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from './ui/button';
 
 type ArticleCardProps = {
   article: Article;
@@ -42,7 +43,8 @@ export default function ArticleCard({ article }: ArticleCardProps) {
       <CardContent className="flex-grow">
         <p className="text-muted-foreground line-clamp-3">{article.aiSummary}</p>
       </CardContent>
-      <CardFooter className="flex items-center gap-3 mt-auto">
+      <CardFooter className="flex items-center justify-between mt-auto">
+        <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 border">
             <AvatarImage src={article.authorAvatarUrl} alt={article.authorName} />
             <AvatarFallback>{authorInitials}</AvatarFallback>
@@ -51,6 +53,10 @@ export default function ArticleCard({ article }: ArticleCardProps) {
             <p className="text-sm font-semibold">{article.authorName}</p>
             <p className="text-xs text-muted-foreground">{publishedDate}</p>
           </div>
+        </div>
+        <Button asChild variant="link">
+            <Link href={`/articles/${article.id}`}>পুরো খবর দেখুন</Link>
+        </Button>
       </CardFooter>
     </Card>
   );
