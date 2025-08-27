@@ -15,4 +15,5 @@ export interface Article {
   authorAvatarUrl: string;
   publishedAt: string; // ISO date string
   aiSummary: string;
+  entityType?: 'ARTICLE'; // Used for GSI partition key
 }

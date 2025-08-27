@@ -114,7 +114,23 @@ DYNAMODB_TABLE_NAME=Oftern_News
 
 ## Connecting to a Real Database (DynamoDB)
 
-To switch from mock data to a real DynamoDB instance, you'll primarily modify `src/lib/api.ts`.
+To switch from mock data to a real DynamoDB instance, you'll primarily modify `src/lib/api.ts`. The code is already set up to connect to DynamoDB if you provide the environment variables above.
+
+### DynamoDB Table and Index Setup
+
+For the application to query articles efficiently, your DynamoDB table must have a specific structure and a Global Secondary Index (GSI).
+
+**Table Primary Key:**
+*   `id` (String) - A unique identifier for each article.
+
+**Global Secondary Index (GSI):**
+*   **Index Name:** `PublishedAtIndex`
+*   **Partition Key:** `entityType` (String) - A static value, e.g., "ARTICLE". This gathers all articles into a single partition for querying.
+*   **Sort Key:** `publishedAt` (String) - The ISO 8601 timestamp of when the article was published. This allows sorting articles by date.
+
+### Updating `src/lib/api.ts`
+
+The `src/lib/api.ts` file is already configured to use the AWS SDK. When you provide your AWS credentials in `.env.local`, it will automatically switch from using mock data to your live DynamoDB table.
 
 1.  **Install AWS SDK:**
     ```bash
@@ -123,49 +139,6 @@ To switch from mock data to a real DynamoDB instance, you'll primarily modify `s
 
 2.  **Set up DynamoDB Local (Optional):**
     For local testing, you can use [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html). Follow the official guide to download and run it. You would then configure the DynamoDB client to point to your local endpoint.
-
-3.  **Update `src/lib/api.ts`:**
-    Replace the mock data imports with the DynamoDB Document Client and implement the query logic.
-
-    *Example `src/lib/api.ts` with DynamoDB:*
-    ```typescript
-    import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-    import { DynamoDBDocumentClient, QueryCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
-    import { Article } from "./types";
-
-    const client = new DynamoDBClient({ region: process.env.AWS_REGION });
-    const docClient = DynamoDBDocumentClient.from(client);
-    const tableName = process.env.DYNAMODB_TABLE_NAME;
-
-    export async function getArticles({ page = 1, limit = 6 }) {
-      // DynamoDB pagination is more complex, often using LastEvaluatedKey
-      const command = new QueryCommand({
-        TableName: tableName,
-        IndexName: 'PublishedAtIndex', // Assuming a GSI on publishedAt
-        KeyConditionExpression: 'EntityType = :type',
-        ExpressionAttributeValues: {
-          ':type': 'ARTICLE',
-        },
-        ScanIndexForward: false, // Sort descending
-        Limit: limit,
-        // Add ExclusiveStartKey for pagination
-      });
-      const { Items, Count } = await docClient.send(command);
-      return { articles: Items as Article[], totalPages: Math.ceil(Count / limit) };
-    }
-
-    export async function getArticleById(id: string) {
-      const command = new GetCommand({
-        TableName: tableName,
-        Key: {
-          PK: `ARTICLE#${id}`,
-          SK: `ARTICLE#${id}`,
-        },
-      });
-      const { Item } = await docClient.send(command);
-      return Item as Article | undefined;
-    }
-    ```
 
 ## Deployment Hints
 
