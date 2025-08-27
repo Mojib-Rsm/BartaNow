@@ -14,6 +14,7 @@ Welcome to BartaNow, a professional starter project for a modern news website. T
   - [Running the App](#running-the-app)
 - [Environment Variables](#environment-variables)
 - [Connecting to a Real Database (DynamoDB)](#connecting-to-a-real-database-dynamodb)
+- [Seeding the Database](#seeding-the-database)
 - [Deployment Hints](#deployment-hints)
   - [Vercel/Netlify/Firebase App Hosting](#vercelnetlifyfirebase-app-hosting)
   - [AWS ECS/Fargate (as requested)](#aws-ecsfargate-as-requested)
@@ -48,6 +49,8 @@ Here's a high-level overview of the key files and directories:
 
 ```
 /
+├── scripts/
+│   └── seed.ts                   # Script to seed the DynamoDB database
 ├── src/
 │   ├── app/
 │   │   ├── articles/[id]/page.tsx  # Dynamic page for a single article
@@ -100,7 +103,7 @@ The application will be available at `http://localhost:9002`.
 
 ## Environment Variables
 
-While the current setup uses mock data and doesn't require environment variables, a production application connecting to AWS would need them. Create a `.env.local` file in the root of your project:
+While the current setup uses mock data by default, connecting to AWS requires environment variables. Create a `.env` file in the root of your project:
 
 ```
 # AWS Credentials for DynamoDB
@@ -130,7 +133,7 @@ For the application to query articles efficiently, your DynamoDB table must have
 
 ### Updating `src/lib/api.ts`
 
-The `src/lib/api.ts` file is already configured to use the AWS SDK. When you provide your AWS credentials in `.env.local`, it will automatically switch from using mock data to your live DynamoDB table.
+The `src/lib/api.ts` file is already configured to use the AWS SDK. When you provide your AWS credentials in `.env`, it will automatically switch from using mock data to your live DynamoDB table.
 
 1.  **Install AWS SDK:**
     ```bash
@@ -139,6 +142,18 @@ The `src/lib/api.ts` file is already configured to use the AWS SDK. When you pro
 
 2.  **Set up DynamoDB Local (Optional):**
     For local testing, you can use [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html). Follow the official guide to download and run it. You would then configure the DynamoDB client to point to your local endpoint.
+
+## Seeding the Database
+
+After setting up your DynamoDB table and configuring your environment variables, you can populate the database with the sample articles from this project.
+
+Run the following command in your terminal:
+
+```bash
+npm run seed
+```
+
+This will execute the `scripts/seed.ts` file, which reads the mock articles from `src/lib/data.ts` and inserts them into your DynamoDB table.
 
 ## Deployment Hints
 
