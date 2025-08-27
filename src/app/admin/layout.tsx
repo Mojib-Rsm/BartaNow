@@ -32,6 +32,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const logoUrl = "https://bartanow.com/wp-content/uploads/2025/04/BartaNow.png";
 
   const isActive = (path: string) => pathname === path || (path !== '/admin' && pathname.startsWith(path));
 
@@ -42,7 +43,7 @@ export default function AdminLayout({
             <Sidebar>
             <SidebarHeader>
                 <div className="flex items-center justify-center p-2">
-                    <Image src="/logo.png" alt="BartaNow Logo" width={150} height={40} />
+                    <Image src={logoUrl} alt="BartaNow Logo" width={150} height={40} />
                 </div>
             </SidebarHeader>
             <SidebarContent>
