@@ -65,6 +65,11 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
     },
+    initialState: {
+        pagination: {
+            pageSize: 20,
+        }
+    }
   })
 
   return (
@@ -89,6 +94,12 @@ export function DataTable<TData, TValue>({
                     .getAllColumns()
                     .filter((column) => column.getCanHide())
                     .map((column) => {
+                        const columnIdMap: { [key: string]: string } = {
+                            'title': 'শিরোনাম',
+                            'category': 'ক্যাটাগরি',
+                            'authorName': 'লেখক',
+                            'publishedAt': 'প্রকাশের তারিখ',
+                        };
                         return (
                         <DropdownMenuCheckboxItem
                             key={column.id}
@@ -98,11 +109,7 @@ export function DataTable<TData, TValue>({
                             column.toggleVisibility(!!value)
                             }
                         >
-                            {column.id === 'title' ? 'শিরোনাম' : 
-                             column.id === 'category' ? 'ক্যাটাগরি' :
-                             column.id === 'authorName' ? 'লেখক' :
-                             column.id === 'publishedAt' ? 'প্রকাশের তারিখ' :
-                             column.id}
+                            {columnIdMap[column.id] || column.id}
                         </DropdownMenuCheckboxItem>
                         )
                     })}
