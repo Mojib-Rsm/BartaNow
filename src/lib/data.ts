@@ -11,8 +11,28 @@ const generateSlug = (title: string) => {
 };
 
 const users: User[] = [
-    { id: 'user-1', name: 'Admin User', email: 'admin@bartanow.com', password: 'password123', role: 'admin' },
-    { id: 'user-2', name: 'Regular User', email: 'user@bartanow.com', password: 'password123', role: 'user' },
+    { 
+        id: 'user-1', 
+        name: 'Admin User', 
+        email: 'admin@bartanow.com', 
+        password: 'password123', 
+        role: 'admin',
+        avatarUrl: 'https://i.pravatar.cc/150?u=admin-user',
+        bio: 'বার্তা নাও ওয়েবসাইটের অ্যাডমিন। আমি প্রযুক্তি, সংবাদ এবং লেখালেখি ভালোবাসি।',
+        bloodGroup: 'A+',
+        preferredTopics: ['প্রযুক্তি', 'রাজনীতি'],
+    },
+    { 
+        id: 'user-2', 
+        name: 'Regular User', 
+        email: 'user@bartanow.com', 
+        password: 'password123', 
+        role: 'user',
+        avatarUrl: 'https://i.pravatar.cc/150?u=regular-user',
+        bio: 'আমি একজন সাধারণ পাঠক। খেলা এবং বিনোদনের খবর পড়তে ভালোবাসি।',
+        bloodGroup: 'O+',
+        preferredTopics: ['খেলা', 'বিনোদন'],
+    },
 ];
 
 const authors: Author[] = [

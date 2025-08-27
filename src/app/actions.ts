@@ -104,6 +104,9 @@ const updateUserSchema = z.object({
     id: z.string(),
     name: z.string().min(3, { message: "নাম কমপক্ষে ৩ অক্ষরের হতে হবে।" }),
     password: z.string().min(6, { message: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।" }).optional().or(z.literal('')),
+    avatarUrl: z.string().url({ message: "সঠিক URL দিন।" }).optional().or(z.literal('')),
+    bio: z.string().optional(),
+    bloodGroup: z.string().optional(),
 });
 
 type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
@@ -115,8 +118,11 @@ export async function updateUserAction(data: UpdateUserFormValues) {
     }
 
     try {
-        const updateData: { name: string; password?: string } = {
+        const updateData: Partial<User> = {
             name: data.name,
+            avatarUrl: data.avatarUrl,
+            bio: data.bio,
+            bloodGroup: data.bloodGroup
         };
 
         if (data.password) {

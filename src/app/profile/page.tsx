@@ -5,11 +5,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mail, User as UserIcon, Edit } from 'lucide-react';
+import { Mail, User as UserIcon, Edit, Droplets, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -29,6 +30,20 @@ export default function ProfilePage() {
       });
       router.push('/login');
     }
+
+     // Listen for storage changes to sync across tabs/components
+    const handleStorageChange = (event: StorageEvent) => {
+        if (event.key === 'bartaNowUser') {
+            const newUser = event.newValue ? JSON.parse(event.newValue) : null;
+            setUser(newUser);
+        }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+
   }, [router, toast]);
 
   if (!user) {
@@ -37,38 +52,49 @@ export default function ProfilePage() {
   }
 
   const userInitials = user.name.split(' ').map((n) => n[0]).join('');
+  const avatarSrc = user.avatarUrl || `https://i.pravatar.cc/150?u=${user.id}`;
 
   return (
     <div className="container mx-auto max-w-2xl py-12">
       <Card>
-        <CardHeader className="items-center text-center">
+        <CardHeader className="items-center text-center space-y-2">
           <Avatar className="h-24 w-24 mb-4 text-3xl">
-            <AvatarImage src={`https://i.pravatar.cc/150?u=${user.id}`} alt={user.name} />
+            <AvatarImage src={avatarSrc} alt={user.name} />
             <AvatarFallback>{userInitials}</AvatarFallback>
           </Avatar>
           <CardTitle className="text-3xl font-headline">{user.name}</CardTitle>
           <CardDescription>
-            @{user.email.split('@')[0]}
+             <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>
+                {user.role === 'admin' ? 'অ্যাডমিন' : 'ব্যবহারকারী'}
+            </Badge>
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+            {user.bio && (
+                <div className="text-center text-muted-foreground p-4 bg-muted/50 rounded-md">
+                     <Info className="inline-block h-4 w-4 mr-2" />
+                    <p className="inline italic">{user.bio}</p>
+                </div>
+            )}
             <div className="flex items-center gap-4 text-muted-foreground">
-                <UserIcon className="h-5 w-5" />
-                <span>{user.role === 'admin' ? 'অ্যাডমিন' : 'ব্যবহারকারী'}</span>
-            </div>
-            <div className="flex items-center gap-4 text-muted-foreground">
-                <Mail className="h-5 w-5" />
+                <Mail className="h-5 w-5 shrink-0" />
                 <span>{user.email}</span>
             </div>
-            <div className="pt-4 flex justify-end">
-                <Button variant="outline" asChild>
-                    <Link href="/profile/edit">
-                        <Edit className="mr-2 h-4 w-4" />
-                        প্রোফাইল এডিট করুন
-                    </Link>
-                </Button>
-            </div>
+            {user.bloodGroup && (
+                <div className="flex items-center gap-4 text-muted-foreground">
+                    <Droplets className="h-5 w-5 shrink-0 text-red-500" />
+                    <span>রক্তের গ্রুপ: {user.bloodGroup}</span>
+                </div>
+            )}
         </CardContent>
+        <CardFooter className="pt-4 flex justify-end">
+            <Button variant="outline" asChild>
+                <Link href="/profile/edit">
+                    <Edit className="mr-2 h-4 w-4" />
+                    প্রোফাইল এডিট করুন
+                </Link>
+            </Button>
+        </CardFooter>
       </Card>
     </div>
   );

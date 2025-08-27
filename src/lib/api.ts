@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import type { Article, Author, Poll, MemeNews, User } from './types';
@@ -358,7 +357,7 @@ export async function createUser(user: Omit<User, 'id' | 'role'>): Promise<User>
     return newUser;
 }
 
-export async function updateUser(userId: string, data: Partial<Pick<User, 'name' | 'password'>>): Promise<User | undefined> {
+export async function updateUser(userId: string, data: Partial<User>): Promise<User | undefined> {
     if (useMockData) {
         const userIndex = mockDb.users.findIndex(u => u.id === userId);
         if (userIndex === -1) return undefined;
@@ -373,15 +372,15 @@ export async function updateUser(userId: string, data: Partial<Pick<User, 'name'
     const expressionAttributeValues: { [key: string]: any } = {};
     const expressionAttributeNames: { [key: string]: string } = {};
 
-    if (data.name) {
-        updateExpressionParts.push('#name = :name');
-        expressionAttributeNames['#name'] = 'name';
-        expressionAttributeValues[':name'] = data.name;
-    }
-    if (data.password) {
-        updateExpressionParts.push('#password = :password');
-        expressionAttributeNames['#password'] = 'password';
-        expressionAttributeValues[':password'] = data.password; // Remember to hash in a real app
+    // Dynamically build the update expression
+    for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key) && key !== 'id' && key !== 'email') {
+            const attrKey = `#${key}`;
+            const valueKey = `:${key}`;
+            updateExpressionParts.push(`${attrKey} = ${valueKey}`);
+            expressionAttributeNames[attrKey] = key;
+            expressionAttributeValues[valueKey] = (data as any)[key];
+        }
     }
     
     if (updateExpressionParts.length === 0) {

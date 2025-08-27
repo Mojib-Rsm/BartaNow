@@ -15,12 +15,17 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { updateUserAction } from '@/app/actions';
 import Link from 'next/link';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
   id: z.string(),
   name: z.string().min(3, { message: "নাম কমপক্ষে ৩ অক্ষরের হতে হবে।" }),
   email: z.string().email(),
   password: z.string().min(6, { message: "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।" }).optional().or(z.literal('')),
+  avatarUrl: z.string().url({ message: "সঠিক URL দিন।" }).optional().or(z.literal('')),
+  bio: z.string().max(300, { message: "বায়ো ৩০০ অক্ষরের মধ্যে হতে হবে।" }).optional(),
+  bloodGroup: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -37,6 +42,9 @@ export default function ProfileEditPage() {
       name: '',
       email: '',
       password: '',
+      avatarUrl: '',
+      bio: '',
+      bloodGroup: '',
     },
   });
 
@@ -50,6 +58,9 @@ export default function ProfileEditPage() {
         name: parsedUser.name,
         email: parsedUser.email,
         password: '',
+        avatarUrl: parsedUser.avatarUrl || '',
+        bio: parsedUser.bio || '',
+        bloodGroup: parsedUser.bloodGroup || '',
       });
     } else {
       toast({
@@ -100,6 +111,17 @@ export default function ProfileEditPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+             <div className="grid gap-2">
+              <Label htmlFor="avatarUrl">প্রোফাইল ছবির URL</Label>
+              <Input
+                id="avatarUrl"
+                placeholder="https://example.com/image.png"
+                {...form.register('avatarUrl')}
+              />
+              {form.formState.errors.avatarUrl && (
+                <p className="text-xs text-destructive">{form.formState.errors.avatarUrl.message}</p>
+              )}
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="name">নাম</Label>
               <Input
@@ -109,6 +131,30 @@ export default function ProfileEditPage() {
               {form.formState.errors.name && (
                 <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>
               )}
+            </div>
+             <div className="grid gap-2">
+              <Label htmlFor="bio">বায়ো</Label>
+              <Textarea
+                id="bio"
+                placeholder="আপনার সম্পর্কে কিছু লিখুন..."
+                {...form.register('bio')}
+              />
+              {form.formState.errors.bio && (
+                <p className="text-xs text-destructive">{form.formState.errors.bio.message}</p>
+              )}
+            </div>
+             <div className="grid gap-2">
+              <Label htmlFor="bloodGroup">রক্তের গ্রুপ</Label>
+              <Select onValueChange={(value) => form.setValue('bloodGroup', value)} defaultValue={form.getValues('bloodGroup')}>
+                  <SelectTrigger id="bloodGroup">
+                    <SelectValue placeholder="রক্তের গ্রুপ নির্বাচন করুন" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(group => (
+                        <SelectItem key={group} value={group}>{group}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">ইমেইল (পরিবর্তনযোগ্য নয়)</Label>

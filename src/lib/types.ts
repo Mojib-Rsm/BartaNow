@@ -36,6 +36,10 @@ export interface User {
     name: string;
     password?: string; // Should be hashed in a real app
     role: 'admin' | 'user';
+    avatarUrl?: string;
+    bio?: string;
+    bloodGroup?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
+    preferredTopics?: string[];
     entityType?: 'USER';
 }
 
