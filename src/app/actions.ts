@@ -104,7 +104,7 @@ const updateUserSchema = z.object({
     id: z.string(),
     name: z.string().min(3, { message: "নাম কমপক্ষে ৩ অক্ষরের হতে হবে।" }),
     password: z.string().min(6, { message: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।" }).optional().or(z.literal('')),
-    avatarUrl: z.string().url({ message: "সঠিক URL দিন।" }).optional().or(z.literal('')),
+    avatarUrl: z.string().optional().or(z.literal('')),
     bio: z.string().optional(),
     bloodGroup: z.string().optional(),
 });
@@ -136,8 +136,8 @@ export async function updateUserAction(data: UpdateUserFormValues) {
         }
 
         // Revalidate the path to show updated info and redirect
-        revalidatePath('/profile');
-        revalidatePath('/profile/edit');
+        revalidatePath('/dashboard/profile');
+        revalidatePath('/dashboard/profile/edit');
         
         return { success: true, message: 'প্রোফাইল সফলভাবে আপডেট হয়েছে।', user: updatedUser };
 

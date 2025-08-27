@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -175,7 +176,7 @@ export default function Header() {
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                                 <Avatar className="h-8 w-8">
-                                    <AvatarImage src={`https://i.pravatar.cc/150?u=${user.id}`} alt={user.name} />
+                                    <AvatarImage src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.id}`} alt={user.name} />
                                     <AvatarFallback>{userInitials}</AvatarFallback>
                                 </Avatar>
                             </Button>
@@ -191,16 +192,16 @@ export default function Header() {
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                              <DropdownMenuItem asChild>
-                                <Link href="/profile">
-                                    <User className="mr-2 h-4 w-4" />
-                                    <span>প্রোফাইল</span>
+                                <Link href="/dashboard">
+                                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                                    <span>ড্যাশবোর্ড</span>
                                 </Link>
                             </DropdownMenuItem>
                             {user.role === 'admin' && (
                                 <DropdownMenuItem asChild>
                                     <Link href="/admin">
                                         <LayoutDashboard className="mr-2 h-4 w-4" />
-                                        <span>ড্যাশবোর্ড</span>
+                                        <span>অ্যাডমিন প্যানেল</span>
                                     </Link>
                                 </DropdownMenuItem>
                             )}

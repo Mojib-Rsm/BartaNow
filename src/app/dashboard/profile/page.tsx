@@ -47,7 +47,7 @@ export default function ProfilePage() {
   }, [router, toast]);
 
   if (!user) {
-    // This will be handled by the loading component
+    // This will be handled by the layout's loader
     return null;
   }
 
@@ -55,24 +55,23 @@ export default function ProfilePage() {
   const avatarSrc = user.avatarUrl || `https://i.pravatar.cc/150?u=${user.id}`;
 
   return (
-    <div className="container mx-auto max-w-2xl py-12">
-      <Card>
+    <Card>
         <CardHeader className="items-center text-center space-y-2">
-          <Avatar className="h-24 w-24 mb-4 text-3xl">
+        <Avatar className="h-24 w-24 mb-4 text-3xl">
             <AvatarImage src={avatarSrc} alt={user.name} />
             <AvatarFallback>{userInitials}</AvatarFallback>
-          </Avatar>
-          <CardTitle className="text-3xl font-headline">{user.name}</CardTitle>
-          <CardDescription>
-             <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>
+        </Avatar>
+        <CardTitle className="text-3xl font-headline">{user.name}</CardTitle>
+        <CardDescription>
+            <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>
                 {user.role === 'admin' ? 'অ্যাডমিন' : 'ব্যবহারকারী'}
             </Badge>
-          </CardDescription>
+        </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 max-w-lg mx-auto">
             {user.bio && (
                 <div className="text-center text-muted-foreground p-4 bg-muted/50 rounded-md">
-                     <Info className="inline-block h-4 w-4 mr-2" />
+                    <Info className="inline-block h-4 w-4 mr-2" />
                     <p className="inline italic">{user.bio}</p>
                 </div>
             )}
@@ -87,15 +86,14 @@ export default function ProfilePage() {
                 </div>
             )}
         </CardContent>
-        <CardFooter className="pt-4 flex justify-end">
+        <CardFooter className="pt-4 flex justify-end max-w-lg mx-auto">
             <Button variant="outline" asChild>
-                <Link href="/profile/edit">
+                <Link href="/dashboard/profile/edit">
                     <Edit className="mr-2 h-4 w-4" />
                     প্রোফাইল এডিট করুন
                 </Link>
             </Button>
         </CardFooter>
-      </Card>
-    </div>
+    </Card>
   );
 }
