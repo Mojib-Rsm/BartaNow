@@ -13,8 +13,8 @@ type FactCheckSidebarProps = {
 
 const verdictMap = {
     'সত্য': { icon: CheckCircle2, color: 'text-green-500' },
-    'মিথ্যা': { icon: XCircle, color: 'text-red-500' },
-    'বিভ্রান্তিকর': { icon: AlertTriangle, color: 'text-yellow-500' },
+    'ভুয়া': { icon: XCircle, color: 'text-red-500' },
+    'আংশিক সত্য': { icon: AlertTriangle, color: 'text-yellow-500' },
 };
 
 export default function FactCheckSidebar({ articles }: FactCheckSidebarProps) {

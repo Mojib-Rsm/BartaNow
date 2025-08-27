@@ -17,11 +17,19 @@ export interface Poll {
   options: PollOption[];
 }
 
+export interface FactCheck {
+  statement: string;
+  verdict: 'সত্য' | 'ভুয়া' | 'আংশিক সত্য';
+  source: {
+    name: string;
+    url: string;
+  };
+}
 
 export interface Article {
   id: string;
   title: string;
-  category: 'রাজনীতি' | 'খেলা' | 'প্রযুক্তি' | 'বিনোদন' | 'অর্থনীতি' | 'আন্তর্জাতিক' | 'মতামত' | 'স্বাস্থ্য' | 'শিক্ষা' | 'পরিবেশ' | 'বিশেষ কভারেজ' | 'জাতীয়' | 'ইসলামী জীবন';
+  category: 'রাজনীতি' | 'খেলা' | 'প্রযুক্তি' | 'বিনোদন' | 'অর্থনীতি' | 'আন্তর্জাতিক' | 'মতামত' | 'স্বাস্থ্য' | 'শিক্ষা' | 'পরিবেশ' | 'বিশেষ কভারেজ' | 'জাতীয়' | 'ইসলামী জীবন' | 'তথ্য যাচাই';
   content: string[]; // Array of paragraphs
   imageUrl: string;
   imageHint?: string;
@@ -35,4 +43,5 @@ export interface Article {
   videoUrl?: string;
   editorsPick?: boolean;
   sponsored?: boolean;
+  factCheck?: FactCheck;
 }

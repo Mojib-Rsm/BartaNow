@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import AdSpot from '@/components/ad-spot';
 import TrendingSidebar from '@/components/trending-sidebar';
 import AudioPlayer from '@/components/audio-player';
+import FactCheckMeter from '@/components/fact-check-meter';
  
 type Props = {
   params: { id: string }
@@ -104,6 +105,12 @@ export default async function ArticlePage({ params }: { params: { id: string } }
                         <p key={index}>{paragraph}</p>
                     ))}
                 </div>
+
+                {article.factCheck && (
+                    <div className="mt-8 pt-6 border-t">
+                        <FactCheckMeter factCheck={article.factCheck} />
+                    </div>
+                )}
                 
                 <div className="mt-8 pt-6 border-t">
                     <ShareButtons articleTitle={article.title} />
