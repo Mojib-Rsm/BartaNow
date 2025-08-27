@@ -50,7 +50,7 @@ export default function Header() {
                     <path d="M245.939 51.5C249.939 51.5 252.739 49.3 252.739 44.9V36.9H239.139V44.9C239.139 49.3 241.939 51.5 245.939 51.5Z" fill="#333333"/>
                     <path d="M245.939 0.5C241.939 0.5 239.139 2.7 239.139 7.1V34.1H252.739V7.1C252.739 2.7 249.939 0.5 245.939 0.5Z" fill="#333333"/>
                     <path d="M262.2 38.7V2.5H258V38.7H262.2Z" fill="#333333"/>
-                    <text x="268" y="34" font-family="PT Sans, sans-serif" font-size="28" font-weight="bold" fill="#333333">নাও</text>
+                    <text x="268" y="34" fontFamily="PT Sans, sans-serif" fontSize="28" fontWeight="bold" fill="#333333">নাও</text>
                 </svg>
             </Link>
             <div className="hidden md:flex items-center gap-4 text-sm">
