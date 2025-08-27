@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Article, Author } from '@/lib/types';
+import type { Article } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,7 +27,6 @@ const formSchema = z.object({
   content: z.string().min(50, "কনটেন্ট কমপক্ষে ৫০ অক্ষরের হতে হবে।"),
   category: z.enum(['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ']),
   imageUrl: z.string().optional().or(z.literal('')),
-  authorId: z.string().min(1, "লেখক নির্বাচন করুন।"),
 });
 
 
@@ -35,10 +34,9 @@ type FormValues = z.infer<typeof formSchema>;
 
 type ArticleEditFormProps = {
     article: Article;
-    authors: Author[];
 }
 
-export default function ArticleEditForm({ article, authors }: ArticleEditFormProps) {
+export default function ArticleEditForm({ article }: ArticleEditFormProps) {
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(article.imageUrl);
   const router = useRouter();
@@ -52,7 +50,6 @@ export default function ArticleEditForm({ article, authors }: ArticleEditFormPro
       content: article.content.join('\n\n') || '',
       category: article.category || 'সর্বশেষ',
       imageUrl: article.imageUrl || '',
-      authorId: article.authorId || '',
     },
   });
 
@@ -95,7 +92,7 @@ export default function ArticleEditForm({ article, authors }: ArticleEditFormPro
       <CardHeader>
         <CardTitle className="text-2xl font-headline">আর্টিকেল এডিট করুন</CardTitle>
         <CardDescription>
-          আর্টিকেলের তথ্য পরিবর্তন করুন।
+          আর্টিকেলের তথ্য পরিবর্তন করুন। লেখকের তথ্য পরিবর্তন করা যাবে না।
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -132,39 +129,21 @@ export default function ArticleEditForm({ article, authors }: ArticleEditFormPro
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="grid gap-2">
-                <Label htmlFor="category">ক্যাটাগরি</Label>
-                <Select onValueChange={(value) => form.setValue('category', value as FormValues['category'])} defaultValue={form.getValues('category')}>
-                    <SelectTrigger id="category">
-                    <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ'].map(cat => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                 {form.formState.errors.category && (
-                    <p className="text-xs text-destructive">{form.formState.errors.category.message}</p>
-                )}
-            </div>
-             <div className="grid gap-2">
-                <Label htmlFor="authorId">লেখক</Label>
-                <Select onValueChange={(value) => form.setValue('authorId', value)} defaultValue={form.getValues('authorId')}>
-                    <SelectTrigger id="authorId">
-                        <SelectValue placeholder="লেখক নির্বাচন করুন" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {authors.map(author => (
-                            <SelectItem key={author.id} value={author.id}>{author.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                 {form.formState.errors.authorId && (
-                    <p className="text-xs text-destructive">{form.formState.errors.authorId.message}</p>
-                )}
-            </div>
+          <div className="grid gap-2">
+              <Label htmlFor="category">ক্যাটাগরি</Label>
+              <Select onValueChange={(value) => form.setValue('category', value as FormValues['category'])} defaultValue={form.getValues('category')}>
+                  <SelectTrigger id="category">
+                  <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ'].map(cat => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+                {form.formState.errors.category && (
+                  <p className="text-xs text-destructive">{form.formState.errors.category.message}</p>
+              )}
           </div>
           
            <div className="grid gap-2">

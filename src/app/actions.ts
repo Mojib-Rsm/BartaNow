@@ -108,7 +108,7 @@ const updateUserSchema = z.object({
     avatarUrl: z.string().optional().or(z.literal('')),
     bio: z.string().optional(),
     bloodGroup: z.string().optional(),
-    role: z.enum(['admin', 'user']).optional(),
+    role: z.enum(['admin', 'editor', 'reporter', 'user']).optional(),
 });
 
 type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
@@ -165,38 +165,30 @@ const articleSchema = z.object({
   content: z.string().min(50, "কনটেন্ট কমপক্ষে ৫০ অক্ষরের হতে হবে।"),
   category: z.enum(['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ']),
   imageUrl: z.string().optional().or(z.literal('')),
-  authorId: z.string().min(1, "লেখক নির্বাচন করুন।"),
+  authorId: z.string().min(1, "লেখক আইডি প্রয়োজন।"),
 });
 
 type ArticleFormValues = z.infer<typeof articleSchema>;
 
-export async function updateArticleAction(data: ArticleFormValues) {
-    const validation = articleSchema.safeParse(data);
+export async function updateArticleAction(data: Omit<ArticleFormValues, 'authorId'> & { id: string }) {
+    const validation = articleSchema.omit({ authorId: true }).safeParse(data);
 
     if (!validation.success) {
         return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
     }
 
     try {
-        const author = await getAuthorById(data.authorId);
-        if (!author) {
-            return { success: false, message: 'লেখক খুঁজে পাওয়া যায়নি।' };
-        }
-
-        let finalImageUrl = data.imageUrl;
-        if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
-            finalImageUrl = await uploadImage(data.imageUrl, `article-${data.id}.png`);
-        }
-
         const articleToUpdate: Partial<Article> = {
             title: data.title,
             content: data.content.split('\n').filter(p => p.trim() !== ''),
             category: data.category,
-            imageUrl: finalImageUrl,
-            authorId: author.id,
-            authorName: author.name,
-            authorAvatarUrl: author.avatarUrl,
         };
+
+        if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
+            articleToUpdate.imageUrl = await uploadImage(data.imageUrl, `article-${data.id}.png`);
+        } else {
+            articleToUpdate.imageUrl = data.imageUrl;
+        }
 
         const updatedArticle = await updateArticle(data.id, articleToUpdate);
 
@@ -222,15 +214,15 @@ export async function updateArticleAction(data: ArticleFormValues) {
 const createArticleSchema = articleSchema.omit({ id: true });
 type CreateArticleFormValues = z.infer<typeof createArticleSchema>;
 
-export async function createArticleAction(data: CreateArticleFormValues) {
-    const validation = createArticleSchema.safeParse(data);
+export async function createArticleAction(data: Omit<CreateArticleFormValues, 'authorId'> & { userId: string }) {
+    const validation = createArticleSchema.omit({ authorId: true }).safeParse(data);
 
     if (!validation.success) {
         return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
     }
 
     try {
-        const author = await getAuthorById(data.authorId);
+        const author = await getUserById(data.userId);
         if (!author) {
             return { success: false, message: 'লেখক খুঁজে পাওয়া যায়নি।' };
         }
@@ -248,7 +240,7 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             imageUrl: finalImageUrl,
             authorId: author.id,
             authorName: author.name,
-            authorAvatarUrl: author.avatarUrl,
+            authorAvatarUrl: author.avatarUrl || '',
         };
 
         const newArticle = await createArticle(newArticleData);

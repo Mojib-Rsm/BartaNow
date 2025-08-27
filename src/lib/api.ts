@@ -533,7 +533,14 @@ export async function createArticle(data: Omit<Article, 'id' | 'publishedAt' | '
         .then(({ summary }) => {
             newArticle.aiSummary = summary;
             // Update the article in the DB with the new summary
-            updateArticle(newArticle.id, { aiSummary: summary });
+            if (useMockData) {
+                const articleIndex = mockDb.articles.findIndex(a => a.id === newArticle.id);
+                if (articleIndex !== -1) {
+                    mockDb.articles[articleIndex].aiSummary = summary;
+                }
+            } else {
+                updateArticle(newArticle.id, { aiSummary: summary });
+            }
         })
         .catch(e => console.error(`Could not generate summary for new article ${newArticle.id}`, e));
 

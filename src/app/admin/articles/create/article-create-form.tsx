@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Author } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,17 +23,16 @@ const formSchema = z.object({
   content: z.string().min(50, "কনটেন্ট কমপক্ষে ৫০ অক্ষরের হতে হবে।"),
   category: z.enum(['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ']),
   imageUrl: z.string().optional().or(z.literal('')),
-  authorId: z.string().min(1, "লেখক নির্বাচন করুন।"),
 });
 
 
 type FormValues = z.infer<typeof formSchema>;
 
 type ArticleCreateFormProps = {
-    authors: Author[];
+    userId: string;
 }
 
-export default function ArticleCreateForm({ authors }: ArticleCreateFormProps) {
+export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const router = useRouter();
@@ -47,7 +45,6 @@ export default function ArticleCreateForm({ authors }: ArticleCreateFormProps) {
       content: '',
       category: 'সর্বশেষ',
       imageUrl: '',
-      authorId: '',
     },
   });
 
@@ -66,7 +63,7 @@ export default function ArticleCreateForm({ authors }: ArticleCreateFormProps) {
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
-    const result = await createArticleAction(data);
+    const result = await createArticleAction({...data, userId});
     setLoading(false);
 
     if (result.success) {
@@ -90,7 +87,7 @@ export default function ArticleCreateForm({ authors }: ArticleCreateFormProps) {
       <CardHeader>
         <CardTitle className="text-2xl font-headline">নতুন আর্টিকেল তৈরি করুন</CardTitle>
         <CardDescription>
-          নতুন আর্টিকেলের জন্য সব তথ্য পূরণ করুন।
+          নতুন আর্টিকেলের জন্য সব তথ্য পূরণ করুন। লেখক হিসেবে আপনাকে স্বয়ংক্রিয়ভাবে নির্বাচন করা হবে।
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -127,39 +124,21 @@ export default function ArticleCreateForm({ authors }: ArticleCreateFormProps) {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="grid gap-2">
-                <Label htmlFor="category">ক্যাটাগরি</Label>
-                <Select onValueChange={(value) => form.setValue('category', value as FormValues['category'])} defaultValue={form.getValues('category')}>
-                    <SelectTrigger id="category">
-                    <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ'].map(cat => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                 {form.formState.errors.category && (
-                    <p className="text-xs text-destructive">{form.formState.errors.category.message}</p>
-                )}
-            </div>
-             <div className="grid gap-2">
-                <Label htmlFor="authorId">লেখক</Label>
-                <Select onValueChange={(value) => form.setValue('authorId', value)} defaultValue={form.getValues('authorId')}>
-                    <SelectTrigger id="authorId">
-                        <SelectValue placeholder="লেখক নির্বাচন করুন" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {authors.map(author => (
-                            <SelectItem key={author.id} value={author.id}>{author.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                 {form.formState.errors.authorId && (
-                    <p className="text-xs text-destructive">{form.formState.errors.authorId.message}</p>
-                )}
-            </div>
+          <div className="grid gap-2">
+              <Label htmlFor="category">ক্যাটাগরি</Label>
+              <Select onValueChange={(value) => form.setValue('category', value as FormValues['category'])} defaultValue={form.getValues('category')}>
+                  <SelectTrigger id="category">
+                  <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ'].map(cat => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+                {form.formState.errors.category && (
+                  <p className="text-xs text-destructive">{form.formState.errors.category.message}</p>
+              )}
           </div>
           
            <div className="grid gap-2">
