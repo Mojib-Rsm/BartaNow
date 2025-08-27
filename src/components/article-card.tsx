@@ -53,3 +53,5 @@ export default function ArticleCard({ article }: ArticleCardProps) {
     </Card>
   );
 }
+
+    
