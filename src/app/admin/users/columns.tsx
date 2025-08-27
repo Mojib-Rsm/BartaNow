@@ -81,6 +81,14 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original
 
+      const handleLoginAsUser = () => {
+        // This is a simplified way to "login as user". 
+        // In a real, secure application, you'd generate a temporary, secure token.
+        // For this demo, we'll just use localStorage to switch the user context.
+        localStorage.setItem('bartaNowUser', JSON.stringify(user));
+        window.location.href = '/dashboard';
+      }
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -93,6 +101,9 @@ export const columns: ColumnDef<User>[] = [
             <DropdownMenuLabel>অ্যাকশন</DropdownMenuLabel>
             <DropdownMenuItem asChild>
                 <Link href={`/admin/users/edit/${user.id}`}>প্রোফাইল এডিট করুন</Link>
+            </DropdownMenuItem>
+             <DropdownMenuItem onClick={handleLoginAsUser}>
+              অ্যাকাউন্টে লগইন করুন
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>ব্লক করুন</DropdownMenuItem>
