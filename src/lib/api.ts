@@ -30,6 +30,14 @@ if (!useMockData) {
     docClient = DynamoDBDocumentClient.from(client);
 }
 
+// Helper to generate a slug from a title
+const generateSlug = (title: string) => {
+    return title
+        .toLowerCase()
+        .replace(/ /g, '-')
+        .replace(/[^\w-à-üÀ-Ü]/g, ''); // Keep bengali characters
+};
+
 async function generateSummariesForMockData() {
     if (mockDb.articles.every(a => a.aiSummary)) {
         return;
@@ -456,14 +464,6 @@ export async function updateUser(userId: string, data: Partial<User>): Promise<U
     }
 }
 
-
-const generateSlug = (title: string) => {
-    return title
-        .toLowerCase()
-        .replace(/ /g, '-')
-        .replace(/[^\w-à-üÀ-Ü]/g, ''); // Keep bengali characters
-};
-
 export async function updateArticle(articleId: string, data: Partial<Article>): Promise<Article | undefined> {
     
     if (data.title && !data.slug) {
@@ -516,4 +516,42 @@ export async function updateArticle(articleId: string, data: Partial<Article>): 
         console.error(`Error updating article ${articleId} in DynamoDB:`, error);
         throw new Error('Failed to update article in the database.');
     }
+}
+
+export async function createArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiSummary'>): Promise<Article> {
+    const newArticle: Article = {
+        id: `article-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        publishedAt: new Date().toISOString(),
+        slug: generateSlug(data.title),
+        aiSummary: data.content.join('\n\n').substring(0, 150) + '...', // Basic summary
+        ...data,
+        entityType: 'ARTICLE',
+    };
+
+    // Generate a better summary in the background
+    summarizeArticle({ articleContent: data.content.join('\n\n') })
+        .then(({ summary }) => {
+            newArticle.aiSummary = summary;
+            // Update the article in the DB with the new summary
+            updateArticle(newArticle.id, { aiSummary: summary });
+        })
+        .catch(e => console.error(`Could not generate summary for new article ${newArticle.id}`, e));
+
+    if (useMockData) {
+        mockDb.articles.unshift(newArticle); // Add to the beginning of the array
+    } else {
+        const command = new PutCommand({
+            TableName: newsTableName,
+            Item: newArticle,
+        });
+
+        try {
+            await docClient.send(command);
+        } catch (error) {
+            console.error(`Error creating article in DynamoDB:`, error);
+            throw new Error('Failed to create article in the database.');
+        }
+    }
+
+    return newArticle;
 }

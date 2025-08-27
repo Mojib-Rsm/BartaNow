@@ -6,23 +6,20 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Article, Author } from '@/lib/types';
+import type { Author } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Upload } from 'lucide-react';
-import { updateArticleAction } from '@/app/actions';
+import { createArticleAction } from '@/app/actions';
 import Link from 'next/link';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
 
 const formSchema = z.object({
-  id: z.string(),
   title: z.string().min(10, "শিরোনাম কমপক্ষে ১০ অক্ষরের হতে হবে।"),
   content: z.string().min(50, "কনটেন্ট কমপক্ষে ৫০ অক্ষরের হতে হবে।"),
   category: z.enum(['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ']),
@@ -33,26 +30,24 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-type ArticleEditFormProps = {
-    article: Article;
+type ArticleCreateFormProps = {
     authors: Author[];
 }
 
-export default function ArticleEditForm({ article, authors }: ArticleEditFormProps) {
+export default function ArticleCreateForm({ authors }: ArticleCreateFormProps) {
   const [loading, setLoading] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(article.imageUrl);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      id: article.id,
-      title: article.title || '',
-      content: article.content.join('\n\n') || '',
-      category: article.category || 'সর্বশেষ',
-      imageUrl: article.imageUrl || '',
-      authorId: article.authorId || '',
+      title: '',
+      content: '',
+      category: 'সর্বশেষ',
+      imageUrl: '',
+      authorId: '',
     },
   });
 
@@ -71,20 +66,20 @@ export default function ArticleEditForm({ article, authors }: ArticleEditFormPro
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
-    const result = await updateArticleAction(data);
+    const result = await createArticleAction(data);
     setLoading(false);
 
     if (result.success) {
       toast({
         title: 'সফল',
-        description: 'আর্টিকেল সফলভাবে আপডেট হয়েছে।',
+        description: 'আর্টিকেল সফলভাবে তৈরি হয়েছে।',
       });
       router.push('/admin/articles');
       router.refresh();
     } else {
       toast({
         variant: 'destructive',
-        title: 'আপডেট ব্যর্থ',
+        title: 'তৈরি ব্যর্থ',
         description: result.message,
       });
     }
@@ -93,27 +88,27 @@ export default function ArticleEditForm({ article, authors }: ArticleEditFormPro
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl font-headline">আর্টিকেল এডিট করুন</CardTitle>
+        <CardTitle className="text-2xl font-headline">নতুন আর্টিকেল তৈরি করুন</CardTitle>
         <CardDescription>
-          আর্টিকেলের তথ্য পরিবর্তন করুন।
+          নতুন আর্টিকেলের জন্য সব তথ্য পূরণ করুন।
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            
-            <div className="flex flex-col items-center gap-4">
+
+          <div className="flex flex-col items-center gap-4">
               {previewImage && (
                 <div className="relative w-full max-w-sm aspect-video rounded-md overflow-hidden border">
                     <Image src={previewImage} alt="Article preview" fill className="object-cover" />
                 </div>
               )}
-                <Input id="picture" type="file" className="hidden" onChange={handleFileChange} accept="image/*"/>
-                <Button type="button" variant="outline" asChild>
-                <Label htmlFor="picture" className="cursor-pointer">
-                    <Upload className="mr-2 h-4 w-4"/>
-                    ছবি পরিবর্তন করুন
-                </Label>
-                </Button>
+                 <Input id="picture" type="file" className="hidden" onChange={handleFileChange} accept="image/*"/>
+                 <Button type="button" variant="outline" asChild>
+                    <Label htmlFor="picture" className="cursor-pointer">
+                        <Upload className="mr-2 h-4 w-4"/>
+                        ছবি আপলোড করুন
+                    </Label>
+                 </Button>
             </div>
 
           <div className="grid gap-2">
@@ -182,7 +177,7 @@ export default function ArticleEditForm({ article, authors }: ArticleEditFormPro
               </Button>
               <Button type="submit" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  আপডেট করুন
+                  তৈরি করুন
               </Button>
           </div>
         </form>
