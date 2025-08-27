@@ -9,6 +9,7 @@ import { ArrowRight, PlayCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import PollSection from '@/components/poll-section';
 import LoadMore from '@/components/load-more';
+import AdSpot from '@/components/ad-spot';
 
 
 type HomePageProps = {
@@ -128,6 +129,8 @@ export default async function Home({ searchParams }: HomePageProps) {
         
         {/* Right Column */}
         <div className="md:col-span-1 space-y-4">
+           {/* Ad Spot */}
+           <AdSpot className="h-48" />
            {/* Poll Section */}
            <PollSection />
 
@@ -201,6 +204,8 @@ export default async function Home({ searchParams }: HomePageProps) {
         </section>
       )}
 
+      {/* Horizontal Ad Spot */}
+      <AdSpot className="h-24" />
 
       {/* Category Sections */}
       {politicsArticles.length > 0 && (
