@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import PollSection from '@/components/poll-section';
 import LoadMore from '@/components/load-more';
 import AdSpot from '@/components/ad-spot';
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 
 
 type HomePageProps = {
@@ -31,10 +32,8 @@ const SectionHeader = ({ title, href }: { title: string, href: string }) => (
 
 export default async function Home({ searchParams }: HomePageProps) {
   const page = searchParams?.page ? parseInt(searchParams.page, 10) : 1;
-  // Fetch initial articles for the grid, not for the "Load More" list
   const { articles, totalPages } = await getArticles({ page: 1, limit: 13 });
   
-  // Fetch a separate set of articles for the "Load More" section
   const latestArticlesResult = await getArticles({ page: 1, limit: 6 });
 
 
@@ -49,9 +48,8 @@ export default async function Home({ searchParams }: HomePageProps) {
     );
   }
 
-  const mainArticle = articles[0];
-  const sideArticles = articles.slice(1, 5);
-  const belowMainArticles = articles.slice(5, 7);
+  const heroArticles = articles.slice(0, 5);
+  const sideArticles = articles.slice(5, 9);
   const trendingArticles = articles.filter(a => a.badge === 'জনপ্রিয়').slice(0, 5);
   const videoArticles = articles.filter(a => a.videoUrl).slice(0, 5);
   const editorsPicks = articles.filter(a => a.editorsPick).slice(0, 4);
@@ -62,90 +60,7 @@ export default async function Home({ searchParams }: HomePageProps) {
   
   return (
     <div className="space-y-12">
-      {/* Hero Section */}
-      <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        
-        {/* Center Column - Main Article. On mobile, this will appear first. */}
-        <div className="md:col-span-2 space-y-6">
-            {/* Main Featured Article */}
-            <Link href={`/articles/${mainArticle.id}`} className="block group">
-                <Card className="border-0 shadow-none rounded-md overflow-hidden">
-                <div className="relative w-full aspect-video">
-                    <Image
-                    src={mainArticle.imageUrl}
-                    alt={mainArticle.title}
-                    fill
-                    className="object-cover rounded-lg"
-                    data-ai-hint={mainArticle.imageHint}
-                    priority
-                    />
-                </div>
-                <CardContent className="p-0 pt-4">
-                    <h1 className="text-3xl md:text-4xl font-bold font-headline text-foreground group-hover:text-primary transition-colors duration-200">
-                    {mainArticle.title}
-                    </h1>
-                    <p className="text-muted-foreground mt-2 line-clamp-2">
-                    {mainArticle.aiSummary}
-                    </p>
-                </CardContent>
-                </Card>
-            </Link>
-
-             {/* Below Main Articles */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t">
-                {belowMainArticles.map((article) => (
-                     <Link key={article.id} href={`/articles/${article.id}`} className="block group">
-                        <Card className="border-0 shadow-none rounded-md flex gap-4">
-                            <div className="relative w-28 h-20 shrink-0">
-                            <Image
-                                src={article.imageUrl}
-                                alt={article.title}
-                                fill
-                                className="object-cover rounded-md"
-                                data-ai-hint={article.imageHint}
-                            />
-                            </div>
-                            <CardContent className="p-0 flex-grow">
-                            <h3 className="text-lg font-bold font-headline leading-tight group-hover:text-primary transition-colors duration-200">
-                                {article.title}
-                            </h3>
-                            </CardContent>
-                        </Card>
-                    </Link>
-                ))}
-            </div>
-        </div>
-
-        {/* Left Column. On mobile, this appears after the main article. */}
-        <div className="md:col-span-1 space-y-4">
-          {sideArticles.slice(0, 2).map((article) => (
-            <div key={article.id} className="border-b pb-4">
-               <Link href={`/articles/${article.id}`} className="block group">
-                  <h3 className="font-bold text-lg mb-1 group-hover:text-primary">{article.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{article.aiSummary}</p>
-                </Link>
-            </div>
-          ))}
-        </div>
-        
-        {/* Right Column. On mobile, this appears last. */}
-        <div className="md:col-span-1 space-y-4">
-           {sideArticles.slice(2, 4).map((article) => (
-            <div key={article.id} className="border-b pb-4">
-               <Link href={`/articles/${article.id}`} className="block group">
-                  <h3 className="font-bold text-lg mb-1 group-hover:text-primary">{article.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{article.aiSummary}</p>
-                </Link>
-            </div>
-          ))}
-           {/* Ad Spot */}
-           <AdSpot className="h-48" />
-           {/* Poll Section */}
-           <PollSection />
-        </div>
-      </section>
-
-      {/* Trending Section */}
+      {/* Trending Section / Ticker */}
       {trendingArticles.length > 0 && (
         <section>
           <div className="flex items-center gap-4 overflow-x-auto pb-4">
@@ -163,6 +78,58 @@ export default async function Home({ searchParams }: HomePageProps) {
           </div>
         </section>
       )}
+
+      {/* Hero Section */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+           <Carousel
+            opts={{
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {heroArticles.map((article) => (
+                <CarouselItem key={article.id}>
+                    <Link href={`/articles/${article.id}`} className="block group">
+                        <Card className="border-0 shadow-none rounded-md overflow-hidden">
+                        <div className="relative w-full aspect-video">
+                            <Image
+                            src={article.imageUrl}
+                            alt={article.title}
+                            fill
+                            className="object-cover rounded-lg"
+                            data-ai-hint={article.imageHint}
+                            priority={heroArticles.indexOf(article) === 0}
+                            />
+                        </div>
+                        <CardContent className="p-0 pt-4">
+                            <h1 className="text-3xl md:text-4xl font-bold font-headline text-foreground group-hover:text-primary transition-colors duration-200">
+                            {article.title}
+                            </h1>
+                            <p className="text-muted-foreground mt-2 line-clamp-2">
+                            {article.aiSummary}
+                            </p>
+                        </CardContent>
+                        </Card>
+                    </Link>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        </div>
+
+        <div className="md:col-span-1 space-y-4">
+           {sideArticles.map((article) => (
+            <div key={article.id} className="border-b pb-4 last:border-b-0">
+               <Link href={`/articles/${article.id}`} className="block group">
+                  <h3 className="font-bold text-lg mb-1 group-hover:text-primary">{article.title}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{article.aiSummary}</p>
+                </Link>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Video Gallery Section */}
       {videoArticles.length > 0 && (
@@ -191,6 +158,7 @@ export default async function Home({ searchParams }: HomePageProps) {
                                 alt={video.title}
                                 fill
                                 className="object-cover"
+                                data-ai-hint={video.imageHint}
                             />
                             <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                                 <PlayCircle className="h-8 w-8 text-white/80" />
@@ -253,14 +221,22 @@ export default async function Home({ searchParams }: HomePageProps) {
         </section>
       )}
 
-      {/* Latest News with Load More */}
-      <section>
-        <SectionHeader title="সর্বশেষ" href="/latest" />
-        <LoadMore 
-          initialArticles={latestArticlesResult.articles} 
-          totalPages={latestArticlesResult.totalPages}
-        />
-      </section>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-2">
+            {/* Latest News with Load More */}
+            <section>
+              <SectionHeader title="সর্বশেষ" href="/latest" />
+              <LoadMore 
+                initialArticles={latestArticlesResult.articles} 
+                totalPages={latestArticlesResult.totalPages}
+              />
+            </section>
+        </div>
+        <aside className="md:col-span-1 space-y-8">
+            <PollSection />
+            <AdSpot className="h-96" />
+        </aside>
+      </div>
 
     </div>
   );
