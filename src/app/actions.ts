@@ -1,9 +1,10 @@
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
 import { getArticleById, getArticles } from '@/lib/api';
-import type { Article } from './lib/types.ts';
+import type { Article } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 
 export async function seedAction() {
@@ -16,8 +17,8 @@ export async function seedAction() {
   return result;
 }
 
-export async function getMoreArticlesAction({ page = 1, limit = 6, category }: { page?: number; limit?: number; category?: Article['category'] }) {
-    const result = await getArticles({ page, limit, category });
+export async function getMoreArticlesAction({ page = 1, limit = 6, category, date }: { page?: number; limit?: number; category?: Article['category'], date?: string }) {
+    const result = await getArticles({ page, limit, category, date });
     return result.articles;
 }
 

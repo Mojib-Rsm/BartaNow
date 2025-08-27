@@ -1,5 +1,6 @@
 
-import 'server-only';
+'use server';
+
 import type { Article, Author, Poll, MemeNews } from './types';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
