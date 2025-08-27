@@ -1,6 +1,7 @@
 'use client';
 
-import type { MemeNews } from '@/lib/types';
+import type { Article, MemeNews } from '@/lib/types';
+import { mockDb } from '@/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -9,8 +10,18 @@ type MemeCardProps = {
 };
 
 export default function MemeCard({ meme }: MemeCardProps) {
+  // Find the corresponding article to build the correct URL
+  const article = mockDb.articles.find(a => a.id === meme.articleId);
+  
+  if (!article) {
+    // Render nothing or a fallback if the article isn't found
+    return null;
+  }
+  
+  const articleUrl = `/${article.category}/${article.slug}`;
+
   return (
-    <Link href={`/articles/${meme.articleId}`} className="block group">
+    <Link href={articleUrl} className="block group">
       <div className="relative aspect-square w-full bg-black rounded-lg overflow-hidden border-2 border-transparent group-hover:border-primary transition-all duration-300">
         <Image
           src={meme.imageUrl}

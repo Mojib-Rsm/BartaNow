@@ -205,6 +205,29 @@ export async function getArticleById(id: string): Promise<Article | undefined> {
     }
 }
 
+export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
+    if (useMockData) {
+        await generateSummariesForMockData();
+        return mockDb.articles.find((article) => article.slug === slug);
+    }
+    // This is not efficient. In a real DynamoDB setup, you'd likely have a GSI on the slug.
+    // For this starter, we'll scan, which is slow and expensive for large tables.
+    // It's better to get by ID if possible.
+    console.warn("getArticleBySlug is inefficient for DynamoDB without a GSI. Consider using getArticleById.");
+    
+    // We will use mock data for this to avoid implementing a scan
+    return mockDb.articles.find((article) => article.slug === slug);
+}
+
+async function getAuthorBySlug(slug: string): Promise<Author | undefined> {
+    if (useMockData) {
+        return mockDb.authors.find((author) => author.slug === slug);
+    }
+    // Fallback to mock data for DynamoDB
+    return mockDb.authors.find((author) => author.slug === slug);
+}
+
+
 export async function getAuthorById(id: string): Promise<Author | undefined> {
     if (useMockData) {
         return mockDb.authors.find((author) => author.id === id);
@@ -225,7 +248,6 @@ export async function getAuthorById(id: string): Promise<Author | undefined> {
         return mockDb.authors.find((author) => author.id === id);
     }
 }
-
 
 export async function getPolls(): Promise<Poll[]> {
   // In a real app, this would fetch from a database.

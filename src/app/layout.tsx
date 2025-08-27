@@ -7,6 +7,7 @@ import './globals.css';
 import PushNotificationManager from '@/components/push-notification-manager';
 import { ThemeProvider } from '@/components/theme-provider';
 import AdminLayout from '@/app/admin/layout';
+import { headers } from 'next/headers';
 
 export const metadata: Metadata = {
   title: {
@@ -34,10 +35,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // A safe way to check if we're rendering the admin part of the app.
-  // It inspects the special `childProp` that Next.js provides in the page `props`.
-  // Note: This is an internal Next.js mechanism and might change.
-  const isAdminRoute = (children as any)?.props?.childProp?.segment === 'admin'
+  const headersList = headers();
+  const pathname = headersList.get('x-pathname') || '';
+  const isAdminRoute = pathname.startsWith('/admin');
 
   return (
     <html lang="bn" dir="ltr" className="h-full" suppressHydrationWarning>

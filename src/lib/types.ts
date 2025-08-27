@@ -1,6 +1,7 @@
 export interface Author {
   id: string;
   name: string;
+  slug: string;
   avatarUrl: string;
   bio?: string;
 }
@@ -12,7 +13,7 @@ export interface PollOption {
 }
 
 export interface Poll {
-  id: string;
+  id:string;
   question: string;
   options: PollOption[];
 }
@@ -28,8 +29,9 @@ export interface FactCheck {
 
 export interface Article {
   id: string;
+  slug: string;
   title: string;
-  category: 'রাজনীতি' | 'খেলা' | 'প্রযুক্তি' | 'বিনোদন' | 'অর্থনীতি' | 'আন্তর্জাতিক' | 'মতামত' | 'স্বাস্থ্য' | 'শিক্ষা' | 'পরিবেশ' | 'বিশেষ কভারেজ' | 'জাতীয়' | 'ইসলামী জীবন' | 'তথ্য যাচাই' | 'মিম নিউজ';
+  category: 'রাজনীতি' | 'খেলা' | 'প্রযুক্তি' | 'বিনোদন' | 'অর্থনীতি' | 'আন্তর্জাতিক' | 'মতামত' | 'স্বাস্থ্য' | 'শিক্ষা' | 'পরিবেশ' | 'বিশেষ-কভারেজ' | 'জাতীয়' | 'ইসলামী-জীবন' | 'তথ্য-যাচাই' | 'মিম-নিউজ' | 'ভিডিও';
   content: string[]; // Array of paragraphs
   imageUrl: string;
   imageHint?: string;

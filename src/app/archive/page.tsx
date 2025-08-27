@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ArchivePage() {
-    const { articles } = await getArticles({ date: new Date().toISOString().split('T')[0] });
+    // Fetch articles for the current date as a default
+    const { articles } = await getArticles({ date: new Date().toISOString().split('T')[0], limit: 12 });
     return <ArchivePageClient initialArticles={articles} />;
 }

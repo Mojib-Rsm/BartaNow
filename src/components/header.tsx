@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, Search, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Image from 'next/image';
@@ -12,23 +12,23 @@ import SearchInput from './search-input';
 import { ThemeToggle } from './theme-toggle';
 
 const topNavLinks = [
-    { title: 'যেভাবে তৈরি হয় রংবেরঙের চুড়ি', image: 'https://picsum.photos/seed/bangles/50/50' },
-    { title: 'মিথিলার গর্ব: পেলেন \'ডক্টর\' উপাধি', image: 'https://picsum.photos/seed/mithila/50/50' },
-    { title: 'আগুন নেভানোর জন্য পানি আনতে গিয়ে পুকুরেই ডুবল...', image: 'https://picsum.photos/seed/firefighter/50/50' },
+    { title: 'যেভাবে তৈরি হয় রংবেরঙের চুড়ি', image: 'https://picsum.photos/seed/bangles/50/50', href: '/story/bangles' },
+    { title: 'মিথিলার গর্ব: পেলেন \'ডক্টর\' উপাধি', image: 'https://picsum.photos/seed/mithila/50/50', href: '/story/mithila' },
+    { title: 'আগুন নেভানোর জন্য পানি আনতে গিয়ে পুকুরেই ডুবল...', image: 'https://picsum.photos/seed/firefighter/50/50', href: '/story/firefighter' },
 ];
 
 const mainNavLinks = [
-    { name: 'সর্বশেষ', href: '/category/latest' },
-    { name: 'জাতীয়', href: '/category/national' },
-    { name: 'রাজনীতি', href: '/category/politics' },
-    { name: 'খেলা', href: '/category/sports' },
-    { name: 'বিনোদন', href: '/category/entertainment' },
-    { name: 'প্রযুক্তি', href: '/category/tech' },
-    { name: 'আন্তর্জাতিক', href: '/category/international' },
-    { name: 'ইসলামী জীবন', href: '/category/islamic-life' },
+    { name: 'সর্বশেষ', href: '/latest' },
+    { name: 'জাতীয়', href: '/national' },
+    { name: 'রাজনীতি', href: '/politics' },
+    { name: 'খেলা', href: '/sports' },
+    { name: 'বিনোদন', href: '/entertainment' },
+    { name: 'প্রযুক্তি', href: '/tech' },
+    { name: 'আন্তর্জাতিক', href: '/international' },
+    { name: 'ইসলামী জীবন', href: '/islamic-life' },
     { name: 'বিশেষ কভারেজ', href: '/special-coverage' },
-    { name: 'ভিডিও', href: '/category/videos' },
-    { name: 'মতামত জরিপ', href: '/polls' },
+    { name: 'ভিডিও', href: '/videos' },
+    { name: 'মিম নিউজ', href: '/memes' },
 ];
 
 export default function Header() {
@@ -83,7 +83,7 @@ export default function Header() {
             </Link>
             <div className="hidden md:flex items-center gap-4 text-sm">
                 {topNavLinks.map((link, index) => (
-                    <Link key={index} href="#" className="flex items-center gap-2 group">
+                    <Link key={index} href={link.href} className="flex items-center gap-2 group">
                         <div className="relative w-12 h-12">
                            <Image src={link.image} alt={link.title} fill className="object-cover rounded"/>
                         </div>

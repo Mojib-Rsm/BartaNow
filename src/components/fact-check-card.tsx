@@ -23,13 +23,14 @@ export default function FactCheckCard({ article }: FactCheckCardProps) {
   const verdictInfo = verdictMap[article.factCheck.verdict];
   const Icon = verdictInfo.icon;
   const formattedDate = format(new Date(article.publishedAt), "d MMMM, yyyy", { locale: bn });
+  const articleUrl = `/${article.category}/${article.slug}`;
 
   return (
     <Card className={cn(
       "flex flex-col overflow-hidden bg-card rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 group border-2",
       verdictInfo.border
     )}>
-      <Link href={`/articles/${article.id}`} className="block overflow-hidden">
+      <Link href={articleUrl} className="block overflow-hidden">
         <div className="relative aspect-video w-full">
             <Image
             src={article.imageUrl}
@@ -43,7 +44,7 @@ export default function FactCheckCard({ article }: FactCheckCardProps) {
       <div className="p-4 flex flex-col flex-grow">
         <CardHeader className='p-0 pb-2'>
           <CardTitle className="font-headline text-base leading-snug">
-              <Link href={`/articles/${article.id}`} className="line-clamp-2 hover:text-primary transition-colors">
+              <Link href={articleUrl} className="line-clamp-2 hover:text-primary transition-colors">
                   {article.title}
               </Link>
           </CardTitle>

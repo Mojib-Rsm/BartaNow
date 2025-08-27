@@ -27,8 +27,8 @@ export default async function Home() {
         getArticles({ category: 'প্রযুক্তি', limit: 4 }),
         getArticles({ editorsPick: true, limit: 4 }),
         getArticles({ hasVideo: true, limit: 5 }),
-        getArticles({ category: 'ইসলামী জীবন', limit: 4 }),
-        getArticles({ category: 'তথ্য যাচাই', limit: 4 }),
+        getArticles({ category: 'ইসলামী-জীবন', limit: 4 }),
+        getArticles({ category: 'তথ্য-যাচাই', limit: 4 }),
         getMemeNews(),
       ]);
 
@@ -60,4 +60,3 @@ export default async function Home() {
         memeNewsResult={memeNewsResult}
     />
 }
-
