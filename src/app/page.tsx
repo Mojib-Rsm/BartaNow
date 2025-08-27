@@ -213,7 +213,7 @@ export default async function Home({ searchParams }: HomePageProps) {
       {/* Editor's Pick Section */}
       {editorsPicks.length > 0 && (
         <section>
-          <SectionHeader title="সম্পাদকের পছন্দ" href="/editors-pick" />
+          <SectionHeader title="সম্পাদকের পছন্দ" href="/category/editors-pick" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {editorsPicks.map((article) => (
               <ArticleCard key={article.id} article={article} />
@@ -226,7 +226,7 @@ export default async function Home({ searchParams }: HomePageProps) {
         <div className="md:col-span-2">
             {/* Latest News with Load More */}
             <section>
-              <SectionHeader title="সর্বশেষ" href="/latest" />
+              <SectionHeader title="সর্বশেষ" href="/category/latest" />
               <LoadMore 
                 initialArticles={latestArticlesResult.articles} 
                 totalPages={latestArticlesResult.totalPages}

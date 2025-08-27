@@ -17,7 +17,7 @@ const topNavLinks = [
 ];
 
 const mainNavLinks = [
-    { name: 'সর্বশেষ', href: '/latest' },
+    { name: 'সর্বশেষ', href: '/category/latest' },
     { name: 'রাজনীতি', href: '/category/politics' },
     { name: 'খেলা', href: '/category/sports' },
     { name: 'প্রযুক্তি', href: '/category/tech' },
