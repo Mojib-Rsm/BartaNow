@@ -34,10 +34,26 @@ const SectionHeader = ({ title, href }: { title: string, href: string }) => (
 
 export default async function Home({ searchParams }: HomePageProps) {
   const page = searchParams?.page ? parseInt(searchParams.page, 10) : 1;
-  const { articles, totalPages } = await getArticles({ page: 1, limit: 13 });
   
-  const latestArticlesResult = await getArticles({ page: 1, limit: 6 });
-
+  const [
+    initialArticles,
+    latestArticlesResult,
+    politicsResult,
+    sportsResult,
+    entertainmentResult,
+    editorsPicksResult,
+    videoArticlesResult
+  ] = await Promise.all([
+    getArticles({ page: 1, limit: 13 }),
+    getArticles({ page: 1, limit: 6 }),
+    getArticles({ category: 'রাজনীতি', limit: 4 }),
+    getArticles({ category: 'খেলা', limit: 4 }),
+    getArticles({ category: 'বিনোদন', limit: 4 }),
+    getArticles({ editorsPick: true, limit: 4 }),
+    getArticles({ hasVideo: true, limit: 5 })
+  ]);
+  
+  const { articles, totalPages } = initialArticles;
 
   if (articles.length === 0) {
     return (
@@ -53,12 +69,11 @@ export default async function Home({ searchParams }: HomePageProps) {
   const heroArticles = articles.slice(0, 5);
   const sideArticles = articles.slice(5, 9);
   const trendingArticles = articles.filter(a => a.badge === 'জনপ্রিয়').slice(0, 5);
-  const videoArticles = articles.filter(a => a.videoUrl).slice(0, 5);
-  const editorsPicks = articles.filter(a => a.editorsPick).slice(0, 4);
-
-  const politicsArticles = articles.filter(a => a.category === 'রাজনীতি').slice(0, 4);
-  const sportsArticles = articles.filter(a => a.category === 'খেলা').slice(0, 4);
-  const entertainmentArticles = articles.filter(a => a.category === 'বিনোদন').slice(0, 4);
+  const { articles: videoArticles } = videoArticlesResult;
+  const { articles: editorsPicks } = editorsPicksResult;
+  const { articles: politicsArticles } = politicsResult;
+  const { articles: sportsArticles } = sportsResult;
+  const { articles: entertainmentArticles } = entertainmentResult;
   
   return (
     <div className="space-y-12">
