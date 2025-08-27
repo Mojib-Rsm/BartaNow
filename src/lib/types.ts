@@ -74,3 +74,16 @@ export interface MemeNews {
   topText: string;
   bottomText: string;
 }
+
+export interface Ad {
+  id: string;
+  name: string;
+  type: 'banner' | 'sidebar' | 'in-article';
+  imageUrl: string;
+  targetUrl: string;
+  placement: string;
+  isActive: boolean;
+  startDate?: string;
+  endDate?: string;
+  entityType?: 'AD';
+}

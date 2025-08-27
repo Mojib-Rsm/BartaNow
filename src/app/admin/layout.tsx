@@ -8,7 +8,8 @@ import {
   Users,
   Settings,
   BarChart2,
-  PanelLeft
+  PanelLeft,
+  Megaphone
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -105,6 +106,14 @@ export default function AdminLayout({
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                  )}
+                 <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/admin/ads')}>
+                        <Link href="/admin/ads">
+                            <Megaphone />
+                            বিজ্ঞাপন
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>
