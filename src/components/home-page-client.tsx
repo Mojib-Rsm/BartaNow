@@ -103,18 +103,21 @@ export default function HomePageClient({
   const [pageData, setPageData] = useState<{
     articles: Article[];
     trendingArticles: Article[];
-    heroArticles: Article[];
+    heroFeaturedArticle?: Article;
+    heroSideArticles: Article[];
   } | null>(null);
 
   useEffect(() => {
       const { articles } = initialArticles;
-      const heroArticles = articles.slice(0, 10);
+      const heroFeaturedArticle = articles[0];
+      const heroSideArticles = articles.slice(1, 5);
       const trendingArticles = articles.filter(a => a.badge === 'জনপ্রিয়').slice(0, 5);
 
       setPageData({
         articles,
         trendingArticles,
-        heroArticles,
+        heroFeaturedArticle,
+        heroSideArticles
       });
   }, [initialArticles]);
 
@@ -123,9 +126,9 @@ export default function HomePageClient({
   }
 
   const {
-    articles,
     trendingArticles,
-    heroArticles,
+    heroFeaturedArticle,
+    heroSideArticles,
   } = pageData;
 
   const { articles: videoArticles } = videoArticlesResult;
@@ -138,14 +141,6 @@ export default function HomePageClient({
   const { articles: islamicLifeArticles } = islamicLifeResult;
   const { articles: factCheckArticles } = factCheckResult;
   
-  // Create pairs of articles for the hero carousel
-  const heroArticlePairs = [];
-  for (let i = 0; i < heroArticles.length; i += 2) {
-    if (heroArticles[i + 1]) {
-      heroArticlePairs.push([heroArticles[i], heroArticles[i + 1]]);
-    }
-  }
-
   return (
     <div className="space-y-12">
        {/* Trending Section / Ticker */}
@@ -187,25 +182,46 @@ export default function HomePageClient({
       )}
 
       {/* Hero Section */}
-      <section>
-        {heroArticlePairs.length > 0 && (
-          <Carousel
-            opts={{ loop: true }}
-            plugins={[Autoplay({ delay: 5000, stopOnInteraction: true, stopOnMouseEnter: true })]}
-            className="w-full"
-          >
-            <CarouselContent>
-              {heroArticlePairs.map((pair, index) => (
-                <CarouselItem key={index}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ArticleCard article={pair[0]} />
-                    <ArticleCard article={pair[1]} />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {heroFeaturedArticle && (
+            <div className="md:col-span-2">
+                <Card className="flex flex-col h-full overflow-hidden bg-card rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 group border">
+                    <Link href={`/articles/${heroFeaturedArticle.id}`} className="block overflow-hidden">
+                        <div className="relative aspect-video w-full">
+                            <Image
+                            src={heroFeaturedArticle.imageUrl}
+                            alt={heroFeaturedArticle.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            data-ai-hint={heroFeaturedArticle.imageHint}
+                            priority
+                            />
+                        </div>
+                    </Link>
+                    <div className="p-4 flex flex-col flex-grow">
+                        <h2 className="font-headline text-2xl md:text-3xl font-bold leading-tight">
+                            <Link href={`/articles/${heroFeaturedArticle.id}`} className="hover:text-primary transition-colors">
+                                {heroFeaturedArticle.title}
+                            </Link>
+                        </h2>
+                        <p className="text-muted-foreground text-base mt-2 flex-grow">{heroFeaturedArticle.aiSummary}</p>
+                        <div className="p-0 pt-4 mt-auto">
+                            <p className="text-sm text-muted-foreground">{new Date(heroFeaturedArticle.publishedAt).toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        </div>
+                    </div>
+                </Card>
+            </div>
         )}
+        <div className="md:col-span-1 space-y-4">
+          {heroSideArticles.map(article => (
+            <Link key={article.id} href={`/articles/${article.id}`} className="block group border-b pb-4 last:border-b-0">
+                <h3 className="font-headline text-lg font-bold leading-snug group-hover:text-primary transition-colors">
+                  {article.title}
+                </h3>
+                <p className="text-muted-foreground text-sm line-clamp-2 mt-1">{article.aiSummary}</p>
+            </Link>
+          ))}
+        </div>
       </section>
 
       {/* Video Gallery Section */}
@@ -419,3 +435,5 @@ export default function HomePageClient({
     </div>
   );
 }
+
+    
