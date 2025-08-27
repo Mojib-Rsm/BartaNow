@@ -33,6 +33,12 @@ const nextConfig: NextConfig = {
         hostname: 'bartanow.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ik.imagekit.io',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
