@@ -1,10 +1,79 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, CreateTableCommand, DescribeTableCommand, ResourceNotFoundException } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { mockDb } from '../src/lib/data';
 import { config } from 'dotenv';
 
 // Load environment variables from .env file at the root of the project
 config({ path: '.env' });
+
+const tableName = process.env.DYNAMODB_TABLE_NAME || 'BartaNow_News';
+const indexName = 'PublishedAtIndex';
+
+async function waitForTable(client: DynamoDBClient, tableName: string) {
+    let tableStatus = '';
+    do {
+        try {
+            console.log(`Checking status of table: ${tableName}...`);
+            const command = new DescribeTableCommand({ TableName: tableName });
+            const { Table } = await client.send(command);
+            tableStatus = Table?.TableStatus || '';
+            if (tableStatus !== 'ACTIVE') {
+                await new Promise(resolve => setTimeout(resolve, 5000)); // wait 5 seconds
+            }
+        } catch (error) {
+            console.error("Error describing table:", error);
+            throw error;
+        }
+    } while (tableStatus !== 'ACTIVE');
+    console.log(`Table ${tableName} is ACTIVE.`);
+}
+
+
+async function createBartaNowTable(client: DynamoDBClient) {
+    console.log(`Creating table '${tableName}' with index '${indexName}'...`);
+    const command = new CreateTableCommand({
+        TableName: tableName,
+        AttributeDefinitions: [
+            { AttributeName: 'id', AttributeType: 'S' },
+            { AttributeName: 'entityType', AttributeType: 'S' },
+            { AttributeName: 'publishedAt', AttributeType: 'S' }
+        ],
+        KeySchema: [
+            { AttributeName: 'id', KeyType: 'HASH' }
+        ],
+        GlobalSecondaryIndexes: [
+            {
+                IndexName: indexName,
+                KeySchema: [
+                    { AttributeName: 'entityType', KeyType: 'HASH' },
+                    { AttributeName: 'publishedAt', KeyType: 'RANGE' }
+                ],
+                Projection: {
+                    ProjectionType: 'ALL'
+                },
+                ProvisionedThroughput: {
+                    ReadCapacityUnits: 1,
+                    WriteCapacityUnits: 1
+                }
+            }
+        ],
+        ProvisionedThroughput: {
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
+        }
+    });
+
+    try {
+        await client.send(command);
+        console.log(`Table '${tableName}' creation request sent. Waiting for it to become active...`);
+        await waitForTable(client, tableName);
+        console.log(`Table '${tableName}' and index '${indexName}' created successfully.`);
+        return true;
+    } catch (error) {
+        console.error(`Error creating table '${tableName}':`, error);
+        throw error;
+    }
+}
 
 export async function seedDatabase() {
     const isAwsConfigured = process.env.AWS_REGION &&
@@ -28,8 +97,28 @@ export async function seedDatabase() {
         }
     });
 
+    try {
+        const describeCommand = new DescribeTableCommand({ TableName: tableName });
+        await client.send(describeCommand);
+        console.log(`Table '${tableName}' already exists.`);
+    } catch (error) {
+        if (error instanceof ResourceNotFoundException) {
+            console.log(`Table '${tableName}' not found. Attempting to create it...`);
+            try {
+                await createBartaNowTable(client);
+            } catch (creationError) {
+                const errorMessage = `Failed to create DynamoDB table. Please check your IAM permissions and AWS console. Error: ${creationError instanceof Error ? creationError.message : String(creationError)}`;
+                return { success: false, message: errorMessage };
+            }
+        } else {
+            console.error("Error checking for table:", error);
+            const errorMessage = `An error occurred while checking for the DynamoDB table: ${error instanceof Error ? error.message : String(error)}`;
+            return { success: false, message: errorMessage };
+        }
+    }
+
+
     const docClient = DynamoDBDocumentClient.from(client);
-    const tableName = process.env.DYNAMODB_TABLE_NAME || 'BartaNow_News';
 
     console.log(`Starting to seed database: ${tableName}`);
 
@@ -55,10 +144,7 @@ export async function seedDatabase() {
         console.error("Error seeding database:", error);
         let errorMessage = "An unknown error occurred during seeding.";
         if (error instanceof Error) {
-            // Check for specific, common errors to provide better user feedback
-            if (error.name === 'ResourceNotFoundException') {
-                errorMessage = `Error seeding database: The table '${tableName}' was not found. Please create the DynamoDB table first. Refer to the README.md for setup instructions.`;
-            } else if (error.name === 'UnrecognizedClientException' || error.message.includes('Invalid security token')) {
+            if (error.name === 'UnrecognizedClientException' || error.message.includes('Invalid security token')) {
                 errorMessage = "Error seeding database: The security token included in the request is invalid. Please check your AWS credentials in the .env file.";
             } else {
                 errorMessage = `Error seeding database: ${error.message}`;
