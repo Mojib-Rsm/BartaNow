@@ -33,14 +33,18 @@ async function generateSummariesForMockData() {
     }
 }
 
+async function getMockArticles({ page = 1, limit = 6 }: { page?: number; limit?: number }) {
+    await generateSummariesForMockData();
+    const sortedArticles = [...mockDb.articles].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    const totalPages = Math.ceil(sortedArticles.length / limit);
+    const offset = (page - 1) * limit;
+    const paginatedArticles = sortedArticles.slice(offset, offset + limit);
+    return { articles: paginatedArticles, totalPages };
+}
+
 export async function getArticles({ page = 1, limit = 6 }: { page?: number; limit?: number }): Promise<{ articles: Article[], totalPages: number }> {
     if (useMockData) {
-        await generateSummariesForMockData();
-        const sortedArticles = [...mockDb.articles].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-        const totalPages = Math.ceil(sortedArticles.length / limit);
-        const offset = (page - 1) * limit;
-        const paginatedArticles = sortedArticles.slice(offset, offset + limit);
-        return { articles: paginatedArticles, totalPages };
+        return getMockArticles({ page, limit });
     }
 
     // A full implementation would require another query to get the total count
@@ -56,22 +60,22 @@ export async function getArticles({ page = 1, limit = 6 }: { page?: number; limi
     
     let allItems: Article[] = [];
     let lastEvaluatedKey: Record<string, any> | undefined = undefined;
-    
-    // This loop is for demonstration. For a real app, you would fetch only up to the requested page.
-    for (let i = 0; i < page; i++) {
-        const command = new QueryCommand({
-            TableName: tableName,
-            IndexName: 'PublishedAtIndex',
-            KeyConditionExpression: 'entityType = :entityType',
-            ExpressionAttributeValues: {
-                ':entityType': 'ARTICLE',
-            },
-            ScanIndexForward: false, // Sort descending by publishedAt
-            Limit: limit,
-            ExclusiveStartKey: lastEvaluatedKey,
-        });
 
-        try {
+    try {
+        // This loop is for demonstration. For a real app, you would fetch only up to the requested page.
+        for (let i = 0; i < page; i++) {
+            const command = new QueryCommand({
+                TableName: tableName,
+                IndexName: 'PublishedAtIndex',
+                KeyConditionExpression: 'entityType = :entityType',
+                ExpressionAttributeValues: {
+                    ':entityType': 'ARTICLE',
+                },
+                ScanIndexForward: false, // Sort descending by publishedAt
+                Limit: limit,
+                ExclusiveStartKey: lastEvaluatedKey,
+            });
+
             const { Items, LastEvaluatedKey } = await docClient.send(command);
             if (Items) {
                 allItems = Items as Article[]; // For the current page
@@ -80,20 +84,24 @@ export async function getArticles({ page = 1, limit = 6 }: { page?: number; limi
             if (!LastEvaluatedKey) {
                 break; 
             }
-        } catch (error) {
-            console.error("Error fetching articles from DynamoDB:", error);
-            // Fallback to mock data in case of a runtime error with DynamoDB
-            return getArticles({ page, limit });
         }
+        return { articles: allItems, totalPages };
+    } catch (error) {
+        console.error("Error fetching articles from DynamoDB:", error);
+        // Fallback to mock data in case of any runtime error with DynamoDB
+        console.log("Falling back to mock data.");
+        return getMockArticles({ page, limit });
     }
+}
 
-    return { articles: allItems, totalPages };
+async function getMockArticleById(id: string) {
+    await generateSummariesForMockData();
+    return mockDb.articles.find((article) => article.id === id);
 }
 
 export async function getArticleById(id: string): Promise<Article | undefined> {
     if (useMockData) {
-        await generateSummariesForMockData();
-        return mockDb.articles.find((article) => article.id === id);
+        return getMockArticleById(id);
     }
 
     const command = new GetCommand({
@@ -104,11 +112,12 @@ export async function getArticleById(id: string): Promise<Article | undefined> {
     });
 
     try {
-        const { Item } = await docClient.send(command);
+        const { Item } = await doc.send(command);
         return Item as Article | undefined;
     } catch(error) {
         console.error(`Error fetching article ${id} from DynamoDB:`, error);
         // Fallback to mock data in case of a runtime error with DynamoDB
-        return getArticleById(id);
+        console.log(`Falling back to mock data for article ${id}.`);
+        return getMockArticleById(id);
     }
 }
