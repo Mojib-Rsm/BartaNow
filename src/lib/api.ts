@@ -39,18 +39,37 @@ async function generateSummariesForMockData() {
     }
 }
 
-async function getMockArticles({ page = 1, limit = 6 }: { page?: number; limit?: number }) {
+type GetArticlesOptions = {
+    page?: number;
+    limit?: number;
+    category?: Article['category'];
+    excludeId?: string;
+};
+
+async function getMockArticles({ page = 1, limit = 6, category, excludeId }: GetArticlesOptions) {
     await generateSummariesForMockData();
-    const sortedArticles = [...mockDb.articles].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    
+    let filteredArticles = [...mockDb.articles];
+
+    if (category) {
+        filteredArticles = filteredArticles.filter(article => article.category === category);
+    }
+    
+    if (excludeId) {
+        filteredArticles = filteredArticles.filter(article => article.id !== excludeId);
+    }
+
+    const sortedArticles = filteredArticles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
     const totalPages = Math.ceil(sortedArticles.length / limit);
     const offset = (page - 1) * limit;
     const paginatedArticles = sortedArticles.slice(offset, offset + limit);
+
     return { articles: paginatedArticles, totalPages };
 }
 
-export async function getArticles({ page = 1, limit = 6 }: { page?: number; limit?: number }): Promise<{ articles: Article[], totalPages: number }> {
+export async function getArticles({ page = 1, limit = 6, category, excludeId }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
     if (useMockData) {
-        return getMockArticles({ page, limit });
+        return getMockArticles({ page, limit, category, excludeId });
     }
     
     try {
@@ -64,6 +83,9 @@ export async function getArticles({ page = 1, limit = 6 }: { page?: number; limi
         // the `LastEvaluatedKey` between page loads. For this starter, we'll
         // simulate basic pagination by repeating the query and relying on client-side page numbers,
         // which is not efficient for deep pagination.
+        
+        // This implementation does not support category filtering for DynamoDB yet.
+        // That would require a GSI on the `category` attribute.
         
         let allItems: Article[] = [];
         let lastEvaluatedKey: Record<string, any> | undefined = undefined;
@@ -91,12 +113,17 @@ export async function getArticles({ page = 1, limit = 6 }: { page?: number; limi
                 break; 
             }
         }
+        
+        if (excludeId) {
+             allItems = allItems.filter(item => item.id !== excludeId);
+        }
+
         return { articles: allItems, totalPages };
     } catch (error) {
         console.error("Error fetching articles from DynamoDB:", error);
         // Fallback to mock data in case of any runtime error with DynamoDB
         console.log("Falling back to mock data.");
-        return getMockArticles({ page, limit });
+        return getMockArticles({ page, limit, category, excludeId });
     }
 }
 
