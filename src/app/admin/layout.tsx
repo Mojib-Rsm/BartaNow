@@ -31,7 +31,7 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
 
-  const isActive = (path: string) => pathname.startsWith(path);
+  const isActive = (path: string) => pathname === path || (path !== '/admin' && pathname.startsWith(path));
 
   return (
     <SidebarProvider>
@@ -68,7 +68,7 @@ export default function AdminLayout({
           <SidebarContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/admin') && pathname === '/admin'}>
+                <SidebarMenuButton asChild isActive={isActive('/admin')}>
                   <Link href="/admin">
                     <BarChart2 />
                     ড্যাশবোর্ড

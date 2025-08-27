@@ -92,7 +92,7 @@ export default function Header() {
         </div>
 
         {/* Main navigation */}
-        <div className="flex items-center justify-between h-12 border-t">
+        <div className="flex items-center justify-between h-12">
           <div className='flex items-center gap-2'>
               <Sheet>
                   <SheetTrigger asChild>

@@ -6,7 +6,7 @@ import Footer from '@/components/footer';
 import './globals.css';
 import PushNotificationManager from '@/components/push-notification-manager';
 import { ThemeProvider } from '@/components/theme-provider';
-
+import AdminLayout from '@/app/admin/layout';
 
 export const metadata: Metadata = {
   title: {
@@ -31,16 +31,22 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: { slug: string[] };
 }>) {
-  // A simple way to check if we are in the admin route.
-  // In a real app, you'd likely have a more robust way to handle layouts.
-  const isLtr = typeof children === 'object' && children && 'props' in children && 
-                children.props.childProp?.segment === 'admin';
+  // A simple way to check if we are in the admin route based on the URL segment.
+  // In a real app, you might have a more robust way to handle layouts.
+  // This logic now correctly checks the route from the childProp passed by Next.js
+  const isAdminRoute =
+    typeof children === 'object' &&
+    children &&
+    'props' in children &&
+    (children.props as any).childProp?.segment === 'admin';
 
   return (
-    <html lang={isLtr ? 'en' : 'bn'} dir={isLtr ? 'ltr' : 'rtl'} className="h-full" suppressHydrationWarning>
+    <html lang={isAdminRoute ? 'en' : 'bn'} dir={isAdminRoute ? 'ltr' : 'rtl'} className="h-full" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -53,10 +59,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-          {isLtr ? (
-            <>
-              {children}
-            </>
+          {isAdminRoute ? (
+             <AdminLayout>
+                {children}
+            </AdminLayout>
           ) : (
             <>
               <PushNotificationManager />
