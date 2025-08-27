@@ -19,4 +19,5 @@ export interface Article {
   entityType?: 'ARTICLE'; // Used for GSI partition key
   badge?: 'নতুন' | 'জনপ্রিয়';
   videoUrl?: string;
+  editorsPick?: boolean;
 }

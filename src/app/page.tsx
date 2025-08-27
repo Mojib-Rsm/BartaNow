@@ -48,6 +48,7 @@ export default async function Home({ searchParams }: HomePageProps) {
   const belowMainArticles = articles.slice(5, 7);
   const trendingArticles = articles.filter(a => a.badge === 'জনপ্রিয়').slice(0, 5);
   const videoArticles = articles.filter(a => a.videoUrl).slice(0, 5);
+  const editorsPicks = articles.filter(a => a.editorsPick).slice(0, 4);
 
   const politicsArticles = articles.filter(a => a.category === 'রাজনীতি').slice(0, 4);
   const sportsArticles = articles.filter(a => a.category === 'খেলা').slice(0, 4);
@@ -226,6 +227,18 @@ export default async function Home({ searchParams }: HomePageProps) {
           <SectionHeader title="বিনোদন" href="/category/entertainment" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {entertainmentArticles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+        </section>
+      )}
+      
+      {/* Editor's Pick Section */}
+      {editorsPicks.length > 0 && (
+        <section>
+          <SectionHeader title="সম্পাদকের পছন্দ" href="/editors-pick" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {editorsPicks.map((article) => (
               <ArticleCard key={article.id} article={article} />
             ))}
           </div>

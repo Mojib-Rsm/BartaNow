@@ -41,6 +41,7 @@ const articles: Article[] = [
     publishedAt: '2024-07-21T14:30:00Z',
     aiSummary: 'বাংলাদেশে শীঘ্রই 5G সেবা চালু হতে যাচ্ছে, যা ইন্টারনেট গতি বাড়ানোর পাশাপাশি দেশের প্রযুক্তি এবং অর্থনীতিতে বড় পরিবর্তন আনবে।',
     badge: 'নতুন',
+    editorsPick: true,
   },
   {
     id: '3',
@@ -126,6 +127,7 @@ const articles: Article[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-16T11:00:00Z',
     aiSummary: 'ঢাকার যানজট নিরসনে সরকারি উদ্যোগের পাশাপাশি নাগরিকদের সচেতনতা, যেমন ব্যক্তিগত গাড়ির ব্যবহার কমানো এবং ট্রাফিক আইন মেনে চলা জরুরি।',
+    editorsPick: true,
   },
   {
     id: '8',
@@ -175,7 +177,8 @@ const articles: Article[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-3',
     publishedAt: '2024-07-20T17:00:00Z',
     aiSummary: 'সুন্দরবনে বাঘের সংখ্যা বৃদ্ধি পেয়েছে, যা সরকারের চোরাচালান দমন এবং সচেতনতামূলক কার্যক্রমের ফল বলে মনে করছেন বিশেষজ্ঞরা।',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    editorsPick: true,
   }
 ];
 
