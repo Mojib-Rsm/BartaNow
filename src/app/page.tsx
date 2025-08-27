@@ -4,14 +4,28 @@ import Pagination from '@/components/pagination';
 import SeedButton from '@/components/seed-button';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import type { Article } from '@/lib/types';
+import { ArrowRight } from 'lucide-react';
+
 
 type HomePageProps = {
   searchParams?: {
     page?: string;
   };
 };
+
+const SectionHeader = ({ title, href }: { title: string, href: string }) => (
+  <div className="flex items-center justify-between border-b-2 border-primary mb-4 pb-2">
+    <h2 className="text-2xl font-bold font-headline text-primary">{title}</h2>
+    <Button asChild variant="link" className="text-primary pr-0">
+      <Link href={href}>
+        সব দেখুন <ArrowRight className="ml-1 h-4 w-4" />
+      </Link>
+    </Button>
+  </div>
+);
 
 export default async function Home({ searchParams }: HomePageProps) {
   const page = searchParams?.page ? parseInt(searchParams.page, 10) : 1;
@@ -31,11 +45,20 @@ export default async function Home({ searchParams }: HomePageProps) {
   const mainArticle = articles[0];
   const sideArticles = articles.slice(1, 5);
   const latestArticles = articles.slice(5, 11);
+  
+  const getCategoryArticles = (category: Article['category'], count: number) => {
+    return articles.filter(a => a.category === category).slice(0, count);
+  }
+
+  const politicsArticles = getCategoryArticles('রাজনীতি', 4);
+  const sportsArticles = getCategoryArticles('খেলা', 4);
+  const entertainmentArticles = getCategoryArticles('বিনোদন', 4);
+
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       {/* Hero Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Featured Article */}
         <div className="lg:col-span-2">
           <Link href={`/articles/${mainArticle.id}`} className="block group">
@@ -45,7 +68,7 @@ export default async function Home({ searchParams }: HomePageProps) {
                   src={mainArticle.imageUrl}
                   alt={mainArticle.title}
                   fill
-                  className="object-cover"
+                  className="object-cover rounded-lg"
                   data-ai-hint={mainArticle.imageHint}
                   priority
                 />
@@ -66,11 +89,11 @@ export default async function Home({ searchParams }: HomePageProps) {
         </div>
 
         {/* Side Articles */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
           {sideArticles.map((article) => (
             <Link key={article.id} href={`/articles/${article.id}`} className="block group">
               <Card className="border-0 shadow-none rounded-md flex gap-4">
-                <div className="relative w-24 h-24 shrink-0">
+                <div className="relative w-28 h-20 shrink-0">
                   <Image
                     src={article.imageUrl}
                     alt={article.title}
@@ -80,7 +103,7 @@ export default async function Home({ searchParams }: HomePageProps) {
                   />
                 </div>
                 <CardContent className="p-0 flex-grow">
-                  <h3 className="text-lg font-bold font-headline line-clamp-3 group-hover:text-primary transition-colors duration-200">
+                  <h3 className="text-lg font-bold font-headline leading-tight group-hover:text-primary transition-colors duration-200">
                     {article.title}
                   </h3>
                 </CardContent>
@@ -90,18 +113,42 @@ export default async function Home({ searchParams }: HomePageProps) {
         </div>
       </section>
 
-      {/* Latest News Section */}
-      {latestArticles.length > 0 && (
+      {/* Politics Section */}
+      {politicsArticles.length > 0 && (
         <section>
-          <div className="border-t my-6"></div>
-           <h2 className="text-2xl font-bold font-headline text-primary mb-4">সর্বশেষ খবর</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {latestArticles.map((article) => (
+          <SectionHeader title="রাজনীতি" href="/category/politics" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {politicsArticles.map((article) => (
               <ArticleCard key={article.id} article={article} />
             ))}
           </div>
         </section>
       )}
+
+      {/* Sports Section */}
+      {sportsArticles.length > 0 && (
+        <section>
+          <SectionHeader title="খেলা" href="/category/sports" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {sportsArticles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Entertainment Section */}
+      {entertainmentArticles.length > 0 && (
+        <section>
+          <SectionHeader title="বিনোদন" href="/category/entertainment" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {entertainmentArticles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+        </section>
+      )}
+
 
       {totalPages > 1 && (
         <Pagination currentPage={page} totalPages={totalPages} />
