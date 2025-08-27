@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Rocket, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Rocket, CheckCircle, AlertTriangle, User, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { seedAction } from '@/app/actions';
@@ -56,12 +56,31 @@ export default function InstallPage() {
     <div className="container mx-auto flex min-h-[calc(100vh-20rem)] items-center justify-center py-12">
         <Card className="w-full max-w-lg">
             <CardHeader>
-                <CardTitle className="text-2xl font-headline">ডেমো ডেটা ইন্সটল করুন</CardTitle>
+                <CardTitle className="text-2xl font-headline">অ্যাপ্লিকেশন ইন্সটলেশন</CardTitle>
                 <CardDescription>
-                    এই বাটনে ক্লিক করে আপনার ডেটাবেসে ডেমো আর্টিকেলগুলো যোগ করুন। এটি আপনার সাইটকে প্রাথমিক কন্টেন্ট দিয়ে চালু করতে সাহায্য করবে।
+                    এই পেজ থেকে আপনার অ্যাপ্লিকেশনের জন্য প্রাথমিক ডেটা এবং সেটআপ সম্পন্ন করুন।
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+                 <Alert>
+                    <User className="h-4 w-4" />
+                    <AlertTitle>ডিফল্ট লগইন তথ্য</AlertTitle>
+                    <AlertDescription>
+                        <div className="space-y-2 mt-2">
+                           <div>
+                                <p className="font-semibold">অ্যাডমিন ব্যবহারকারী:</p>
+                                <p><strong>ইমেইল:</strong> admin@bartanow.com</p>
+                                <p><strong>পাসওয়ার্ড:</strong> password123</p>
+                           </div>
+                            <div>
+                                <p className="font-semibold">সাধারণ ব্যবহারকারী:</p>
+                                <p><strong>ইমেইল:</strong> user@bartanow.com</p>
+                                <p><strong>পাসওয়ার্ড:</strong> password123</p>
+                           </div>
+                        </div>
+                    </AlertDescription>
+                </Alert>
+
                  {!isAwsConfigured && (
                     <Alert variant="destructive">
                         <AlertTriangle className="h-4 w-4" />
