@@ -39,6 +39,7 @@ export default async function Home({ searchParams }: HomePageProps) {
     initialArticles,
     latestArticlesResult,
     politicsResult,
+    nationalResult,
     sportsResult,
     entertainmentResult,
     techResult,
@@ -48,6 +49,7 @@ export default async function Home({ searchParams }: HomePageProps) {
     getArticles({ page: 1, limit: 13 }),
     getArticles({ page: 1, limit: 6 }),
     getArticles({ category: 'রাজনীতি', limit: 4 }),
+    getArticles({ category: 'জাতীয়', limit: 4 }),
     getArticles({ category: 'খেলা', limit: 4 }),
     getArticles({ category: 'বিনোদন', limit: 4 }),
     getArticles({ category: 'প্রযুক্তি', limit: 4 }),
@@ -74,6 +76,7 @@ export default async function Home({ searchParams }: HomePageProps) {
   const { articles: videoArticles } = videoArticlesResult;
   const { articles: editorsPicks } = editorsPicksResult;
   const { articles: politicsArticles } = politicsResult;
+  const { articles: nationalArticles } = nationalResult;
   const { articles: sportsArticles } = sportsResult;
   const { articles: entertainmentArticles } = entertainmentResult;
   const { articles: techArticles } = techResult;
@@ -201,6 +204,17 @@ export default async function Home({ searchParams }: HomePageProps) {
           <SectionHeader title="রাজনীতি" href="/category/politics" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {politicsArticles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {nationalArticles.length > 0 && (
+        <section>
+          <SectionHeader title="জাতীয়" href="/category/national" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {nationalArticles.map((article) => (
               <ArticleCard key={article.id} article={article} />
             ))}
           </div>

@@ -21,7 +21,7 @@ export interface Poll {
 export interface Article {
   id: string;
   title: string;
-  category: 'রাজনীতি' | 'খেলা' | 'প্রযুক্তি' | 'বিনোদন' | 'অর্থনীতি' | 'আন্তর্জাতিক' | 'মতামত' | 'স্বাস্থ্য' | 'শিক্ষা' | 'পরিবেশ' | 'বিশেষ কভারেজ';
+  category: 'রাজনীতি' | 'খেলা' | 'প্রযুক্তি' | 'বিনোদন' | 'অর্থনীতি' | 'আন্তর্জাতিক' | 'মতামত' | 'স্বাস্থ্য' | 'শিক্ষা' | 'পরিবেশ' | 'বিশেষ কভারেজ' | 'জাতীয়';
   content: string[]; // Array of paragraphs
   imageUrl: string;
   imageHint?: string;

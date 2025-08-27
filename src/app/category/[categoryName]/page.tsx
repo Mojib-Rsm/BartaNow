@@ -12,6 +12,7 @@ type CategoryPageProps = {
 
 const CATEGORY_MAP: { [key: string]: string } = {
     politics: 'রাজনীতি',
+    national: 'জাতীয়',
     sports: 'খেলা',
     tech: 'প্রযুক্তি',
     entertainment: 'বিনোদন',
