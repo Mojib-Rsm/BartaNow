@@ -63,15 +63,23 @@ export async function signupAction(data: SignupFormValues) {
     }
 
     try {
-        await createUser({
+        const newUser = await createUser({
             name: data.name,
             email: data.email,
             password: data.password, // In a real app, hash this password before saving
         });
-        return { success: true, message: 'আপনার একাউন্ট সফলভাবে তৈরি হয়েছে। অনুগ্রহ করে লগইন করুন।' };
+
+        if (newUser) {
+          return { success: true, message: 'আপনার একাউন্ট সফলভাবে তৈরি হয়েছে। অনুগ্রহ করে লগইন করুন।' };
+        }
+        
+        // This case should ideally not be reached if createUser throws an error on failure.
+        return { success: false, message: 'একাউন্ট তৈরিতে একটি অজানা সমস্যা হয়েছে।' };
+
     } catch (error) {
         console.error("Signup Error:", error);
-        return { success: false, message: 'একাউন্ট তৈরিতে একটি সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।' };
+        const errorMessage = error instanceof Error ? error.message : 'একাউন্ট তৈরিতে একটি সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।';
+        return { success: false, message: errorMessage };
     }
 }
 
@@ -90,3 +98,4 @@ export async function getArticleAudioAction(articleId: string) {
     const { media } = await textToSpeech(fullText);
     return media;
 }
+
