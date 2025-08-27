@@ -43,7 +43,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
       <CardContent className="flex-grow">
         <p className="text-muted-foreground line-clamp-3">{article.aiSummary}</p>
       </CardContent>
-      <CardFooter className="flex items-center justify-between mt-auto">
+      <CardFooter className="flex items-center justify-between mt-auto bg-background/50 py-3">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 border">
             <AvatarImage src={article.authorAvatarUrl} alt={article.authorName} />
@@ -54,7 +54,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
             <p className="text-xs text-muted-foreground">{publishedDate}</p>
           </div>
         </div>
-        <Button asChild variant="link">
+        <Button asChild variant="link" className="text-primary">
             <Link href={`/articles/${article.id}`}>পুরো খবর দেখুন</Link>
         </Button>
       </CardFooter>

@@ -77,7 +77,7 @@ export default async function ArticlePage({ params }: { params: { id: string } }
         />
       </div>
 
-      <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-foreground">
+      <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-foreground/90">
         {article.content.map((paragraph, index) => (
             <p key={index}>{paragraph}</p>
         ))}
