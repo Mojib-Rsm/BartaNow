@@ -30,7 +30,13 @@ export default function LoadMoreCategory({ initialArticles, totalPages, category
             limit: 12, 
             category: category as any 
         });
-        setArticles((prevArticles) => [...prevArticles, ...newArticles]);
+
+        setArticles((prevArticles) => {
+            const existingIds = new Set(prevArticles.map(a => a.id));
+            const uniqueNewArticles = newArticles.filter(a => !existingIds.has(a.id));
+            return [...prevArticles, ...uniqueNewArticles];
+        });
+        
         setPage((prevPage) => prevPage + 1);
         setLoading(false);
     };

@@ -25,7 +25,13 @@ export default function LoadMore({ initialArticles, totalPages }: LoadMoreProps)
         if (loading || page > totalPages) return;
         setLoading(true);
         const newArticles = await getMoreArticlesAction({ page, limit: 6 });
-        setArticles((prevArticles) => [...prevArticles, ...newArticles]);
+        
+        setArticles((prevArticles) => {
+            const existingIds = new Set(prevArticles.map(a => a.id));
+            const uniqueNewArticles = newArticles.filter(a => !existingIds.has(a.id));
+            return [...prevArticles, ...uniqueNewArticles];
+        });
+
         setPage((prevPage) => prevPage + 1);
         setLoading(false);
     };
