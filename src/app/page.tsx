@@ -64,19 +64,8 @@ export default async function Home({ searchParams }: HomePageProps) {
     <div className="space-y-12">
       {/* Hero Section */}
       <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Left Column */}
-        <div className="md:col-span-1 space-y-4">
-          {sideArticles.slice(0, 2).map((article) => (
-            <div key={article.id} className="border-b pb-4">
-               <Link href={`/articles/${article.id}`} className="block group">
-                  <h3 className="font-bold text-lg mb-1 group-hover:text-primary">{article.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{article.aiSummary}</p>
-                </Link>
-            </div>
-          ))}
-        </div>
-
-        {/* Center Column */}
+        
+        {/* Center Column - Main Article. On mobile, this will appear first. */}
         <div className="md:col-span-2 space-y-6">
             {/* Main Featured Article */}
             <Link href={`/articles/${mainArticle.id}`} className="block group">
@@ -126,14 +115,21 @@ export default async function Home({ searchParams }: HomePageProps) {
                 ))}
             </div>
         </div>
-        
-        {/* Right Column */}
-        <div className="md:col-span-1 space-y-4">
-           {/* Ad Spot */}
-           <AdSpot className="h-48" />
-           {/* Poll Section */}
-           <PollSection />
 
+        {/* Left Column. On mobile, this appears after the main article. */}
+        <div className="md:col-span-1 space-y-4">
+          {sideArticles.slice(0, 2).map((article) => (
+            <div key={article.id} className="border-b pb-4">
+               <Link href={`/articles/${article.id}`} className="block group">
+                  <h3 className="font-bold text-lg mb-1 group-hover:text-primary">{article.title}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{article.aiSummary}</p>
+                </Link>
+            </div>
+          ))}
+        </div>
+        
+        {/* Right Column. On mobile, this appears last. */}
+        <div className="md:col-span-1 space-y-4">
            {sideArticles.slice(2, 4).map((article) => (
             <div key={article.id} className="border-b pb-4">
                <Link href={`/articles/${article.id}`} className="block group">
@@ -142,6 +138,10 @@ export default async function Home({ searchParams }: HomePageProps) {
                 </Link>
             </div>
           ))}
+           {/* Ad Spot */}
+           <AdSpot className="h-48" />
+           {/* Poll Section */}
+           <PollSection />
         </div>
       </section>
 
