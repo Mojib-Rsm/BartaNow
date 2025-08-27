@@ -5,11 +5,17 @@ import { DynamoDBDocumentClient, QueryCommand, GetCommand, ScanCommand } from "@
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
 
-const useMockData = !process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY;
+const useMockData = !process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION;
 
-const client = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-east-1' });
-const docClient = DynamoDBDocumentClient.from(client);
+let client: DynamoDBClient;
+let docClient: DynamoDBDocumentClient;
 const tableName = process.env.DYNAMODB_TABLE_NAME || 'Oftern_News';
+
+if (!useMockData) {
+    client = new DynamoDBClient({ region: process.env.AWS_REGION });
+    docClient = DynamoDBDocumentClient.from(client);
+}
+
 
 async function generateSummariesForMockData() {
     if (mockDb.articles.every(a => a.aiSummary)) {
@@ -17,6 +23,7 @@ async function generateSummariesForMockData() {
     }
     for (const article of mockDb.articles) {
         if (!article.aiSummary) {
+            // In a real app, you might want to handle potential errors here
             const { summary } = await summarizeArticle({ articleContent: article.content.join('\n\n') });
             article.aiSummary = summary;
         }
