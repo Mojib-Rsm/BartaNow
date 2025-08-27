@@ -5,6 +5,7 @@ import Footer from '@/components/footer';
 import './globals.css';
 import PushNotificationManager from '@/components/push-notification-manager';
 
+
 export const metadata: Metadata = {
   title: {
     default: 'বার্তা নাও - আপনার প্রতিদিনের খবরের উৎস',

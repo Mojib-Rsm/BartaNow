@@ -1,12 +1,20 @@
+
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePushNotifications } from '@/hooks/use-push-notifications';
-import { useToast } from './ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from './ui/button';
 import { BellRing, BellOff } from 'lucide-react';
+import dynamic from 'next/dynamic';
 
-export default function PushNotificationManager() {
+const PushNotificationManagerComponent = () => {
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const {
     userConsent,
     permissionStatus,
@@ -18,10 +26,10 @@ export default function PushNotificationManager() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // This effect can be used to show a toast or a banner to encourage users to subscribe
-    // For now, we'll just log the status.
-    console.log('Push Notification Permission Status:', permissionStatus);
-  }, [permissionStatus]);
+    if (isClient) {
+        console.log('Push Notification Permission Status:', permissionStatus);
+    }
+  }, [permissionStatus, isClient]);
 
   const handleSubscription = async () => {
     if (isSubscribed) {
@@ -47,8 +55,12 @@ export default function PushNotificationManager() {
     }
   };
 
+  if (!isClient) {
+    return null;
+  }
+  
   // We don't render the button if permission is not determined yet or not supported
-  if (permissionStatus === 'prompt' || !('PushManager' in window)) {
+  if (permissionStatus === 'prompt' || (typeof window !== 'undefined' && !('PushManager' in window))) {
     return null;
   }
   
@@ -73,3 +85,11 @@ export default function PushNotificationManager() {
     </div>
   );
 }
+
+
+// Dynamically import the component that uses client-side features
+const PushNotificationManager = dynamic(() => Promise.resolve(PushNotificationManagerComponent), {
+  ssr: false,
+});
+
+export default PushNotificationManager;
