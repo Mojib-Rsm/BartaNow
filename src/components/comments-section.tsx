@@ -39,7 +39,7 @@ export default function CommentsSection({ articleId }: { articleId: string }) {
             const comment: Comment = {
                 id: Date.now(),
                 author: user.name,
-                avatar: `https://i.pravatar.cc/150?u=${user.id}`,
+                avatar: user.avatarUrl || `https://i.pravatar.cc/150?u=${user.id}`,
                 text: newComment,
                 timestamp: 'এখন',
             };
@@ -56,7 +56,7 @@ export default function CommentsSection({ articleId }: { articleId: string }) {
       <CardContent className="space-y-6">
         <div className="space-y-2">
             <Textarea 
-                placeholder="আপনার মতামত লিখুন..." 
+                placeholder={user ? "আপনার মতামত লিখুন..." : "মতামত জানাতে লগইন করুন"}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 disabled={!user}
