@@ -44,9 +44,10 @@ type GetArticlesOptions = {
     limit?: number;
     category?: Article['category'];
     excludeId?: string;
+    query?: string;
 };
 
-async function getMockArticles({ page = 1, limit = 6, category, excludeId }: GetArticlesOptions) {
+async function getMockArticles({ page = 1, limit = 6, category, excludeId, query }: GetArticlesOptions) {
     await generateSummariesForMockData();
     
     let filteredArticles = [...mockDb.articles];
@@ -59,7 +60,17 @@ async function getMockArticles({ page = 1, limit = 6, category, excludeId }: Get
         filteredArticles = filteredArticles.filter(article => article.id !== excludeId);
     }
 
+    if (query) {
+        const lowercasedQuery = query.toLowerCase();
+        filteredArticles = filteredArticles.filter(article => 
+            article.title.toLowerCase().includes(lowercasedQuery) ||
+            article.content.join(' ').toLowerCase().includes(lowercasedQuery) ||
+            article.category.toLowerCase().includes(lowercasedQuery)
+        );
+    }
+
     const sortedArticles = filteredArticles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    
     const totalPages = Math.ceil(sortedArticles.length / limit);
     const offset = (page - 1) * limit;
     const paginatedArticles = sortedArticles.slice(offset, offset + limit);
@@ -67,12 +78,21 @@ async function getMockArticles({ page = 1, limit = 6, category, excludeId }: Get
     return { articles: paginatedArticles, totalPages };
 }
 
-export async function getArticles({ page = 1, limit = 6, category, excludeId }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
+export async function getArticles({ page = 1, limit = 6, category, excludeId, query }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
     if (useMockData) {
-        return getMockArticles({ page, limit, category, excludeId });
+        return getMockArticles({ page, limit, category, excludeId, query });
     }
     
+    // DynamoDB implementation for production
     try {
+        if (query) {
+            // Full-text search with DynamoDB is complex and usually requires integration
+            // with services like OpenSearch (fka Elasticsearch).
+            // For this starter, we will fall back to mock data for search queries.
+            console.warn("DynamoDB search query detected. Falling back to mock data for this query.");
+            return getMockArticles({ page, limit, category, excludeId, query });
+        }
+
         // A full implementation would require another query to get the total count
         // for simplicity, we'll estimate total pages, but this is not robust for production.
         // A better approach is to store the total count separately or accept an approximation.

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import SearchInput from './search-input';
 
 const topNavLinks = [
     { title: 'যেভাবে তৈরি হয় রংবেরঙের চুড়ি', image: 'https://picsum.photos/seed/bangles/50/50' },
@@ -166,10 +167,7 @@ export default function Header() {
                 ))}
             </nav>
             <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
-                    <Search className="h-5 w-5" />
-                    <span className="sr-only">Search</span>
-                </Button>
+                <SearchInput />
                 <Button variant="outline" size="sm" className="hidden md:inline-flex">ই-পেপার</Button>
                  <Button variant="ghost" size="sm" className="hidden md:inline-flex items-center gap-1.5">
                     লগইন
