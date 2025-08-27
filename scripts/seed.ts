@@ -1,3 +1,4 @@
+
 import { DynamoDBClient, CreateTableCommand, DescribeTableCommand, ResourceNotFoundException } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { mockDb } from '../src/lib/data';
@@ -36,7 +37,8 @@ async function createBartaNowTable(client: DynamoDBClient) {
         AttributeDefinitions: [
             { AttributeName: 'id', AttributeType: 'S' },
             { AttributeName: 'entityType', AttributeType: 'S' },
-            { AttributeName: 'publishedAt', AttributeType: 'S' }
+            { AttributeName: 'publishedAt', AttributeType: 'S' },
+            { AttributeName: 'email', AttributeType: 'S' },
         ],
         KeySchema: [
             { AttributeName: 'id', KeyType: 'HASH' }
@@ -55,6 +57,19 @@ async function createBartaNowTable(client: DynamoDBClient) {
                     ReadCapacityUnits: 1,
                     WriteCapacityUnits: 1
                 }
+            },
+            {
+                IndexName: 'EmailIndex',
+                KeySchema: [
+                    { AttributeName: 'email', KeyType: 'HASH' }
+                ],
+                 Projection: {
+                    ProjectionType: 'ALL'
+                },
+                ProvisionedThroughput: {
+                    ReadCapacityUnits: 1,
+                    WriteCapacityUnits: 1
+                }
             }
         ],
         ProvisionedThroughput: {
@@ -67,7 +82,7 @@ async function createBartaNowTable(client: DynamoDBClient) {
         await client.send(command);
         console.log(`Table '${tableName}' creation request sent. Waiting for it to become active...`);
         await waitForTable(client, tableName);
-        console.log(`Table '${tableName}' and index '${indexName}' created successfully.`);
+        console.log(`Table '${tableName}' and indices created successfully.`);
         return true;
     } catch (error) {
         console.error(`Error creating table '${tableName}':`, error);
@@ -119,15 +134,15 @@ export async function seedDatabase() {
 
 
     const docClient = DynamoDBDocumentClient.from(client);
-
     console.log(`Starting to seed database: ${tableName}`);
 
-    const putRequests = mockDb.articles.map(article => {
-        const item = {
-            ...article,
-            entityType: 'ARTICLE' // Adding the GSI partition key
-        };
+    const allItems = [
+        ...mockDb.articles.map(item => ({ ...item, entityType: 'ARTICLE' })),
+        ...mockDb.authors.map(item => ({ ...item, entityType: 'AUTHOR' })),
+        ...mockDb.users.map(item => ({ ...item, entityType: 'USER' })),
+    ];
 
+    const putRequests = allItems.map(item => {
         const command = new PutCommand({
             TableName: tableName,
             Item: item
@@ -135,9 +150,10 @@ export async function seedDatabase() {
         return docClient.send(command);
     });
 
+
     try {
         await Promise.all(putRequests);
-        const successMessage = `Successfully seeded ${mockDb.articles.length} articles.`;
+        const successMessage = `Successfully seeded ${mockDb.articles.length} articles, ${mockDb.authors.length} authors, and ${mockDb.users.length} users.`;
         console.log(successMessage);
         return { success: true, message: successMessage };
     } catch (error) {

@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Article, Author, Poll, MemeNews } from './types';
+import type { Article, Author, Poll, MemeNews, User } from './types';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { mockDb } from './data';
@@ -219,14 +219,36 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
     return mockDb.articles.find((article) => article.slug === slug);
 }
 
-async function getAuthorBySlug(slug: string): Promise<Author | undefined> {
-    if (useMockData) {
-        return mockDb.authors.find((author) => author.slug === slug);
-    }
-    // Fallback to mock data for DynamoDB
-    return mockDb.authors.find((author) => author.slug === slug);
+async function getMockUserByEmail(email: string): Promise<User | undefined> {
+    return mockDb.users.find((user) => user.email === email);
 }
 
+export async function getUserByEmail(email: string): Promise<User | undefined> {
+    if (useMockData) {
+        return getMockUserByEmail(email);
+    }
+
+    const command = new QueryCommand({
+        TableName: tableName,
+        IndexName: 'EmailIndex',
+        KeyConditionExpression: 'email = :email',
+        ExpressionAttributeValues: {
+            ':email': email,
+        },
+    });
+
+    try {
+        const { Items } = await docClient.send(command);
+        if (Items && Items.length > 0) {
+            return Items[0] as User;
+        }
+        return undefined;
+    } catch (error) {
+        console.error(`Error fetching user by email ${email} from DynamoDB:`, error);
+        console.log(`Falling back to mock data for user with email ${email}.`);
+        return getMockUserByEmail(email);
+    }
+}
 
 export async function getAuthorById(id: string): Promise<Author | undefined> {
     if (useMockData) {

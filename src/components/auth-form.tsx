@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -10,6 +11,8 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
+import { loginAction } from "@/app/actions"
+import { useRouter } from "next/navigation"
 
 const loginSchema = z.object({
   email: z.string().email({ message: "সঠিক ইমেইল দিন।" }),
@@ -28,26 +31,38 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 export default function AuthForm() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+        email: "admin@bartanow.com",
+        password: "password123",
+    }
   });
 
   const signupForm = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
   });
 
-  const onLoginSubmit = (data: LoginFormValues) => {
+  const onLoginSubmit = async (data: LoginFormValues) => {
     setLoading(true);
-    console.log("Login data:", data);
-    // TODO: Implement actual login logic
-    setTimeout(() => {
-      setLoading(false);
+    const result = await loginAction(data);
+    setLoading(false);
+
+    if (result.success) {
       toast({
         title: "লগইন সফল",
         description: "আপনাকে ড্যাশবোর্ডে পাঠানো হচ্ছে...",
       });
-    }, 1500);
+      router.push('/admin');
+    } else {
+      toast({
+        variant: "destructive",
+        title: "লগইন ব্যর্থ",
+        description: result.message,
+      });
+    }
   };
 
   const onSignupSubmit = (data: SignupFormValues) => {

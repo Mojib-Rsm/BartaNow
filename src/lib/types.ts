@@ -1,9 +1,11 @@
+
 export interface Author {
   id: string;
   name: string;
   slug: string;
   avatarUrl: string;
   bio?: string;
+  entityType?: 'AUTHOR';
 }
 
 export interface PollOption {
@@ -25,6 +27,15 @@ export interface FactCheck {
     name: string;
     url: string;
   };
+}
+
+export interface User {
+    id: string;
+    email: string;
+    name: string;
+    password?: string; // Should be hashed in a real app
+    role: 'admin' | 'user';
+    entityType?: 'USER';
 }
 
 export interface Article {
