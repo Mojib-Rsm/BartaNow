@@ -64,14 +64,6 @@ export default function AdminLayout({
                     </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/users')}>
-                    <Link href="#">
-                        <Users />
-                        ব্যবহারকারী
-                    </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>
@@ -82,14 +74,6 @@ export default function AdminLayout({
                                 <Home />
                                 ওয়েবসাইটে ফিরে যান
                             </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild isActive={isActive('/admin/settings')}>
-                        <Link href="#">
-                            <Settings />
-                            সেটিংস
-                        </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
