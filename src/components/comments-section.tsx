@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import type { User } from '@/lib/types';
 
 type Comment = {
   id: number;
@@ -24,14 +25,21 @@ const mockComments: Comment[] = [
 export default function CommentsSection({ articleId }: { articleId: string }) {
     const [comments, setComments] = useState(mockComments);
     const [newComment, setNewComment] = useState('');
-    const isLoggedIn = false; // Placeholder for auth status
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('bartaNowUser');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
 
     const handlePostComment = () => {
-        if (newComment.trim()) {
+        if (newComment.trim() && user) {
             const comment: Comment = {
                 id: Date.now(),
-                author: 'Guest User',
-                avatar: 'https://i.pravatar.cc/150?u=guest',
+                author: user.name,
+                avatar: `https://i.pravatar.cc/150?u=${user.id}`,
                 text: newComment,
                 timestamp: 'এখন',
             };
@@ -51,9 +59,9 @@ export default function CommentsSection({ articleId }: { articleId: string }) {
                 placeholder="আপনার মতামত লিখুন..." 
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                disabled={!isLoggedIn}
+                disabled={!user}
             />
-             {!isLoggedIn && (
+             {!user && (
                 <p className="text-xs text-muted-foreground">
                     মতামত জানাতে অনুগ্রহ করে{' '}
                     <Link href="/login" className="text-primary hover:underline">
@@ -64,7 +72,7 @@ export default function CommentsSection({ articleId }: { articleId: string }) {
              )}
         </div>
         <div className="flex justify-end">
-            <Button onClick={handlePostComment} disabled={!isLoggedIn || !newComment.trim()}>
+            <Button onClick={handlePostComment} disabled={!user || !newComment.trim()}>
                 পোস্ট করুন
             </Button>
         </div>
@@ -73,7 +81,7 @@ export default function CommentsSection({ articleId }: { articleId: string }) {
                 <div key={comment.id} className="flex items-start gap-4">
                     <Avatar>
                         <AvatarImage src={comment.avatar} alt={comment.author} />
-                        <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>{comment.author.charAt(0)}</Fallback>
                     </Avatar>
                     <div className="flex-1">
                         <div className="flex items-baseline gap-2">
