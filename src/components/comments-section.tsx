@@ -81,7 +81,7 @@ export default function CommentsSection({ articleId }: { articleId: string }) {
                 <div key={comment.id} className="flex items-start gap-4">
                     <Avatar>
                         <AvatarImage src={comment.avatar} alt={comment.author} />
-                        <AvatarFallback>{comment.author.charAt(0)}</Fallback>
+                        <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                         <div className="flex items-baseline gap-2">
