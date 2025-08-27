@@ -64,8 +64,8 @@ export default function AdminLayout({
   const hasAccessToUsers = user?.role === 'admin' || user?.role === 'editor';
 
   const isActive = (path: string) => {
-    if (path === '/admin') return pathname === '/admin';
-    return pathname.startsWith(path);
+    if (path === '/admin' && pathname === '/admin') return true;
+    return path !== '/admin' && pathname.startsWith(path);
   }
   
   const userInitials = user?.name.split(' ').map((n) => n[0]).join('');
@@ -83,7 +83,7 @@ export default function AdminLayout({
             <SidebarContent>
                 <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin') && pathname === '/admin'}>
+                    <SidebarMenuButton asChild isActive={isActive('/admin')}>
                     <Link href="/admin">
                         <BarChart2 />
                         ড্যাশবোর্ড
@@ -129,6 +129,14 @@ export default function AdminLayout({
                         <Link href="/admin/ads">
                             <Megaphone />
                             বিজ্ঞাপন
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/admin/settings')}>
+                        <Link href="/admin/settings">
+                            <Settings />
+                            সেটিংস
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
