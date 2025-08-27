@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { Article } from '@/lib/types';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, PlayCircle, Film } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 
 type HomePageProps = {
@@ -45,19 +46,13 @@ export default async function Home({ searchParams }: HomePageProps) {
   const mainArticle = articles[0];
   const sideArticles = articles.slice(1, 5);
   const belowMainArticles = articles.slice(5, 7);
+  const trendingArticles = articles.filter(a => a.badge === 'জনপ্রিয়').slice(0, 5);
+  const videoArticles = articles.filter(a => a.videoUrl).slice(0, 5);
+
   const politicsArticles = articles.filter(a => a.category === 'রাজনীতি').slice(0, 4);
   const sportsArticles = articles.filter(a => a.category === 'খেলা').slice(0, 4);
   const entertainmentArticles = articles.filter(a => a.category === 'বিনোদন').slice(0, 4);
-  const technologyArticles = articles.filter(a => a.category === 'প্রযুক্তি').slice(0, 1);
-
-
-  const categoryHighlights = [
-    ...politicsArticles.slice(0,1), 
-    ...technologyArticles.slice(0,1),
-    ...sportsArticles.slice(0,1),
-    ...entertainmentArticles.slice(0,1),
-  ];
-
+  
   return (
     <div className="space-y-12">
       {/* Hero Section */}
@@ -140,35 +135,68 @@ export default async function Home({ searchParams }: HomePageProps) {
                 </Link>
             </div>
           ))}
-
         </div>
       </section>
 
-      {/* Category Highlight Scroll Section */}
-      <section className="border-t border-b py-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {categoryHighlights.map((article) => (
-                  <Link key={article.id} href={`/articles/${article.id}`} className="block group relative overflow-hidden rounded-md">
-                      <div className="relative h-40">
-                          <Image
-                              src={article.imageUrl}
-                              alt={article.title}
-                              fill
-                              className="object-cover group-hover:scale-110 transition-transform duration-300"
-                              data-ai-hint={article.imageHint}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                      </div>
-                      <div className="absolute bottom-0 left-0 p-3">
-                         <span className="text-sm bg-primary text-primary-foreground px-2 py-1 rounded-sm font-semibold">{article.category}</span>
-                          <h3 className="text-white text-md font-bold font-headline mt-2 leading-tight">
-                              {article.title}
-                          </h3>
-                      </div>
-                  </Link>
+      {/* Trending Section */}
+      {trendingArticles.length > 0 && (
+        <section>
+          <div className="flex items-center gap-4 overflow-x-auto pb-4">
+            <h3 className="text-xl font-headline font-bold text-primary whitespace-nowrap">ট্রেন্ডিং</h3>
+            <div className="flex items-center gap-4">
+              {trendingArticles.map(article => (
+                <Link key={article.id} href={`/articles/${article.id}`} className="group">
+                  <div className="flex items-center gap-2">
+                    {article.badge && <Badge variant="default">{article.badge}</Badge>}
+                    <p className="font-semibold group-hover:text-primary whitespace-nowrap">{article.title}</p>
+                  </div>
+                </Link>
               ))}
+            </div>
           </div>
-      </section>
+        </section>
+      )}
+
+      {/* Video Gallery Section */}
+      {videoArticles.length > 0 && (
+        <section>
+          <SectionHeader title="ভিডিও গ্যালারি" href="/category/videos" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+                <div className="relative aspect-video w-full rounded-lg overflow-hidden group">
+                    <iframe
+                        src={videoArticles[0].videoUrl}
+                        title={videoArticles[0].title}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full"
+                    ></iframe>
+                </div>
+                <h2 className="text-2xl font-bold font-headline mt-2">{videoArticles[0].title}</h2>
+            </div>
+            <div className="md:col-span-1 space-y-4">
+                {videoArticles.slice(1).map(video => (
+                    <Link key={video.id} href={`/articles/${video.id}`} className="flex items-center gap-4 group">
+                        <div className="relative w-24 h-16 shrink-0 rounded-md overflow-hidden">
+                            <Image 
+                                src={video.imageUrl}
+                                alt={video.title}
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                <PlayCircle className="h-8 w-8 text-white/80" />
+                            </div>
+                        </div>
+                        <h3 className="font-semibold text-sm group-hover:text-primary">{video.title}</h3>
+                    </Link>
+                ))}
+            </div>
+          </div>
+        </section>
+      )}
+
 
       {/* Category Sections */}
       {politicsArticles.length > 0 && (

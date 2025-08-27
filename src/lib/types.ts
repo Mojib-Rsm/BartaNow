@@ -17,4 +17,6 @@ export interface Article {
   publishedAt: string; // ISO date string
   aiSummary: string;
   entityType?: 'ARTICLE'; // Used for GSI partition key
+  badge?: 'নতুন' | 'জনপ্রিয়';
+  videoUrl?: string;
 }

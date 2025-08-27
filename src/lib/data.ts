@@ -22,6 +22,8 @@ const articles: Article[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-22T10:00:00Z',
     aiSummary: 'এশিয়া কাপের প্রথম ম্যাচে অধিনায়কের অনবদ্য শতকে বাংলাদেশ একটি शानदार জয় পেয়েছে, যা দলের আত্মবিশ্বাস বাড়িয়ে দিয়েছে।',
+    badge: 'জনপ্রিয়',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
   },
   {
     id: '2',
@@ -38,6 +40,7 @@ const articles: Article[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
     publishedAt: '2024-07-21T14:30:00Z',
     aiSummary: 'বাংলাদেশে শীঘ্রই 5G সেবা চালু হতে যাচ্ছে, যা ইন্টারনেট গতি বাড়ানোর পাশাপাশি দেশের প্রযুক্তি এবং অর্থনীতিতে বড় পরিবর্তন আনবে।',
+    badge: 'নতুন',
   },
   {
     id: '3',
@@ -54,6 +57,7 @@ const articles: Article[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-20T09:00:00Z',
     aiSummary: 'ডলারের দাম বৃদ্ধিতে আমদানি খরচ বেড়েছে, যা সাধারণ মানুষের জীবনযাত্রায় প্রভাব ফেলছে। পরিস্থিতি নিয়ন্ত্রণে পদক্ষেপ নেওয়া হচ্ছে।',
+    badge: 'জনপ্রিয়',
   },
   {
     id: '4',
@@ -70,6 +74,8 @@ const articles: Article[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
     publishedAt: '2024-07-19T11:45:00Z',
     aiSummary: 'বিএনপি দেশব্যাপী নতুন কর্মসূচি ঘোষণা করেছে, যার মধ্যে রয়েছে সমাবেশ এবং বিক্ষোভ মিছিল, যা দাবি আদায় না হওয়া পর্যন্ত চলবে।',
+    badge: 'জনপ্রিয়',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
   },
   {
     id: '5',
@@ -86,6 +92,7 @@ const articles: Article[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-18T22:00:00Z',
     aiSummary: 'ঈদে দর্শকদের জন্য পাঁচটি নতুন বাংলা চলচ্চিত্র মুক্তি পাচ্ছে, যেগুলোতে বিভিন্ন ঘরানার গল্প ও জনপ্রিয় তারকারা রয়েছেন।',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
   },
   {
     id: '6',
@@ -102,6 +109,7 @@ const articles: Article[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
     publishedAt: '2024-07-17T18:00:00Z',
     aiSummary: 'নাসা একটি উন্নত স্পেস টেলিস্কোপ উৎক্ষেপণ করেছে যা মহাবিশ্বের রহস্য উন্মোচন করতে এবং দূরবর্তী গ্যালাক্সির ছবি তুলতে সাহায্য করবে।',
+    badge: 'জনপ্রিয়',
   },
   {
     id: '7',
@@ -134,6 +142,7 @@ const articles: Article[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-3',
     publishedAt: '2024-07-22T12:00:00Z',
     aiSummary: 'ডেঙ্গু প্রতিরোধে এডিস মশার বংশবিস্তার রোধ করতে চারপাশ পরিষ্কার রাখা এবং জ্বর হলে দ্রুত চিকিৎসকের পরামর্শ নেওয়া প্রয়োজন।',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
   },
    {
     id: '9',
@@ -166,6 +175,7 @@ const articles: Article[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-3',
     publishedAt: '2024-07-20T17:00:00Z',
     aiSummary: 'সুন্দরবনে বাঘের সংখ্যা বৃদ্ধি পেয়েছে, যা সরকারের চোরাচালান দমন এবং সচেতনতামূলক কার্যক্রমের ফল বলে মনে করছেন বিশেষজ্ঞরা।',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
   }
 ];
 
