@@ -10,7 +10,8 @@ import {
   BarChart2,
   PanelLeft,
   Megaphone,
-  Image as ImageIcon
+  Image as ImageIcon,
+  MessagesSquare,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -107,6 +108,14 @@ export default function AdminLayout({
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                  )}
+                 <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/admin/comments')}>
+                        <Link href="/admin/comments">
+                            <MessagesSquare />
+                            মন্তব্যসমূহ
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
                  <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive('/admin/media')}>
                         <Link href="/admin/media">
