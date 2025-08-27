@@ -3,9 +3,10 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail } from '@/lib/api';
-import type { Article } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser } from '@/lib/api';
+import type { Article, User } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
+import { z } from 'zod';
 
 export async function seedAction() {
   const result = await seedDatabase();
@@ -38,6 +39,40 @@ export async function loginAction(credentials: { email?: string, password?: stri
     const { password, ...userWithoutPassword } = user;
 
     return { success: true, message: 'লগইন সফল!', user: userWithoutPassword };
+}
+
+const signupSchema = z.object({
+    name: z.string().min(3, { message: "নাম কমপক্ষে ৩ অক্ষরের হতে হবে।" }),
+    email: z.string().email({ message: "সঠিক ইমেইল দিন।" }),
+    password: z.string().min(6, { message: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।" }),
+});
+
+type SignupFormValues = z.infer<typeof signupSchema>;
+
+
+export async function signupAction(data: SignupFormValues) {
+    const validation = signupSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+
+    // Check if user already exists
+    const existingUser = await getUserByEmail(data.email);
+    if (existingUser) {
+        return { success: false, message: 'এই ইমেইল দিয়ে ইতোমধ্যে একটি একাউন্ট রয়েছে।' };
+    }
+
+    try {
+        await createUser({
+            name: data.name,
+            email: data.email,
+            password: data.password, // In a real app, hash this password before saving
+        });
+        return { success: true, message: 'আপনার একাউন্ট সফলভাবে তৈরি হয়েছে। অনুগ্রহ করে লগইন করুন।' };
+    } catch (error) {
+        console.error("Signup Error:", error);
+        return { success: false, message: 'একাউন্ট তৈরিতে একটি সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।' };
+    }
 }
 
 

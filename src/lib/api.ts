@@ -3,7 +3,7 @@
 
 import type { Article, Author, Poll, MemeNews, User } from './types';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, QueryCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, QueryCommand, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
 
@@ -286,4 +286,41 @@ export async function getMemeNews(): Promise<MemeNews[]> {
   return mockDb.memeNews;
 }
 
+async function createMockUser(user: Omit<User, 'id' | 'role'>) {
+    const newUser: User = {
+        id: `user-${Date.now()}`,
+        ...user,
+        role: 'user',
+    };
+    mockDb.users.push(newUser);
+    return newUser;
+}
+
+
+export async function createUser(user: Omit<User, 'id' | 'role'>): Promise<User> {
+    const newUser: User = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        ...user
+    };
+
+    if (useMockData) {
+        return createMockUser(user);
+    }
     
+    const command = new PutCommand({
+        TableName: usersTableName,
+        Item: newUser,
+        ConditionExpression: 'attribute_not_exists(email)', // Ensure email is unique
+    });
+
+    try {
+        await docClient.send(command);
+        return newUser;
+    } catch (error) {
+        console.error(`Error creating user in DynamoDB:`, error);
+        // The ConditionExpression will throw an error if the email exists.
+        // We could handle that specific error code for a better message.
+        throw new Error('Failed to create user in the database.');
+    }
+}

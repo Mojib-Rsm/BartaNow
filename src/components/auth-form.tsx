@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
-import { loginAction } from "@/app/actions"
+import { loginAction, signupAction } from "@/app/actions"
 import { useRouter } from "next/navigation"
 
 const loginSchema = z.object({
@@ -30,6 +30,7 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function AuthForm() {
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("login");
   const { toast } = useToast();
   const router = useRouter();
 
@@ -73,21 +74,31 @@ export default function AuthForm() {
     }
   };
 
-  const onSignupSubmit = (data: SignupFormValues) => {
+  const onSignupSubmit = async (data: SignupFormValues) => {
     setLoading(true);
-    console.log("Signup data:", data);
-    // TODO: Implement actual signup logic
-    setTimeout(() => {
-        setLoading(false);
+    const result = await signupAction(data);
+    setLoading(false);
+
+    if (result.success) {
+      toast({
+        title: "একাউন্ট তৈরি সফল",
+        description: result.message,
+      });
+      // Switch to login tab and populate email
+      setActiveTab("login");
+      loginForm.setValue("email", data.email);
+      loginForm.setValue("password", "");
+    } else {
         toast({
-            title: "একাউন্ট তৈরি সফল",
-            description: "আপনার একাউন্ট তৈরি হয়েছে। অনুগ্রহ করে লগইন করুন।",
+            variant: "destructive",
+            title: "একাউন্ট তৈরি ব্যর্থ",
+            description: result.message,
         });
-    }, 1500);
+    }
   };
   
   return (
-    <Tabs defaultValue="login" className="w-full">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="login">লগইন করুন</TabsTrigger>
         <TabsTrigger value="signup">একাউন্ট তৈরি করুন</TabsTrigger>
