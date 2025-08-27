@@ -50,12 +50,20 @@ export default function AuthForm() {
     const result = await loginAction(data);
     setLoading(false);
 
-    if (result.success) {
+    if (result.success && result.user) {
       toast({
         title: "লগইন সফল",
         description: "আপনাকে ড্যাশবোর্ডে পাঠানো হচ্ছে...",
       });
-      router.push('/admin');
+      // Store user info in localStorage
+      localStorage.setItem('bartaNowUser', JSON.stringify(result.user));
+      
+      if (result.user.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/');
+      }
+      router.refresh(); // To make the header re-render with user state
     } else {
       toast({
         variant: "destructive",
