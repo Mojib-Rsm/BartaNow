@@ -1,250 +1,115 @@
 import type { Article, Author } from './types';
 
 const authors: Author[] = [
-  { id: 'author-1', name: 'Jane Doe', avatarUrl: 'https://i.pravatar.cc/150?u=author-1' },
-  { id: 'author-2', name: 'John Smith', avatarUrl: 'https://i.pravatar.cc/150?u=author-2' },
+  { id: 'author-1', name: 'জান্নাতুল ফেরদৌস', avatarUrl: 'https://i.pravatar.cc/150?u=author-1' },
+  { id: 'author-2', name: 'রহিম শেখ', avatarUrl: 'https://i.pravatar.cc/150?u=author-2' },
 ];
 
 const articles: Article[] = [
   {
     id: '1',
-    title: 'The Future of Renewable Energy',
+    title: 'খেলা: বাংলাদেশের দুর্দান্ত জয়ে এশিয়া কাপ শুরু',
     content: [
-      "Renewable energy is at the forefront of the global conversation on sustainability and climate change. As technology advances, sources like solar, wind, and geothermal are becoming increasingly viable and cost-effective alternatives to fossil fuels.",
-      "Governments and corporations worldwide are investing billions in renewable infrastructure, recognizing the long-term benefits of a cleaner planet and energy independence. The transition, however, is not without its challenges, including grid integration, energy storage, and the need for supportive policies.",
-      "Innovations in battery technology are particularly crucial, as they address the intermittent nature of solar and wind power. By storing excess energy, we can ensure a consistent supply, even when the sun isn't shining or the wind isn't blowing. The next decade will be pivotal in shaping our energy future."
+      "এশিয়া কাপের উদ্বোধনী ম্যাচে বাংলাদেশ ক্রিকেট দল এক অসাধারণ পারফরম্যান্স দেখিয়ে প্রতিপক্ষকে হারিয়েছে। অধিনায়কের শতক এবং বোলারদের নিয়ন্ত্রিত বোলিং দলের জয় নিশ্চিত করে।",
+      "এই জয়ের ফলে দলের মনোবল অনেকটাই বেড়ে গেছে এবং সমর্থকরা আশাবাদী যে টুর্নামেন্টে বাংলাদেশ ভালো কিছু করবে। আগামী ম্যাচেও এই জয়ের ধারা অব্যাহত রাখার লক্ষ্য নিয়ে মাঠে নামবে টাইগাররা।"
     ],
-    imageUrl: 'https://picsum.photos/seed/1/600/400',
-    imageHint: 'wind turbines',
-    authorId: 'author-1',
-    authorName: 'Jane Doe',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
+    imageUrl: 'https://picsum.photos/seed/cricket/600/400',
+    imageHint: 'cricket match',
+    authorId: 'author-2',
+    authorName: 'রহিম শেখ',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-22T10:00:00Z',
-    aiSummary: 'A look into the advancements and challenges of renewable energy, highlighting the importance of new technologies and global investment for a sustainable future.',
+    aiSummary: 'এশিয়া কাপের প্রথম ম্যাচে অধিনায়কের অনবদ্য শতকে বাংলাদেশ একটি शानदार জয় পেয়েছে, যা দলের আত্মবিশ্বাস বাড়িয়ে দিয়েছে।',
   },
   {
     id: '2',
-    title: 'Exploring the Deep Sea: New Discoveries',
+    title: 'প্রযুক্তি: দেশজুড়ে 5G সেবা চালু হতে যাচ্ছে',
     content: [
-        "The deep sea remains one of the last truly unexplored frontiers on Earth. Recent expeditions using advanced submersibles have unveiled a stunning array of new species and geological formations, challenging our understanding of life's resilience.",
-        "Bioluminescent creatures light up the abyssal plains, while hydrothermal vents support entire ecosystems thriving on chemical energy instead of sunlight. These discoveries have profound implications for astrobiology, suggesting that life could exist in similar extreme environments on other planets.",
-        "Protecting these fragile ecosystems from human impact, such as deep-sea mining and pollution, is a growing concern for scientists and conservationists. The race is on to study and understand these environments before they are irrevocably altered."
+        "বহুল প্রতীক্ষিত 5G প্রযুক্তি অবশেষে বাংলাদেশে চালু হতে যাচ্ছে। প্রাথমিকভাবে প্রধান শহরগুলোতে এই সেবা পাওয়া যাবে এবং পর্যায়ক্রমে সারা দেশে বিস্তার লাভ করবে।",
+        "এই প্রযুক্তির মাধ্যমে ইন্টারনেট গতি বহুগুণ বাড়বে, যা ডিজিটাল সেবা, শিক্ষা, এবং স্বাস্থ্যখাতে বৈপ্লবিক পরিবর্তন আনবে বলে আশা করা হচ্ছে। বিশেষজ্ঞরা বলছেন, এটি দেশের অর্থনৈতিক উন্নয়নেও বড় ভূমিকা রাখবে।"
     ],
-    imageUrl: 'https://picsum.photos/seed/2/600/400',
-    imageHint: 'deep sea',
-    authorId: 'author-2',
-    authorName: 'John Smith',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
+    imageUrl: 'https://picsum.photos/seed/5g/600/400',
+    imageHint: '5g network',
+    authorId: 'author-1',
+    authorName: 'জান্নাতুল ফেরদৌস',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
     publishedAt: '2024-07-21T14:30:00Z',
-    aiSummary: 'Recent deep-sea explorations have uncovered new species and ecosystems, offering insights into life\'s adaptability and the potential for extraterrestrial life.',
+    aiSummary: 'বাংলাদেশে শীঘ্রই 5G সেবা চালু হতে যাচ্ছে, যা ইন্টারনেট গতি বাড়ানোর পাশাপাশি দেশের প্রযুক্তি এবং অর্থনীতিতে বড় পরিবর্তন আনবে।',
   },
   {
     id: '3',
-    title: 'The Rise of Artificial Intelligence in Art',
+    title: 'অর্থনীতি: ডলারের বাজারে অস্থিরতা, অর্থনীতিতে প্রভাব',
     content: [
-        "Artificial intelligence is no longer just a tool for scientists and engineers; it's now a canvas for artists. AI-powered algorithms can generate breathtaking visuals, compose music, and even write poetry, blurring the lines between human and machine creativity.",
-        "This new wave of 'generative art' raises fascinating questions about authorship, originality, and the nature of creativity itself. Is the artist the one who writes the code, or is the AI a creative partner in its own right? Museums and galleries are beginning to feature AI-generated works, sparking a lively debate in the art world.",
-        "While some purists are skeptical, many artists are embracing AI as a powerful new medium that extends their creative possibilities. The collaboration between human intuition and machine learning is poised to unlock entirely new forms of artistic expression."
+        "গত কয়েক সপ্তাহ ধরে ডলারের বাজারে持续 অস্থিরতা লক্ষ্য করা যাচ্ছে। টাকার বিপরীতে ডলারের দাম বেড়ে যাওয়ায় আমদানি খরচ বাড়ছে, যার প্রভাব পড়ছে সাধারণ মানুষের জীবনযাত্রার উপর।",
+        "অর্থনীতিবিদরা বলছেন, এই পরিস্থিতি নিয়ন্ত্রণে দ্রুত পদক্ষেপ নেওয়া প্রয়োজন। সরকার এবং কেন্দ্রীয় ব্যাংক পরিস্থিতি স্থিতিশীল করতে কাজ করে যাচ্ছে বলে জানিয়েছে।"
     ],
-    imageUrl: 'https://picsum.photos/seed/3/600/400',
-    imageHint: 'abstract art',
-    authorId: 'author-1',
-    authorName: 'Jane Doe',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
+    imageUrl: 'https://picsum.photos/seed/economy/600/400',
+    imageHint: 'dollar money',
+    authorId: 'author-2',
+    authorName: 'রহিম শেখ',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-20T09:00:00Z',
-    aiSummary: 'AI is transforming the art world by enabling new forms of generative creativity, sparking debates about authorship and pushing the boundaries of artistic expression.',
+    aiSummary: 'ডলারের দাম বৃদ্ধিতে আমদানি খরচ বেড়েছে, যা সাধারণ মানুষের জীবনযাত্রায় প্রভাব ফেলছে। পরিস্থিতি নিয়ন্ত্রণে পদক্ষেপ নেওয়া হচ্ছে।',
   },
   {
     id: '4',
-    title: 'Urban Farming: A Green Revolution in Our Cities',
+    title: 'রাজনীতি: বিএনপি’র নতুন কর্মসূচি ঘোষণা',
     content: [
-      "As urban populations grow, so does the challenge of feeding them sustainably. Urban farming, from rooftop gardens to vertical farms in skyscrapers, is emerging as a powerful solution to bring fresh, local produce to city dwellers.",
-      "These innovative farming methods reduce food miles, minimize water usage through hydroponics and aeroponics, and reconnect people with their food sources. They also contribute to greener cities, improve air quality, and create community hubs.",
-      "While not a replacement for traditional agriculture, urban farming is a vital component of a more resilient and sustainable food system. It empowers communities, enhances food security, and transforms concrete jungles into vibrant, productive landscapes."
+      "বাংলাদেশ জাতীয়তাবাদী দল (বিএনপি) সরকারের উপর চাপ সৃষ্টি করতে নতুন দেশব্যাপী কর্মসূচি ঘোষণা করেছে। দলের মহাসচিব এক সংবাদ সম্মেলনে এই কর্মসূচির বিস্তারিত তুলে ধরেন।",
+      "কর্মসূচির মধ্যে রয়েছে সমাবেশ, বিক্ষোভ মিছিল এবং অন্যান্য গণতান্ত্রিক কার্যক্রম। দলটি বলছে, তাদের দাবি আদায় না হওয়া পর্যন্ত এই আন্দোলন চলবে।"
     ],
-    imageUrl: 'https://picsum.photos/seed/4/600/400',
-    imageHint: 'urban farm',
-    authorId: 'author-2',
-    authorName: 'John Smith',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
+    imageUrl: 'https://picsum.photos/seed/politics/600/400',
+    imageHint: 'political rally',
+    authorId: 'author-1',
+    authorName: 'জান্নাতুল ফেরদৌস',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
     publishedAt: '2024-07-19T11:45:00Z',
-    aiSummary: 'Urban farming is revolutionizing city food systems with sustainable methods like vertical farms, reducing food miles and enhancing local food security.',
+    aiSummary: 'বিএনপি দেশব্যাপী নতুন কর্মসূচি ঘোষণা করেছে, যার মধ্যে রয়েছে সমাবেশ এবং বিক্ষোভ মিছিল, যা দাবি আদায় না হওয়া পর্যন্ত চলবে।',
   },
   {
     id: '5',
-    title: 'The Science of Sleep: Why It Matters More Than You Think',
+    title: 'বিনোদন: ঈদে মুক্তি পাচ্ছে পাঁচটি নতুন চলচ্চিত্র',
     content: [
-      "In our fast-paced world, sleep is often the first thing we sacrifice. However, a growing body of research reveals that quality sleep is fundamental to our physical and mental health, affecting everything from memory consolidation to immune function.",
-      "During sleep, the brain works to repair itself, process information, and clear out toxins. Chronic sleep deprivation is linked to a host of problems, including an increased risk of heart disease, diabetes, and depression.",
-      "Experts recommend 7-9 hours of quality sleep per night for most adults. Simple habits like maintaining a regular sleep schedule, creating a restful environment, and avoiding screens before bed can significantly improve sleep quality and overall well-being."
+      "আসন্ন ঈদুল আজহা উপলক্ষে পাঁচটি নতুন বাংলা চলচ্চিত্র মুক্তি পেতে যাচ্ছে। জনপ্রিয় তারকাদের অভিনয়ে নির্মিত এই সিনেমাগুলো নিয়ে দর্শকদের মধ্যে ব্যাপক আগ্রহ তৈরি হয়েছে।",
+      "চলচ্চিত্রগুলোর মধ্যে রয়েছে অ্যাকশন, রোমান্টিক-كوميدي, এবং সামাজিক ঘরানার গল্প। নির্মাতারা আশা করছেন, এই সিনেমাগুলো ঈদের ছুটিতে দর্শকদের বিনোদনের খোরাক জোগাবে।"
     ],
-    imageUrl: 'https://picsum.photos/seed/5/600/400',
-    imageHint: 'peaceful bedroom',
-    authorId: 'author-1',
-    authorName: 'Jane Doe',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
+    imageUrl: 'https://picsum.photos/seed/cinema/600/400',
+    imageHint: 'movie theater',
+    authorId: 'author-2',
+    authorName: 'রহিম শেখ',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-18T22:00:00Z',
-    aiSummary: 'Quality sleep is crucial for health, impacting memory and immunity. Chronic deprivation increases health risks; experts advise 7-9 hours nightly.',
+    aiSummary: 'ঈদে দর্শকদের জন্য পাঁচটি নতুন বাংলা চলচ্চিত্র মুক্তি পাচ্ছে, যেগুলোতে বিভিন্ন ঘরানার গল্প ও জনপ্রিয় তারকারা রয়েছেন।',
   },
   {
     id: '6',
-    title: 'A Journey Through the Stars: The Latest in Space Telescopes',
+    title: 'আন্তর্জাতিক: মহাকাশে নতুন টেলিস্কোপ পাঠাল নাসা',
     content: [
-      "With the launch of next-generation space telescopes, our view of the cosmos has never been clearer. These powerful observatories are peering back to the dawn of time, capturing images of the first galaxies and studying the atmospheres of distant exoplanets.",
-      "The incredible data being collected is fueling a golden age of astronomy, leading to breakthroughs in our understanding of dark matter, black holes, and the origins of the universe.",
-      "Each new image is a testament to human ingenuity and our insatiable curiosity to understand our place in the universe. The discoveries from these telescopes will continue to inspire and awe for generations to come."
+      "মার্কিন মহাকাশ গবেষণা সংস্থা নাসা একটি নতুন, আরও শক্তিশালী স্পেস টেলিস্কোপ উৎক্ষেপণ করেছে। এই টেলিস্কোপটি মহাবিশ্বের অজানা রহস্য উন্মোচনে সাহায্য করবে বলে আশা করা হচ্ছে।",
+      "এটি দূরবর্তী গ্যালাক্সি এবং এক্সোপ্ল্যানেটের ছবি তুলবে, যা বিজ্ঞানীদের মহাবিশ্বের উৎপত্তি ও গঠন সম্পর্কে নতুন তথ্য দেবে। বিশ্বজুড়ে জ্যোতির্বিজ্ঞানীরা এই মিশনের ফলাফলের জন্য অধীর আগ্রহে অপেক্ষা করছেন।"
     ],
-    imageUrl: 'https://picsum.photos/seed/6/600/400',
+    imageUrl: 'https://picsum.photos/seed/space/600/400',
     imageHint: 'galaxy nebula',
-    authorId: 'author-2',
-    authorName: 'John Smith',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
+    authorId: 'author-1',
+    authorName: 'জান্নাতুল ফেরদৌস',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
     publishedAt: '2024-07-17T18:00:00Z',
-    aiSummary: 'New space telescopes are revolutionizing astronomy, providing unprecedented views of the early universe and exoplanets, heralding a new era of cosmic discovery.',
+    aiSummary: 'নাসা একটি উন্নত স্পেস টেলিস্কোপ উৎক্ষেপণ করেছে যা মহাবিশ্বের রহস্য উন্মোচন করতে এবং দূরবর্তী গ্যালাক্সির ছবি তুলতে সাহায্য করবে।',
   },
   {
     id: '7',
-    title: 'Quantum Computing: The Next Technological Leap',
+    title: 'মতামত: যানজট নিরসনে আমাদের করণীয়',
     content: [
-        "Quantum computing promises to revolutionize industries from medicine to finance by solving problems currently intractable for even the most powerful supercomputers. Unlike classical computers that use bits, quantum computers use qubits, which can exist in multiple states at once.",
-        "This property, known as superposition, along with entanglement, allows quantum machines to perform complex calculations at incredible speeds. Researchers are racing to build stable, large-scale quantum computers, though significant engineering challenges remain.",
-        "The potential applications are vast, including designing new materials, discovering novel drugs, and breaking current encryption standards. The quantum era is approaching, and it will redefine our technological landscape."
+      "ঢাকা শহরের যানজট একটি নিত্যদিনের সমস্যা। এই সমস্যা সমাধানে শুধু সরকারের উপর নির্ভর না করে নাগরিকদেরও দায়িত্ব রয়েছে। ব্যক্তিগত গাড়ির ব্যবহার কমানো, পাবলিক ট্রান্সপোর্ট ব্যবহারে উৎসাহিত হওয়া এবং ট্রাফিক আইন মেনে চলা অত্যন্ত জরুরি।",
+      "সমন্বিত পরিকল্পনা এবং জনসচেতনতা ছাড়া এই ভয়াবহ সমস্যা থেকে মুক্তি পাওয়া কঠিন। আমাদের সবাইকে একসঙ্গে কাজ করতে হবে একটি যানজটমুক্ত শহর গড়ার জন্য।"
     ],
-    imageUrl: 'https://picsum.photos/seed/7/600/400',
-    imageHint: 'quantum computer',
-    authorId: 'author-1',
-    authorName: 'Jane Doe',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
+    imageUrl: 'https://picsum.photos/seed/traffic/600/400',
+    imageHint: 'city traffic',
+    authorId: 'author-2',
+    authorName: 'রহিম শেখ',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-16T11:00:00Z',
-    aiSummary: 'Quantum computing, with its use of qubits and superposition, is set to solve complex problems beyond classical computers, promising major breakthroughs in various fields.'
-  },
-  {
-    id: '8',
-    title: 'Sustainable Architecture: Building for a Better Future',
-    content: [
-        "Sustainable architecture, or 'green building,' is a design philosophy that seeks to minimize the negative environmental impact of buildings. This is achieved through efficiency and moderation in the use of materials, energy, and development space.",
-        "Key principles include using renewable materials, designing for energy efficiency with passive solar and natural ventilation, and integrating buildings with the natural landscape. Green roofs, rainwater harvesting systems, and living walls are becoming common features.",
-        "These buildings are not only better for the planet but also healthier for their occupants, offering improved air quality and a greater connection to nature. As climate change accelerates, sustainable design is no longer a niche, but a necessity."
-    ],
-    imageUrl: 'https://picsum.photos/seed/8/600/400',
-    imageHint: 'green building',
-    authorId: 'author-2',
-    authorName: 'John Smith',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
-    publishedAt: '2024-07-15T16:20:00Z',
-    aiSummary: 'Sustainable architecture minimizes environmental impact through renewable materials and energy-efficient design, creating healthier buildings for people and the planet.'
-  },
-  {
-    id: '9',
-    title: 'The History and Future of the Internet',
-    content: [
-      "From its origins as a military project called ARPANET to the global network of today, the internet has transformed society in just a few decades. It has democratized information, connected billions of people, and created entirely new economies.",
-      "The early web was a decentralized, text-based world. The dot-com boom of the late 90s brought commercialization and the graphical web, followed by the rise of social media and the mobile internet.",
-      "Looking ahead, the internet's future may involve even greater decentralization with technologies like blockchain, more immersive experiences through the metaverse, and a stronger emphasis on privacy and digital rights. Its evolution is far from over."
-    ],
-    imageUrl: 'https://picsum.photos/seed/9/600/400',
-    imageHint: 'network cables',
-    authorId: 'author-1',
-    authorName: 'Jane Doe',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
-    publishedAt: '2024-07-14T09:00:00Z',
-    aiSummary: 'From its ARPANET origins to a global phenomenon, the internet has reshaped society. Its future points towards decentralization, the metaverse, and a focus on digital privacy.'
-  },
-  {
-    id: '10',
-    title: 'The Global Supply Chain: Strengths and Vulnerabilities',
-    content: [
-      "The modern global supply chain is a marvel of logistics, enabling products to be sourced, manufactured, and distributed across the world with incredible efficiency. This complex network has lowered consumer prices and fueled global economic growth.",
-      "However, recent events have exposed its vulnerabilities. The COVID-19 pandemic, geopolitical tensions, and natural disasters have caused significant disruptions, leading to shortages and delays.",
-      "Companies are now rethinking their supply chain strategies, moving towards greater resilience through diversification, regionalization, and increased investment in technology for better visibility and risk management. The era of pure cost optimization may be giving way to one of strategic resilience."
-    ],
-    imageUrl: 'https://picsum.photos/seed/10/600/400',
-    imageHint: 'cargo ship',
-    authorId: 'author-2',
-    authorName: 'John Smith',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
-    publishedAt: '2024-07-13T12:00:00Z',
-    aiSummary: 'While the global supply chain is a model of efficiency, recent disruptions have revealed its weaknesses, pushing companies to prioritize resilience over pure cost savings.'
-  },
-  {
-    id: '11',
-    title: 'Mindfulness and Meditation: A Path to Mental Clarity',
-    content: [
-      "In an age of constant distraction, the practices of mindfulness and meditation are gaining mainstream acceptance as powerful tools for improving mental well-being. Mindfulness is the practice of being present and fully aware of the current moment.",
-      "Meditation, often a formal practice of mindfulness, involves setting aside time to train the mind, often by focusing on the breath or bodily sensations. Studies have shown it can reduce stress, improve focus, and even lead to structural changes in the brain associated with self-awareness and compassion.",
-      "You don't need to be a monk to reap the benefits. Even a few minutes of daily practice can help calm the nervous system and provide a sense of inner peace and clarity."
-    ],
-    imageUrl: 'https://picsum.photos/seed/11/600/400',
-    imageHint: 'person meditating',
-    authorId: 'author-1',
-    authorName: 'Jane Doe',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
-    publishedAt: '2024-07-12T08:30:00Z',
-    aiSummary: 'Mindfulness and meditation are gaining recognition as effective methods for reducing stress and enhancing mental clarity, with even brief daily practice offering significant benefits.'
-  },
-  {
-    id: '12',
-    title: 'The Comeback of Vinyl: A Return to Analog Sound',
-    content: [
-      "In a digital world dominated by streaming, an old format is making a surprising comeback: the vinyl record. Music lovers are drawn to its warm, rich sound and the tangible experience of owning and playing a physical album.",
-      "Album art, liner notes, and the ritual of placing a needle on a record offer a deeper connection to the music and the artist, something often lost in the convenience of digital playlists.",
-      "This resurgence is not just about nostalgia; a new generation is discovering the unique audio fidelity and a more intentional way of listening. Record stores are thriving, and artists are increasingly releasing their music on vinyl, signaling that analog has a firm place in the digital age."
-    ],
-    imageUrl: 'https://picsum.photos/seed/12/600/400',
-    imageHint: 'vinyl record',
-    authorId: 'author-2',
-    authorName: 'John Smith',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
-    publishedAt: '2024-07-11T17:00:00Z',
-    aiSummary: 'Vinyl records are experiencing a major resurgence, attracting listeners with their warm analog sound and the tangible experience of physical media in a digital-first world.'
-  },
-  {
-    id: '13',
-    title: 'The Intricate World of Honey Bees',
-    content: [
-      "Honey bees are vital pollinators, crucial for the reproduction of many plants, including a large portion of the food we eat. Their complex social structure and communication methods, like the famous 'waggle dance,' have fascinated scientists for centuries.",
-      "Within a hive, each bee has a specific role, from the queen who lays eggs to the worker bees who forage for nectar and pollen. Their collective efforts ensure the survival and prosperity of the colony.",
-      "Unfortunately, bee populations are facing threats from habitat loss, pesticides, and climate change. Conservation efforts are essential to protect these indispensable insects and the ecosystems that depend on them."
-    ],
-    imageUrl: 'https://picsum.photos/seed/13/600/400',
-    imageHint: 'honey bee',
-    authorId: 'author-1',
-    authorName: 'Jane Doe',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
-    publishedAt: '2024-07-10T10:45:00Z',
-    aiSummary: 'Honey bees are essential pollinators with a complex social system. Facing threats from environmental changes, their protection is crucial for our ecosystems and food supply.'
-  },
-  {
-    id: '14',
-    title: 'The Art of Artisan Bread Making',
-    content: [
-      "Baking artisan bread at home has become a popular hobby, connecting people to a centuries-old tradition. The process is a blend of science and art, requiring patience, precision, and an understanding of fermentation.",
-      "A simple mixture of flour, water, salt, and yeast can be transformed into a crusty, flavorful loaf with a tender crumb. The magic lies in the slow fermentation process, which develops complex flavors and a beautiful open texture.",
-      "Beyond the delicious results, many find the process of kneading, shaping, and baking to be a meditative and rewarding experience. It's a tangible way to create something wonderful from the most basic ingredients."
-    ],
-    imageUrl: 'https://picsum.photos/seed/14/600/400',
-    imageHint: 'artisan bread',
-    authorId: 'author-2',
-    authorName: 'John Smith',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
-    publishedAt: '2024-07-09T13:00:00Z',
-    aiSummary: 'Artisan bread making, a blend of science and patience, turns simple ingredients into delicious loaves, offering a meditative and rewarding experience for home bakers.'
-  },
-  {
-    id: '15',
-    title: 'Navigating the World of Craft Coffee',
-    content: [
-      "The world of coffee has expanded far beyond the standard morning brew. 'Third wave' coffee culture emphasizes high-quality, single-origin beans and artisanal brewing methods that highlight unique flavor profiles.",
-      "From pour-over and AeroPress to cold brew, each method extracts different characteristics from the beans, allowing coffee lovers to explore a spectrum of tastes, from fruity and acidic to nutty and chocolaty.",
-      "Understanding the origin, roast level, and grind size are key to unlocking the perfect cup. It's a journey of discovery that transforms a daily ritual into a delightful sensory experience."
-    ],
-    imageUrl: 'https://picsum.photos/seed/15/600/400',
-    imageHint: 'coffee cup',
-    authorId: 'author-1',
-    authorName: 'Jane Doe',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
-    publishedAt: '2024-07-08T09:15:00Z',
-    aiSummary: 'Third wave coffee focuses on single-origin beans and artisanal brewing, turning coffee into a sensory journey of diverse flavors and methods.'
+    aiSummary: 'ঢাকার যানজট নিরসনে সরকারি উদ্যোগের পাশাপাশি নাগরিকদের সচেতনতা, যেমন ব্যক্তিগত গাড়ির ব্যবহার কমানো এবং ট্রাফিক আইন মেনে চলা জরুরি।',
   }
 ];
 
