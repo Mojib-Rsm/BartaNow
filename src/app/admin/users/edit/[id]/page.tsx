@@ -59,7 +59,10 @@ export default function UserEditPage({ params }: PageProps) {
 
   useEffect(() => {
     const fetchUser = async () => {
-        const fetchedUser = await getUserById(params.id);
+        const userId = params.id;
+        if (!userId) return;
+
+        const fetchedUser = await getUserById(userId);
         if (fetchedUser) {
             setUser(fetchedUser);
             setPreviewImage(fetchedUser.avatarUrl || null);
@@ -82,7 +85,7 @@ export default function UserEditPage({ params }: PageProps) {
         }
     };
     fetchUser();
-  }, [params.id, router, toast, form]);
+  }, [params, router, toast, form]);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -222,3 +225,5 @@ export default function UserEditPage({ params }: PageProps) {
     </Card>
   );
 }
+
+    
