@@ -44,17 +44,19 @@ export default async function Home({ searchParams }: HomePageProps) {
     entertainmentResult,
     techResult,
     editorsPicksResult,
-    videoArticlesResult
+    videoArticlesResult,
+    islamicLifeResult,
   ] = await Promise.all([
     getArticles({ page: 1, limit: 13 }),
     getArticles({ page: 1, limit: 6 }),
     getArticles({ category: 'রাজনীতি', limit: 4 }),
-    getArticles({ category: 'জাতীয়', limit: 4 }),
+    getArticles({ category: 'জাতীয়', limit: 3 }),
     getArticles({ category: 'খেলা', limit: 4 }),
     getArticles({ category: 'বিনোদন', limit: 4 }),
     getArticles({ category: 'প্রযুক্তি', limit: 4 }),
     getArticles({ editorsPick: true, limit: 4 }),
-    getArticles({ hasVideo: true, limit: 5 })
+    getArticles({ hasVideo: true, limit: 5 }),
+    getArticles({ category: 'ইসলামী জীবন', limit: 4 }),
   ]);
   
   const { articles, totalPages } = initialArticles;
@@ -80,6 +82,7 @@ export default async function Home({ searchParams }: HomePageProps) {
   const { articles: sportsArticles } = sportsResult;
   const { articles: entertainmentArticles } = entertainmentResult;
   const { articles: techArticles } = techResult;
+  const { articles: islamicLifeArticles } = islamicLifeResult;
   
   return (
     <div className="space-y-12">
@@ -198,7 +201,7 @@ export default async function Home({ searchParams }: HomePageProps) {
       {/* Horizontal Ad Spot */}
       <AdSpot className="h-24" />
 
-      {/* Category Sections */}
+      {/* Politics Section - Style 1 (Standard Grid) */}
       {politicsArticles.length > 0 && (
         <section>
           <SectionHeader title="রাজনীতি" href="/category/politics" />
@@ -210,39 +213,105 @@ export default async function Home({ searchParams }: HomePageProps) {
         </section>
       )}
 
+      {/* National Section - Style 2 (1 Large, 2 Small) */}
       {nationalArticles.length > 0 && (
         <section>
-          <SectionHeader title="জাতীয়" href="/category/national" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {nationalArticles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
-          </div>
+            <SectionHeader title="জাতীয়" href="/category/national" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-1">
+                    <ArticleCard article={nationalArticles[0]} />
+                </div>
+                <div className="md:col-span-1 space-y-4">
+                    {nationalArticles.slice(1).map((article) => (
+                         <Card key={article.id} className="flex items-center group overflow-hidden">
+                            <Link href={`/articles/${article.id}`} className='flex w-full'>
+                                <div className="relative w-1/3 aspect-square">
+                                    <Image
+                                        src={article.imageUrl}
+                                        alt={article.title}
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform"
+                                        data-ai-hint={article.imageHint}
+                                    />
+                                </div>
+                                <div className="p-4 w-2/3">
+                                    <h3 className="font-semibold text-base line-clamp-2 group-hover:text-primary">
+                                        {article.title}
+                                    </h3>
+                                     <p className="text-muted-foreground line-clamp-2 text-sm mt-1">{article.aiSummary}</p>
+                                </div>
+                            </Link>
+                        </Card>
+                    ))}
+                </div>
+            </div>
         </section>
       )}
-
+      
+      {/* Sports Section - Style 3 (List View) */}
       {sportsArticles.length > 0 && (
         <section>
           <SectionHeader title="খেলা" href="/category/sports" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             {sportsArticles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
+              <Link key={article.id} href={`/articles/${article.id}`} className="flex items-center gap-4 group">
+                  <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden">
+                      <Image 
+                          src={article.imageUrl}
+                          alt={article.title}
+                          fill
+                          className="object-cover"
+                          data-ai-hint={article.imageHint}
+                      />
+                  </div>
+                  <h3 className="font-semibold text-base group-hover:text-primary">{article.title}</h3>
+              </Link>
             ))}
           </div>
         </section>
       )}
 
+      {/* Entertainment Section - Style 4 (Image-centric) */}
       {entertainmentArticles.length > 0 && (
         <section>
           <SectionHeader title="বিনোদন" href="/category/entertainment" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {entertainmentArticles.map((article) => (
+              <Link key={article.id} href={`/articles/${article.id}`} className="block group">
+                  <Card className="overflow-hidden">
+                      <div className="relative aspect-square w-full">
+                          <Image
+                              src={article.imageUrl}
+                              alt={article.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform"
+                              data-ai-hint={article.imageHint}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                          <h3 className="font-headline text-lg text-white absolute bottom-4 left-4 right-4 group-hover:text-primary/90">
+                              {article.title}
+                          </h3>
+                      </div>
+                  </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+      
+      {/* Islamic Life Section - Standard Grid */}
+      {islamicLifeArticles.length > 0 && (
+        <section>
+          <SectionHeader title="ইসলামী জীবন" href="/category/islamic-life" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {islamicLifeArticles.map((article) => (
               <ArticleCard key={article.id} article={article} />
             ))}
           </div>
         </section>
       )}
 
+      {/* Tech Section - Standard Grid */}
       {techArticles.length > 0 && (
         <section>
           <SectionHeader title="প্রযুক্তি" href="/category/tech" />

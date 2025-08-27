@@ -20,7 +20,8 @@ const CATEGORY_MAP: { [key: string]: string } = {
     latest: 'সর্বশেষ',
     'editors-pick': 'সম্পাদকের পছন্দ',
     videos: 'ভিডিও',
-    polls: 'মতামত জরিপ'
+    polls: 'মতামত জরিপ',
+    'islamic-life': 'ইসলামী জীবন'
 };
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
