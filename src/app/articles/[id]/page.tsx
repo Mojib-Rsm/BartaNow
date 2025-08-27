@@ -7,6 +7,7 @@ import type { Metadata, ResolvingMetadata } from 'next'
 import ShareButtons from '@/components/share-buttons';
 import RelatedArticles from '@/components/related-articles';
 import CommentsSection from '@/components/comments-section';
+import { Badge } from '@/components/ui/badge';
  
 type Props = {
   params: { id: string }
@@ -59,6 +60,7 @@ export default async function ArticlePage({ params }: { params: { id: string } }
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-12">
         <article className="lg:col-span-2 bg-card p-6 sm:p-8 rounded-lg shadow-lg">
             <header className="mb-8">
+                <Badge variant="default" className="mb-4">{article.category}</Badge>
                 <h1 className="text-3xl md:text-5xl font-bold font-headline text-primary mb-4">
                 {article.title}
                 </h1>
