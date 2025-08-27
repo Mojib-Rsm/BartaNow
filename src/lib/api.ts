@@ -4,7 +4,7 @@
 
 import type { Article, Author, Poll, MemeNews, User } from './types';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, QueryCommand, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, QueryCommand, GetCommand, PutCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
 import { sendMail } from './mailer';
@@ -356,4 +356,55 @@ export async function createUser(user: Omit<User, 'id' | 'role'>): Promise<User>
     }
 
     return newUser;
+}
+
+export async function updateUser(userId: string, data: Partial<Pick<User, 'name' | 'password'>>): Promise<User | undefined> {
+    if (useMockData) {
+        const userIndex = mockDb.users.findIndex(u => u.id === userId);
+        if (userIndex === -1) return undefined;
+        
+        const updatedUser = { ...mockDb.users[userIndex], ...data };
+        mockDb.users[userIndex] = updatedUser;
+        return updatedUser;
+    }
+
+    // DynamoDB Implementation
+    const updateExpressionParts: string[] = [];
+    const expressionAttributeValues: { [key: string]: any } = {};
+    const expressionAttributeNames: { [key: string]: string } = {};
+
+    if (data.name) {
+        updateExpressionParts.push('#name = :name');
+        expressionAttributeNames['#name'] = 'name';
+        expressionAttributeValues[':name'] = data.name;
+    }
+    if (data.password) {
+        updateExpressionParts.push('#password = :password');
+        expressionAttributeNames['#password'] = 'password';
+        expressionAttributeValues[':password'] = data.password; // Remember to hash in a real app
+    }
+    
+    if (updateExpressionParts.length === 0) {
+        // Nothing to update, just return the current user data
+        const command = new GetCommand({ TableName: usersTableName, Key: { id: userId } });
+        const { Item } = await docClient.send(command);
+        return Item as User | undefined;
+    }
+
+    const command = new UpdateCommand({
+        TableName: usersTableName,
+        Key: { id: userId },
+        UpdateExpression: `SET ${updateExpressionParts.join(', ')}`,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ReturnValues: 'ALL_NEW',
+    });
+
+    try {
+        const { Attributes } = await docClient.send(command);
+        return Attributes as User | undefined;
+    } catch (error) {
+        console.error(`Error updating user ${userId} in DynamoDB:`, error);
+        throw new Error('Failed to update user in the database.');
+    }
 }

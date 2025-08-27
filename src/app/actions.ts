@@ -3,10 +3,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser } from '@/lib/api';
 import type { Article, User } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
+import { redirect } from 'next/navigation';
 
 export async function seedAction() {
   const result = await seedDatabase();
@@ -99,3 +100,44 @@ export async function getArticleAudioAction(articleId: string) {
     return media;
 }
 
+const updateUserSchema = z.object({
+    id: z.string(),
+    name: z.string().min(3, { message: "নাম কমপক্ষে ৩ অক্ষরের হতে হবে।" }),
+    password: z.string().min(6, { message: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।" }).optional().or(z.literal('')),
+});
+
+type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
+
+export async function updateUserAction(data: UpdateUserFormValues) {
+    const validation = updateUserSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+
+    try {
+        const updateData: { name: string; password?: string } = {
+            name: data.name,
+        };
+
+        if (data.password) {
+            updateData.password = data.password;
+        }
+
+        const updatedUser = await updateUser(data.id, updateData);
+        
+        if (!updatedUser) {
+            return { success: false, message: 'ব্যবহারকারী খুঁজে পাওয়া যায়নি।' };
+        }
+
+        // Revalidate the path to show updated info and redirect
+        revalidatePath('/profile');
+        revalidatePath('/profile/edit');
+        
+        return { success: true, message: 'প্রোফাইল সফলভাবে আপডেট হয়েছে।', user: updatedUser };
+
+    } catch (error) {
+        console.error("Update User Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'প্রোফাইল আপডেট করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}

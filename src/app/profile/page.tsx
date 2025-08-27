@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Mail, User as UserIcon, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -60,9 +61,11 @@ export default function ProfilePage() {
                 <span>{user.email}</span>
             </div>
             <div className="pt-4 flex justify-end">
-                <Button variant="outline">
-                    <Edit className="mr-2 h-4 w-4" />
-                    প্রোফাইল এডিট করুন
+                <Button variant="outline" asChild>
+                    <Link href="/profile/edit">
+                        <Edit className="mr-2 h-4 w-4" />
+                        প্রোফাইল এডিট করুন
+                    </Link>
                 </Button>
             </div>
         </CardContent>
