@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/header';
@@ -33,8 +34,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // A simple way to check if we are in the admin route.
+  // In a real app, you'd likely have a more robust way to handle layouts.
+  const isLtr = typeof children === 'object' && children && 'props' in children && 
+                children.props.childProp?.segment === 'admin';
+
   return (
-    <html lang="bn" className="h-full" suppressHydrationWarning>
+    <html lang={isLtr ? 'en' : 'bn'} dir={isLtr ? 'ltr' : 'rtl'} className="h-full" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -47,12 +53,20 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-            <PushNotificationManager />
-            <Header />
-            <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-            </main>
-            <Footer />
+          {isLtr ? (
+            <>
+              {children}
+            </>
+          ) : (
+            <>
+              <PushNotificationManager />
+              <Header />
+              <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {children}
+              </main>
+              <Footer />
+            </>
+          )}
             <Toaster />
         </ThemeProvider>
       </body>
