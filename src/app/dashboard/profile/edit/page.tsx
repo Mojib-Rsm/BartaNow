@@ -95,6 +95,7 @@ export default function ProfileEditPage() {
 
     if (result.success && result.user) {
       localStorage.setItem('bartaNowUser', JSON.stringify(result.user));
+      // Manually dispatch a storage event to notify other components (like the header)
       window.dispatchEvent(new Event('storage'));
 
       toast({
