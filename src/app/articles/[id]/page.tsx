@@ -8,6 +8,8 @@ import ShareButtons from '@/components/share-buttons';
 import RelatedArticles from '@/components/related-articles';
 import CommentsSection from '@/components/comments-section';
 import { Badge } from '@/components/ui/badge';
+import AdSpot from '@/components/ad-spot';
+import TrendingSidebar from '@/components/trending-sidebar';
  
 type Props = {
   params: { id: string }
@@ -38,12 +40,15 @@ export default async function ArticlePage({ params }: { params: { id: string } }
     notFound();
   }
 
-  // Fetch related articles from the same category
-  const related = await getArticles({ 
-    category: article.category, 
-    limit: 4, 
-    excludeId: article.id 
-  });
+  // Fetch related and trending articles
+  const [related, trending] = await Promise.all([
+    getArticles({ 
+      category: article.category, 
+      limit: 4, 
+      excludeId: article.id 
+    }),
+    getArticles({ limit: 5 }) // Assuming most recent are "trending" for the sidebar
+  ]);
 
   const authorInitials = article.authorName
     .split(' ')
@@ -58,52 +63,61 @@ export default async function ArticlePage({ params }: { params: { id: string } }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-12">
-        <article className="lg:col-span-2 bg-card p-6 sm:p-8 rounded-lg shadow-lg">
-            <header className="mb-8">
-                <Badge variant="default" className="mb-4">{article.category}</Badge>
-                <h1 className="text-3xl md:text-5xl font-bold font-headline text-primary mb-4">
-                {article.title}
-                </h1>
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground text-sm">
-                    <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                            <AvatarImage src={article.authorAvatarUrl} alt={article.authorName} />
-                            <AvatarFallback>{authorInitials}</AvatarFallback>
-                        </Avatar>
-                        <span>{article.authorName}</span>
+        <div className="lg:col-span-2 space-y-8">
+            <article className="bg-card p-6 sm:p-8 rounded-lg shadow-lg">
+                <header className="mb-8">
+                    <Badge variant="default" className="mb-4">{article.category}</Badge>
+                    <h1 className="text-3xl md:text-5xl font-bold font-headline text-primary mb-4">
+                    {article.title}
+                    </h1>
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground text-sm">
+                        <div className="flex items-center gap-2">
+                            <Avatar className="h-8 w-8">
+                                <AvatarImage src={article.authorAvatarUrl} alt={article.authorName} />
+                                <AvatarFallback>{authorInitials}</AvatarFallback>
+                            </Avatar>
+                            <span>{article.authorName}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <time dateTime={article.publishedAt}>{publishedDate}</time>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <time dateTime={article.publishedAt}>{publishedDate}</time>
-                    </div>
+                </header>
+
+                <div className="relative w-full h-64 md:h-96 mb-8 rounded-lg overflow-hidden">
+                    <Image
+                    src={article.imageUrl}
+                    alt={article.title}
+                    fill
+                    className="object-cover"
+                    data-ai-hint={article.imageHint}
+                    priority
+                    />
                 </div>
-            </header>
 
-            <div className="relative w-full h-64 md:h-96 mb-8 rounded-lg overflow-hidden">
-                <Image
-                src={article.imageUrl}
-                alt={article.title}
-                fill
-                className="object-cover"
-                data-ai-hint={article.imageHint}
-                priority
-                />
-            </div>
-
-            <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-foreground/90">
-                {article.content.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                ))}
-            </div>
+                <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-foreground/90">
+                    {article.content.map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                    ))}
+                </div>
+                
+                <div className="mt-8 pt-6 border-t">
+                    <ShareButtons articleTitle={article.title} />
+                </div>
+            </article>
             
-            <div className="mt-8 pt-6 border-t">
-                <ShareButtons articleTitle={article.title} />
-            </div>
-        </article>
+            <RelatedArticles articles={related.articles} />
+            
+            <CommentsSection articleId={article.id} />
+        </div>
 
         <aside className="lg:col-span-1 space-y-8 mt-8 lg:mt-0">
-             <RelatedArticles articles={related.articles} />
-             <CommentsSection articleId={article.id} />
+             <AdSpot className="h-64" />
+             <TrendingSidebar articles={trending.articles} />
+             <div className="sticky top-24">
+                <AdSpot className="h-96" />
+             </div>
         </aside>
     </div>
   );
