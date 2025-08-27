@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -6,6 +7,7 @@ import { getMoreArticlesAction } from '@/app/actions';
 import ArticleCard from './article-card';
 import { Loader2 } from 'lucide-react';
 import { useDebouncedCallback } from 'use-debounce';
+import { Button } from './ui/button';
 
 type LoadMoreCategoryProps = {
     initialArticles: Article[];
@@ -17,9 +19,10 @@ export default function LoadMoreCategory({ initialArticles, totalPages, category
     const [articles, setArticles] = useState<Article[]>(initialArticles);
     const [page, setPage] = useState(2);
     const [loading, setLoading] = useState(false);
+    const [initialAutoLoadDone, setInitialAutoLoadDone] = useState(false);
     const loaderRef = useRef(null);
 
-    const debouncedLoadMore = useDebouncedCallback(async () => {
+    const loadMoreArticles = async () => {
         if (loading || page > totalPages) return;
         setLoading(true);
         const newArticles = await getMoreArticlesAction({ 
@@ -30,14 +33,25 @@ export default function LoadMoreCategory({ initialArticles, totalPages, category
         setArticles((prevArticles) => [...prevArticles, ...newArticles]);
         setPage((prevPage) => prevPage + 1);
         setLoading(false);
+    };
+
+    const handleManualLoad = () => {
+        loadMoreArticles();
+    };
+
+    const debouncedAutoLoad = useDebouncedCallback(async () => {
+        await loadMoreArticles();
+        setInitialAutoLoadDone(true);
     }, 300);
 
      useEffect(() => {
+        if (initialAutoLoadDone) return;
+
         const observer = new IntersectionObserver(
             (entries) => {
                 const target = entries[0];
-                if (target.isIntersecting) {
-                    debouncedLoadMore();
+                if (target.isIntersecting && !loading) {
+                    debouncedAutoLoad();
                 }
             },
             { rootMargin: '200px' }
@@ -52,7 +66,7 @@ export default function LoadMoreCategory({ initialArticles, totalPages, category
                 observer.unobserve(loaderRef.current);
             }
         };
-    }, [debouncedLoadMore]);
+    }, [debouncedAutoLoad, initialAutoLoadDone, loading]);
 
 
     return (
@@ -64,8 +78,18 @@ export default function LoadMoreCategory({ initialArticles, totalPages, category
             </div>
 
             <div ref={loaderRef} className="flex justify-center mt-8 h-10">
-                 {loading && <Loader2 className="h-8 w-8 animate-spin text-primary" />}
-                 {page > totalPages && !loading && <p className="text-muted-foreground">সব আর্টিকেল লোড করা হয়েছে।</p>}
+                 {loading ? (
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                 ) : (
+                    <>
+                        {initialAutoLoadDone && page <= totalPages && (
+                             <Button onClick={handleManualLoad} variant="outline">
+                                আরও পড়ুন
+                            </Button>
+                        )}
+                        {page > totalPages && <p className="text-muted-foreground">সব আর্টিকেল লোড করা হয়েছে।</p>}
+                    </>
+                 )}
             </div>
         </>
     );
