@@ -2,6 +2,7 @@ export interface Author {
   id: string;
   name: string;
   avatarUrl: string;
+  bio?: string;
 }
 
 export interface Article {

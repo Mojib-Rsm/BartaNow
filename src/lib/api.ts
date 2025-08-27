@@ -1,5 +1,5 @@
 import 'server-only';
-import type { Article } from './types';
+import type { Article, Author } from './types';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { mockDb } from './data';
@@ -43,11 +43,12 @@ type GetArticlesOptions = {
     page?: number;
     limit?: number;
     category?: Article['category'];
+    authorId?: string;
     excludeId?: string;
     query?: string;
 };
 
-async function getMockArticles({ page = 1, limit = 6, category, excludeId, query }: GetArticlesOptions) {
+async function getMockArticles({ page = 1, limit = 6, category, authorId, excludeId, query }: GetArticlesOptions) {
     await generateSummariesForMockData();
     
     let filteredArticles = [...mockDb.articles];
@@ -56,6 +57,10 @@ async function getMockArticles({ page = 1, limit = 6, category, excludeId, query
         filteredArticles = filteredArticles.filter(article => article.category === category);
     }
     
+    if (authorId) {
+        filteredArticles = filteredArticles.filter(article => article.authorId === authorId);
+    }
+
     if (excludeId) {
         filteredArticles = filteredArticles.filter(article => article.id !== excludeId);
     }
@@ -78,9 +83,9 @@ async function getMockArticles({ page = 1, limit = 6, category, excludeId, query
     return { articles: paginatedArticles, totalPages };
 }
 
-export async function getArticles({ page = 1, limit = 6, category, excludeId, query }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
+export async function getArticles({ page = 1, limit = 6, category, authorId, excludeId, query }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
     if (useMockData) {
-        return getMockArticles({ page, limit, category, excludeId, query });
+        return getMockArticles({ page, limit, category, authorId, excludeId, query });
     }
     
     // DynamoDB implementation for production
@@ -104,8 +109,8 @@ export async function getArticles({ page = 1, limit = 6, category, excludeId, qu
         // simulate basic pagination by repeating the query and relying on client-side page numbers,
         // which is not efficient for deep pagination.
         
-        // This implementation does not support category filtering for DynamoDB yet.
-        // That would require a GSI on the `category` attribute.
+        // This implementation does not support category or author filtering for DynamoDB yet.
+        // That would require a GSI on the `category` or `authorId` attribute.
         
         let allItems: Article[] = [];
         let lastEvaluatedKey: Record<string, any> | undefined = undefined;
@@ -172,5 +177,26 @@ export async function getArticleById(id: string): Promise<Article | undefined> {
         // Fallback to mock data in case of a runtime error with DynamoDB
         console.log(`Falling back to mock data for article ${id}.`);
         return getMockArticleById(id);
+    }
+}
+
+export async function getAuthorById(id: string): Promise<Author | undefined> {
+    if (useMockData) {
+        return mockDb.authors.find((author) => author.id === id);
+    }
+    // In a real DynamoDB setup, you'd likely have a separate 'AUTHOR' entityType
+    // and query it. This is a simplified example.
+    const command = new GetCommand({
+        TableName: tableName,
+        Key: { id: id },
+    });
+     try {
+        const { Item } = await docClient.send(command);
+        // This assumes author data is stored with a different structure.
+        // For this starter, we fall back to mock data for authors.
+        return mockDb.authors.find((author) => author.id === id);
+    } catch(error) {
+        console.error(`Error fetching author ${id} from DynamoDB:`, error);
+        return mockDb.authors.find((author) => author.id === id);
     }
 }

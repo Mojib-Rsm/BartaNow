@@ -1,6 +1,7 @@
 import { getArticleById, getArticles } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar } from 'lucide-react';
 import type { Metadata, ResolvingMetadata } from 'next'
@@ -71,13 +72,13 @@ export default async function ArticlePage({ params }: { params: { id: string } }
                     {article.title}
                     </h1>
                     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground text-sm">
-                        <div className="flex items-center gap-2">
+                        <Link href={`/authors/${article.authorId}`} className="flex items-center gap-2 hover:text-primary">
                             <Avatar className="h-8 w-8">
                                 <AvatarImage src={article.authorAvatarUrl} alt={article.authorName} />
                                 <AvatarFallback>{authorInitials}</AvatarFallback>
                             </Avatar>
                             <span>{article.authorName}</span>
-                        </div>
+                        </Link>
                         <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
                             <time dateTime={article.publishedAt}>{publishedDate}</time>

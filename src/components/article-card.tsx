@@ -44,6 +44,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
         </CardContent>
         <CardFooter className="p-0 pt-4 mt-auto">
            <div className="flex items-center gap-3 w-full">
+            <Link href={`/authors/${article.authorId}`} className="flex items-center gap-3 hover:opacity-80">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={article.authorAvatarUrl} alt={article.authorName} />
                 <AvatarFallback>{authorInitials}</AvatarFallback>
@@ -52,6 +53,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
                 <p className="font-semibold text-foreground">{article.authorName}</p>
                 <p className="text-muted-foreground">{formattedDate}</p>
               </div>
+            </Link>
             </div>
         </CardFooter>
       </div>

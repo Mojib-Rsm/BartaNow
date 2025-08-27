@@ -1,9 +1,9 @@
 import type { Article, Author } from './types';
 
 const authors: Author[] = [
-  { id: 'author-1', name: 'জান্নাতুল ফেরদৌস', avatarUrl: 'https://i.pravatar.cc/150?u=author-1' },
-  { id: 'author-2', name: 'রহিম শেখ', avatarUrl: 'https://i.pravatar.cc/150?u=author-2' },
-  { id: 'author-3', name: 'আলিয়া চৌধুরী', avatarUrl: 'https://i.pravatar.cc/150?u=author-3' },
+  { id: 'author-1', name: 'জান্নাতুল ফেরদৌস', avatarUrl: 'https://i.pravatar.cc/150?u=author-1', bio: 'জান্নাতুল ফেরদৌস একজন অভিজ্ঞ সাংবাদিক যিনি প্রযুক্তি এবং রাজনীতি বিষয়ে লেখেন। তিনি জটিল বিষয় সহজভাবে উপস্থাপন করতে পারদর্শী।' },
+  { id: 'author-2', name: 'রহিম শেখ', avatarUrl: 'https://i.pravatar.cc/150?u=author-2', bio: 'রহিম শেখ খেলা এবং বিনোদন জগতের খবর কভার করেন। তার লেখাগুলো পাঠকদের মধ্যে বেশ জনপ্রিয়।' },
+  { id: 'author-3', name: 'আলিয়া চৌধুরী', avatarUrl: 'https://i.pravatar.cc/150?u=author-3', bio: 'আলিয়া চৌধুরী পরিবেশ এবং স্বাস্থ্য নিয়ে কাজ করেন। তার গবেষণাধর্মী লেখাগুলো সচেতনতা তৈরিতে সাহায্য করে।' },
 ];
 
 const articles: Article[] = [
