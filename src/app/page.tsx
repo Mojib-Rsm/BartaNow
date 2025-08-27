@@ -11,6 +11,7 @@ import PollSection from '@/components/poll-section';
 import LoadMore from '@/components/load-more';
 import AdSpot from '@/components/ad-spot';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import TrendingSidebar from '@/components/trending-sidebar';
 
 
 type HomePageProps = {
@@ -234,6 +235,7 @@ export default async function Home({ searchParams }: HomePageProps) {
         </div>
         <aside className="md:col-span-1 space-y-8">
             <PollSection />
+            <TrendingSidebar articles={trendingArticles} />
             <AdSpot className="h-96" />
         </aside>
       </div>

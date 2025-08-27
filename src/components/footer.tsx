@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Facebook, Twitter, Youtube, Instagram } from "lucide-react";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -40,8 +42,12 @@ export default function Footer() {
               <Link href="#" className="text-muted-foreground hover:text-primary"><Youtube size={20} /></Link>
               <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram size={20} /></Link>
             </div>
-            <h3 className="font-bold text-lg text-primary font-headline mb-2 mt-4">সদস্য হোন</h3>
-            <p className="text-muted-foreground text-sm">সদস্য হোন এবং প্রতিদিন সংবাদ পান</p>
+            <h3 className="font-bold text-lg text-primary font-headline mb-2 mt-4">নিউজলেটার</h3>
+            <p className="text-muted-foreground text-sm mb-2">সর্বশেষ খবর সরাসরি আপনার ইনবক্সে পেতে সাবস্ক্রাইব করুন।</p>
+            <form className="flex gap-2">
+                <Input type="email" placeholder="আপনার ইমেইল" className="flex-grow" aria-label="Email for newsletter"/>
+                <Button type="submit">সাবস্ক্রাইব</Button>
+            </form>
           </div>
         </div>
         <div className="border-t mt-8 pt-4 text-center text-muted-foreground text-sm">
