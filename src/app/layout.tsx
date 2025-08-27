@@ -31,22 +31,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { slug: string[] };
 }>) {
-  // A simple way to check if we are in the admin route based on the URL segment.
-  // In a real app, you might have a more robust way to handle layouts.
-  // This logic now correctly checks the route from the childProp passed by Next.js
-  const isAdminRoute =
-    typeof children === 'object' &&
-    children &&
-    'props' in children &&
-    (children.props as any).childProp?.segment === 'admin';
+  // A safe way to check if we're rendering the admin part of the app.
+  // It inspects the special `childProp` that Next.js provides in the page `props`.
+  // Note: This is an internal Next.js mechanism and might change.
+  const isAdminRoute = (children as any)?.props?.childProp?.segment === 'admin'
 
   return (
-    <html lang={isAdminRoute ? 'en' : 'bn'} dir={isAdminRoute ? 'ltr' : 'rtl'} className="h-full" suppressHydrationWarning>
+    <html lang="bn" dir="ltr" className="h-full" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -60,7 +54,7 @@ export default function RootLayout({
             disableTransitionOnChange
         >
           {isAdminRoute ? (
-             <AdminLayout>
+            <AdminLayout>
                 {children}
             </AdminLayout>
           ) : (
@@ -73,7 +67,7 @@ export default function RootLayout({
               <Footer />
             </>
           )}
-            <Toaster />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
