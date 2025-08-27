@@ -7,6 +7,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
+import { sendMail } from './mailer';
 
 const useMockData = !process.env.AWS_REGION || 
                     process.env.AWS_REGION === 'your_aws_region' ||
@@ -311,24 +312,46 @@ export async function createUser(user: Omit<User, 'id' | 'role'>): Promise<User>
         ...user
     };
 
+    let success = false;
     if (useMockData) {
         mockDb.users.push(newUser);
-        return newUser;
+        success = true;
+    } else {
+        const command = new PutCommand({
+            TableName: usersTableName,
+            Item: newUser,
+            ConditionExpression: 'attribute_not_exists(email)', // Ensure email is unique
+        });
+
+        try {
+            await docClient.send(command);
+            success = true;
+        } catch (error) {
+            console.error(`Error creating user in DynamoDB:`, error);
+            // The ConditionExpression will throw an error if the email exists.
+            // We could handle that specific error code for a better message.
+            throw new Error('Failed to create user in the database.');
+        }
     }
     
-    const command = new PutCommand({
-        TableName: usersTableName,
-        Item: newUser,
-        ConditionExpression: 'attribute_not_exists(email)', // Ensure email is unique
-    });
-
-    try {
-        await docClient.send(command);
-        return newUser;
-    } catch (error) {
-        console.error(`Error creating user in DynamoDB:`, error);
-        // The ConditionExpression will throw an error if the email exists.
-        // We could handle that specific error code for a better message.
-        throw new Error('Failed to create user in the database.');
+    if (success && process.env.ADMIN_EMAIL) {
+        try {
+            await sendMail({
+                to: process.env.ADMIN_EMAIL,
+                subject: 'New User Registration on BartaNow',
+                html: `
+                    <h1>A new user has registered on BartaNow!</h1>
+                    <p><strong>Name:</strong> ${newUser.name}</p>
+                    <p><strong>Email:</strong> ${newUser.email}</p>
+                `
+            });
+            console.log('Admin notification email sent successfully.');
+        } catch (mailError) {
+            console.error('Failed to send admin notification email:', mailError);
+            // We don't throw an error here because the user creation was successful.
+            // This is a non-critical failure.
+        }
     }
+
+    return newUser;
 }
