@@ -9,7 +9,8 @@ import {
   Settings,
   BarChart2,
   PanelLeft,
-  Megaphone
+  Megaphone,
+  Image as ImageIcon
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -81,7 +82,7 @@ export default function AdminLayout({
             <SidebarContent>
                 <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin')}>
+                    <SidebarMenuButton asChild isActive={isActive('/admin') && pathname === '/admin'}>
                     <Link href="/admin">
                         <BarChart2 />
                         ড্যাশবোর্ড
@@ -106,6 +107,14 @@ export default function AdminLayout({
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                  )}
+                 <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/admin/media')}>
+                        <Link href="/admin/media">
+                            <ImageIcon />
+                            মিডিয়া
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
                  <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive('/admin/ads')}>
                         <Link href="/admin/ads">
