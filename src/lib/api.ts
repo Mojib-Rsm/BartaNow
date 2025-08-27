@@ -31,13 +31,20 @@ async function generateSummariesForMockData() {
     if (mockDb.articles.every(a => a.aiSummary)) {
         return;
     }
-    for (const article of mockDb.articles) {
+    // This is a slow operation, so let's not wait for it in a real scenario
+    // It should be a background job. For the demo, we do it on first load.
+    const summaryPromises = mockDb.articles.map(async (article) => {
         if (!article.aiSummary) {
-            // In a real app, you might want to handle potential errors here
-            const { summary } = await summarizeArticle({ articleContent: article.content.join('\n\n') });
-            article.aiSummary = summary;
+            try {
+                const { summary } = await summarizeArticle({ articleContent: article.content.join('\n\n') });
+                article.aiSummary = summary;
+            } catch (e) {
+                console.error(`Could not generate summary for article ${article.id}`, e);
+                article.aiSummary = article.content[0].substring(0, 150) + '...'; // Fallback
+            }
         }
-    }
+    });
+    await Promise.all(summaryPromises);
 }
 
 type GetArticlesOptions = {

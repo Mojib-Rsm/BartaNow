@@ -1,4 +1,6 @@
 
+'use client';
+
 import { getArticles, getMemeNews } from '@/lib/api';
 import ArticleCard from '@/components/article-card';
 import SeedButton from '@/components/seed-button';
@@ -15,13 +17,10 @@ import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carouse
 import TrendingSidebar from '@/components/trending-sidebar';
 import FactCheckSidebar from '@/components/fact-check-sidebar';
 import MemeCard from '@/components/meme-card';
+import type { Article } from '@/lib/types';
+import { useEffect, useState } from 'react';
+import Autoplay from "embla-carousel-autoplay";
 
-
-type HomePageProps = {
-  searchParams?: {
-    page?: string;
-  };
-};
 
 const SectionHeader = ({ title, href }: { title: string, href: string }) => (
   <div className="flex items-center justify-between border-b-2 border-primary mb-4 pb-2">
@@ -34,39 +33,157 @@ const SectionHeader = ({ title, href }: { title: string, href: string }) => (
   </div>
 );
 
-export default async function Home({ searchParams }: HomePageProps) {
-  const page = searchParams?.page ? parseInt(searchParams.page, 10) : 1;
-  
-  const [
-    initialArticles,
-    latestArticlesResult,
+// A simple skeleton loader for the home page
+const HomePageSkeleton = () => (
+  <div className="space-y-12">
+    {/* Ticker Skeleton */}
+    <div className="flex items-center gap-4">
+      <div className="h-7 w-24 bg-muted animate-pulse rounded-md" />
+      <div className="h-6 w-full bg-muted animate-pulse rounded-md" />
+    </div>
+
+    {/* Hero Skeleton */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="md:col-span-2 space-y-4">
+        <div className="h-[40vh] w-full bg-muted animate-pulse rounded-lg" />
+        <div className="h-10 w-3/4 bg-muted animate-pulse rounded-md" />
+        <div className="h-6 w-full bg-muted animate-pulse rounded-md" />
+      </div>
+      <div className="md:col-span-1 space-y-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="space-y-2 pb-4 border-b last:border-b-0">
+             <div className="h-6 w-full bg-muted animate-pulse rounded-md" />
+             <div className="h-4 w-5/6 bg-muted animate-pulse rounded-md" />
+          </div>
+        ))}
+      </div>
+    </div>
+     <div className="h-24 w-full bg-muted/50 animate-pulse rounded-lg" />
+     {/* Grid Skeleton */}
+     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+            <div key={i} className="space-y-3">
+                <div className="h-40 w-full bg-muted animate-pulse rounded-lg" />
+                <div className="h-5 w-full bg-muted animate-pulse rounded-md" />
+                <div className="h-10 w-5/6 bg-muted animate-pulse rounded-md" />
+            </div>
+        ))}
+     </div>
+  </div>
+);
+
+
+export default function Home() {
+  const [pageData, setPageData] = useState<{
+    articles: Article[];
+    totalPages: number;
+    latestArticlesResult: { articles: Article[], totalPages: number };
+    politicsResult: { articles: Article[] };
+    nationalResult: { articles: Article[] };
+    sportsResult: { articles: Article[] };
+    entertainmentResult: { articles: Article[] };
+    techResult: { articles: Article[] };
+    editorsPicksResult: { articles: Article[] };
+    videoArticlesResult: { articles: Article[] };
+    islamicLifeResult: { articles: Article[] };
+    factCheckResult: { articles: Article[] };
+    memeNewsResult: any[];
+    trendingArticles: Article[];
+    heroArticles: Article[];
+    sideArticles: Article[];
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const [
+        initialArticles,
+        latestArticlesResult,
+        politicsResult,
+        nationalResult,
+        sportsResult,
+        entertainmentResult,
+        techResult,
+        editorsPicksResult,
+        videoArticlesResult,
+        islamicLifeResult,
+        factCheckResult,
+        memeNewsResult,
+      ] = await Promise.all([
+        getArticles({ page: 1, limit: 13 }),
+        getArticles({ page: 1, limit: 6 }),
+        getArticles({ category: 'রাজনীতি', limit: 4 }),
+        getArticles({ category: 'জাতীয়', limit: 3 }),
+        getArticles({ category: 'খেলা', limit: 4 }),
+        getArticles({ category: 'বিনোদন', limit: 4 }),
+        getArticles({ category: 'প্রযুক্তি', limit: 4 }),
+        getArticles({ editorsPick: true, limit: 4 }),
+        getArticles({ hasVideo: true, limit: 5 }),
+        getArticles({ category: 'ইসলামী জীবন', limit: 4 }),
+        getArticles({ category: 'তথ্য যাচাই', limit: 4 }),
+        getMemeNews(),
+      ]);
+
+      const { articles, totalPages } = initialArticles;
+      const heroArticles = articles.slice(0, 5);
+      const sideArticles = articles.slice(5, 9);
+      const trendingArticles = articles.filter(a => a.badge === 'জনপ্রিয়').slice(0, 5);
+
+      setPageData({
+        articles,
+        totalPages,
+        latestArticlesResult,
+        politicsResult,
+        nationalResult,
+        sportsResult,
+        entertainmentResult,
+        techResult,
+        editorsPicksResult,
+        videoArticlesResult,
+        islamicLifeResult,
+        factCheckResult,
+        memeNewsResult,
+        trendingArticles,
+        heroArticles,
+        sideArticles,
+      });
+    };
+
+    fetchData();
+  }, []);
+
+  if (!pageData) {
+    return <HomePageSkeleton />;
+  }
+
+  const {
+    articles,
+    trendingArticles,
+    heroArticles,
+    sideArticles,
+    videoArticlesResult,
+    editorsPicksResult,
     politicsResult,
     nationalResult,
     sportsResult,
     entertainmentResult,
     techResult,
-    editorsPicksResult,
-    videoArticlesResult,
     islamicLifeResult,
     factCheckResult,
+    latestArticlesResult,
     memeNewsResult,
-  ] = await Promise.all([
-    getArticles({ page: 1, limit: 13 }),
-    getArticles({ page: 1, limit: 6 }),
-    getArticles({ category: 'রাজনীতি', limit: 4 }),
-    getArticles({ category: 'জাতীয়', limit: 3 }),
-    getArticles({ category: 'খেলা', limit: 4 }),
-    getArticles({ category: 'বিনোদন', limit: 4 }),
-    getArticles({ category: 'প্রযুক্তি', limit: 4 }),
-    getArticles({ editorsPick: true, limit: 4 }),
-    getArticles({ hasVideo: true, limit: 5 }),
-    getArticles({ category: 'ইসলামী জীবন', limit: 4 }),
-    getArticles({ category: 'তথ্য যাচাই', limit: 4 }),
-    getMemeNews(),
-  ]);
-  
-  const { articles, totalPages } = initialArticles;
+    totalPages
+  } = pageData;
 
+  const { articles: videoArticles } = videoArticlesResult;
+  const { articles: editorsPicks } = editorsPicksResult;
+  const { articles: politicsArticles } = politicsResult;
+  const { articles: nationalArticles } = nationalResult;
+  const { articles: sportsArticles } = sportsResult;
+  const { articles: entertainmentArticles } = entertainmentResult;
+  const { articles: techArticles } = techResult;
+  const { articles: islamicLifeArticles } = islamicLifeResult;
+  const { articles: factCheckArticles } = factCheckResult;
+  
   if (articles.length === 0) {
     return (
       <div className="text-center py-16 col-span-full">
@@ -78,36 +195,42 @@ export default async function Home({ searchParams }: HomePageProps) {
     );
   }
 
-  const heroArticles = articles.slice(0, 5);
-  const sideArticles = articles.slice(5, 9);
-  const trendingArticles = articles.filter(a => a.badge === 'জনপ্রিয়').slice(0, 5);
-  const { articles: videoArticles } = videoArticlesResult;
-  const { articles: editorsPicks } = editorsPicksResult;
-  const { articles: politicsArticles } = politicsResult;
-  const { articles: nationalArticles } = nationalResult;
-  const { articles: sportsArticles } = sportsResult;
-  const { articles: entertainmentArticles } = entertainmentResult;
-  const { articles: techArticles } = techResult;
-  const { articles: islamicLifeArticles } = islamicLifeResult;
-  const { articles: factCheckArticles } = factCheckResult;
-  
   return (
     <div className="space-y-12">
-      {/* Trending Section / Ticker */}
+       {/* Trending Section / Ticker */}
       {trendingArticles.length > 0 && (
         <section>
-          <div className="flex items-center gap-4 overflow-x-auto pb-4">
-            <h3 className="text-xl font-headline font-bold text-primary whitespace-nowrap">ট্রেন্ডিং</h3>
-            <div className="flex items-center gap-4">
-              {trendingArticles.map(article => (
-                <Link key={article.id} href={`/articles/${article.id}`} className="group">
-                  <div className="flex items-center gap-2">
-                    {article.badge && <Badge variant="default">{article.badge}</Badge>}
-                    <p className="font-semibold group-hover:text-primary whitespace-nowrap">{article.title}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+          <div className="flex items-center gap-4">
+             <h3 className="text-xl font-headline font-bold text-primary whitespace-nowrap">ট্রেন্ডিং</h3>
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              plugins={[
+                Autoplay({
+                  delay: 3000,
+                  stopOnInteraction: true,
+                  stopOnMouseEnter: true,
+                }),
+              ]}
+              className="w-full overflow-hidden"
+            >
+              <CarouselContent>
+                {trendingArticles.map((article) => (
+                  <CarouselItem key={article.id} className="basis-auto">
+                     <Link href={`/articles/${article.id}`} className="group">
+                        <div className="flex items-center gap-2">
+                            {article.badge && <Badge variant="default">{article.badge}</Badge>}
+                            <p className="font-semibold group-hover:text-primary whitespace-nowrap text-sm">
+                            {article.title}
+                            </p>
+                        </div>
+                    </Link>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
           </div>
         </section>
       )}
@@ -122,7 +245,7 @@ export default async function Home({ searchParams }: HomePageProps) {
             className="w-full"
           >
             <CarouselContent>
-              {heroArticles.map((article) => (
+              {heroArticles.map((article, index) => (
                 <CarouselItem key={article.id}>
                     <Link href={`/articles/${article.id}`} className="block group">
                         <Card className="border-0 shadow-none rounded-md overflow-hidden">
@@ -133,7 +256,7 @@ export default async function Home({ searchParams }: HomePageProps) {
                             fill
                             className="object-cover rounded-lg"
                             data-ai-hint={article.imageHint}
-                            priority={heroArticles.indexOf(article) === 0}
+                            priority={index === 0}
                             />
                         </div>
                         <CardContent className="p-0 pt-4">
