@@ -58,6 +58,7 @@ export interface Article {
   editorsPick?: boolean;
   sponsored?: boolean;
   factCheck?: FactCheck;
+  location?: string; // e.g., 'ঢাকা', 'চট্টগ্রাম'
 }
 
 export interface MemeNews {

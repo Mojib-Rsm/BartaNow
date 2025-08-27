@@ -5,9 +5,9 @@ import type { Article, Author, Poll, MemeNews, User } from './types';
 // Helper to generate a slug from a title
 const generateSlug = (title: string) => {
     return title
-      .toLowerCase()
-      .replace(/ /g, '-')
-      .replace(/[^\w-]+/g, '');
+        .toLowerCase()
+        .replace(/ /g, '-')
+        .replace(/[^\w-à-üÀ-Ü]/g, ''); // Keep bengali characters
 };
 
 const users: User[] = [
@@ -38,7 +38,8 @@ const articlesData: Omit<Article, 'slug'>[] = [
     publishedAt: '2024-07-22T10:00:00Z',
     aiSummary: 'এশিয়া কাপের প্রথম ম্যাচে অধিনায়কের অনবদ্য শতকে বাংলাদেশ একটি शानदार জয় পেয়েছে, যা দলের আত্মবিশ্বাস বাড়িয়ে দিয়েছে।',
     badge: 'জনপ্রিয়',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    location: 'চট্টগ্রাম',
   },
   {
     id: '2',
@@ -58,6 +59,7 @@ const articlesData: Omit<Article, 'slug'>[] = [
     badge: 'নতুন',
     editorsPick: true,
     sponsored: true,
+    location: 'ঢাকা',
   },
   {
     id: '3',
@@ -92,7 +94,8 @@ const articlesData: Omit<Article, 'slug'>[] = [
     publishedAt: '2024-07-19T11:45:00Z',
     aiSummary: 'বিএনপি দেশব্যাপী নতুন কর্মসূচি ঘোষণা করেছে, যার মধ্যে রয়েছে সমাবেশ এবং বিক্ষোভ মিছিল, যা দাবি আদায় না হওয়া পর্যন্ত চলবে।',
     badge: 'জনপ্রিয়',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    location: 'ঢাকা',
   },
   {
     id: '5',
@@ -144,6 +147,7 @@ const articlesData: Omit<Article, 'slug'>[] = [
     publishedAt: '2024-07-16T11:00:00Z',
     aiSummary: 'ঢাকার যানজট নিরসনে সরকারি উদ্যোগের পাশাপাশি নাগরিকদের সচেতনতা, যেমন ব্যক্তিগত গাড়ির ব্যবহার কমানো এবং ট্রাফিক আইন মেনে চলা জরুরি।',
     editorsPick: true,
+    location: 'ঢাকা',
   },
   {
     id: '8',
@@ -160,7 +164,8 @@ const articlesData: Omit<Article, 'slug'>[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-3',
     publishedAt: '2024-07-22T12:00:00Z',
     aiSummary: 'ডেঙ্গু প্রতিরোধে এডিস মশার বংশবিস্তার রোধ করতে চারপাশ পরিষ্কার রাখা এবং জ্বর হলে দ্রুত চিকিৎসকের পরামর্শ নেওয়া প্রয়োজন।',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    location: 'ঢাকা',
   },
    {
     id: '9',
@@ -195,6 +200,7 @@ const articlesData: Omit<Article, 'slug'>[] = [
     aiSummary: 'সুন্দরবনে বাঘের সংখ্যা বৃদ্ধি পেয়েছে, যা সরকারের চোরাচালান দমন এবং সচেতনতামূলক কার্যক্রমের ফল বলে মনে করছেন বিশেষজ্ঞরা।',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     editorsPick: true,
+    location: 'খুলনা',
   },
   {
     id: '11',
@@ -244,7 +250,8 @@ const articlesData: Omit<Article, 'slug'>[] = [
     authorName: 'রহিম শেখ',
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-24T18:00:00Z',
-    aiSummary: 'বাংলাদেশ প্রিমিয়ার লিগের উত্তেজনাপূর্ণ ম্যাচে আবাহনী ২-১ গোলে মোহামেডানকে হারিয়ে পয়েন্ট টেবিলের শীর্ষে উঠে এসেছে।'
+    aiSummary: 'বাংলাদেশ প্রিমিয়ার লিগের উত্তেজনাপূর্ণ ম্যাচে আবাহনী ২-১ গোলে মোহামেডানকে হারিয়ে পয়েন্ট টেবিলের শীর্ষে উঠে এসেছে।',
+    location: 'ঢাকা',
   },
   {
     id: '14',
@@ -260,7 +267,8 @@ const articlesData: Omit<Article, 'slug'>[] = [
     authorName: 'জান্নাতুল ফেরদৌস',
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
     publishedAt: '2024-07-25T11:00:00Z',
-    aiSummary: 'ঢাকা উত্তর সিটি কর্পোরেশনের উপ-নির্বাচনের তফসিল ঘোষণা করা হয়েছে, যা আগামী মাসে অনুষ্ঠিত হবে। দলগুলো প্রার্থী চূড়ান্ত করতে ব্যস্ত।'
+    aiSummary: 'ঢাকা উত্তর সিটি কর্পোরেশনের উপ-নির্বাচনের তফসিল ঘোষণা করা হয়েছে, যা আগামী মাসে অনুষ্ঠিত হবে। দলগুলো প্রার্থী চূড়ান্ত করতে ব্যস্ত।',
+    location: 'ঢাকা',
   },
   {
     id: '15',
@@ -364,7 +372,8 @@ const articlesData: Omit<Article, 'slug'>[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-3',
     publishedAt: '2024-07-28T11:00:00Z',
     aiSummary: 'ঢাকার যানজট কমাতে মেট্রোরেলের জনপ্রিয়তা বাড়ছে। এটি সময় ও অর্থ সাশ্রয়ী হওয়ায় জনগণ এর ব্যবহারে cada vez más আগ্রহী হচ্ছে।',
-    badge: 'জনপ্রিয়'
+    badge: 'জনপ্রিয়',
+    location: 'ঢাকা',
   },
   {
     id: '21',

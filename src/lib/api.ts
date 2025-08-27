@@ -61,9 +61,10 @@ type GetArticlesOptions = {
     hasVideo?: boolean;
     editorsPick?: boolean;
     date?: string;
+    location?: string;
 };
 
-async function getMockArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date }: GetArticlesOptions) {
+async function getMockArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date, location }: GetArticlesOptions) {
     await generateSummariesForMockData();
     
     let filteredArticles = [...mockDb.articles];
@@ -100,6 +101,10 @@ async function getMockArticles({ page = 1, limit = 6, category, authorId, exclud
     if (date) {
         filteredArticles = filteredArticles.filter(article => article.publishedAt.startsWith(date));
     }
+    
+    if (location) {
+        filteredArticles = filteredArticles.filter(article => article.location === location);
+    }
 
 
     const sortedArticles = filteredArticles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
@@ -111,19 +116,19 @@ async function getMockArticles({ page = 1, limit = 6, category, authorId, exclud
     return { articles: paginatedArticles, totalPages };
 }
 
-export async function getArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
+export async function getArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date, location }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
     if (useMockData) {
-        return getMockArticles({ page, limit, category, authorId, excludeId, query, hasVideo, editorsPick, date });
+        return getMockArticles({ page, limit, category, authorId, excludeId, query, hasVideo, editorsPick, date, location });
     }
     
     // DynamoDB implementation for production
     try {
-        if (query) {
-            // Full-text search with DynamoDB is complex and usually requires integration
+        if (query || location) {
+            // Full-text search and location filtering with DynamoDB is complex and usually requires integration
             // with services like OpenSearch (fka Elasticsearch).
-            // For this starter, we will fall back to mock data for search queries.
-            console.warn("DynamoDB search query detected. Falling back to mock data for this query.");
-            return getMockArticles({ page, limit, category, excludeId, query, hasVideo, editorsPick, date });
+            // For this starter, we will fall back to mock data for these queries.
+            console.warn("DynamoDB search or location query detected. Falling back to mock data for this query.");
+            return getMockArticles({ page, limit, category, excludeId, query, hasVideo, editorsPick, date, location });
         }
 
         // A full implementation would require another query to get the total count
@@ -176,7 +181,7 @@ export async function getArticles({ page = 1, limit = 6, category, authorId, exc
         console.error("Error fetching articles from DynamoDB:", error);
         // Fallback to mock data in case of any runtime error with DynamoDB
         console.log("Falling back to mock data.");
-        return getMockArticles({ page, limit, category, excludeId, hasVideo, editorsPick, date });
+        return getMockArticles({ page, limit, category, excludeId, hasVideo, editorsPick, date, location });
     }
 }
 
@@ -312,10 +317,8 @@ export async function createUser(user: Omit<User, 'id' | 'role'>): Promise<User>
         ...user
     };
 
-    let success = false;
     if (useMockData) {
         mockDb.users.push(newUser);
-        success = true;
     } else {
         const command = new PutCommand({
             TableName: usersTableName,
@@ -325,7 +328,6 @@ export async function createUser(user: Omit<User, 'id' | 'role'>): Promise<User>
 
         try {
             await docClient.send(command);
-            success = true;
         } catch (error) {
             console.error(`Error creating user in DynamoDB:`, error);
             // The ConditionExpression will throw an error if the email exists.
@@ -334,7 +336,7 @@ export async function createUser(user: Omit<User, 'id' | 'role'>): Promise<User>
         }
     }
     
-    if (success && process.env.ADMIN_EMAIL) {
+    if (process.env.ADMIN_EMAIL) {
         try {
             await sendMail({
                 to: process.env.ADMIN_EMAIL,
