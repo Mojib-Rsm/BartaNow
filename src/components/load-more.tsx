@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Article } from '@/lib/types';
 import { getMoreArticlesAction } from '@/app/actions';
 import ArticleCard from './article-card';
-import { Button } from './ui/button';
 import { Loader2 } from 'lucide-react';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -17,14 +16,38 @@ export default function LoadMore({ initialArticles, totalPages }: LoadMoreProps)
     const [articles, setArticles] = useState<Article[]>(initialArticles);
     const [page, setPage] = useState(2); // Start from the second page
     const [loading, setLoading] = useState(false);
+    const loaderRef = useRef(null);
 
     const debouncedLoadMore = useDebouncedCallback(async () => {
+        if (loading || page > totalPages) return;
         setLoading(true);
         const newArticles = await getMoreArticlesAction({ page, limit: 6 });
         setArticles((prevArticles) => [...prevArticles, ...newArticles]);
         setPage((prevPage) => prevPage + 1);
         setLoading(false);
     }, 300);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const target = entries[0];
+                if (target.isIntersecting) {
+                    debouncedLoadMore();
+                }
+            },
+            { rootMargin: '200px' } 
+        );
+
+        if (loaderRef.current) {
+            observer.observe(loaderRef.current);
+        }
+
+        return () => {
+            if (loaderRef.current) {
+                observer.unobserve(loaderRef.current);
+            }
+        };
+    }, [debouncedLoadMore]);
 
     return (
         <>
@@ -33,21 +56,11 @@ export default function LoadMore({ initialArticles, totalPages }: LoadMoreProps)
                     <ArticleCard key={article.id} article={article} />
                 ))}
             </div>
-
-            {page <= totalPages && (
-                <div className="flex justify-center mt-8">
-                    <Button onClick={() => debouncedLoadMore()} disabled={loading} variant="outline" size="lg">
-                        {loading ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                লোড হচ্ছে...
-                            </>
-                        ) : (
-                            'আরও পড়ুন'
-                        )}
-                    </Button>
-                </div>
-            )}
+            
+            <div ref={loaderRef} className="flex justify-center mt-8">
+                 {loading && <Loader2 className="h-8 w-8 animate-spin text-primary" />}
+                 {page > totalPages && <p className="text-muted-foreground">সব আর্টিকেল লোড করা হয়েছে।</p>}
+            </div>
         </>
     );
 }
