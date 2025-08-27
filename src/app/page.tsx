@@ -1,3 +1,4 @@
+
 import { getArticles, getMemeNews } from '@/lib/api';
 import HomePageClient from '@/components/home-page-client';
 import SeedButton from '@/components/seed-button';
@@ -59,3 +60,4 @@ export default async function Home() {
         memeNewsResult={memeNewsResult}
     />
 }
+

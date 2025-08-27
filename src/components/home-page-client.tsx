@@ -103,20 +103,20 @@ export default function HomePageClient({
   const [pageData, setPageData] = useState<{
     articles: Article[];
     trendingArticles: Article[];
-    heroFeaturedArticle?: Article;
+    heroGridArticles: Article[];
     heroSideArticles: Article[];
   } | null>(null);
 
   useEffect(() => {
       const { articles } = initialArticles;
-      const heroFeaturedArticle = articles[0];
-      const heroSideArticles = articles.slice(1, 5);
+      const heroGridArticles = articles.slice(0, 4);
+      const heroSideArticles = articles.slice(4, 8);
       const trendingArticles = articles.filter(a => a.badge === 'জনপ্রিয়').slice(0, 5);
 
       setPageData({
         articles,
         trendingArticles,
-        heroFeaturedArticle,
+        heroGridArticles,
         heroSideArticles
       });
   }, [initialArticles]);
@@ -127,7 +127,7 @@ export default function HomePageClient({
 
   const {
     trendingArticles,
-    heroFeaturedArticle,
+    heroGridArticles,
     heroSideArticles,
   } = pageData;
 
@@ -183,35 +183,11 @@ export default function HomePageClient({
 
       {/* Hero Section */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {heroFeaturedArticle && (
-            <div className="md:col-span-2">
-                <Card className="flex flex-col h-full overflow-hidden bg-card rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 group border">
-                    <Link href={`/articles/${heroFeaturedArticle.id}`} className="block overflow-hidden">
-                        <div className="relative aspect-video w-full">
-                            <Image
-                            src={heroFeaturedArticle.imageUrl}
-                            alt={heroFeaturedArticle.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                            data-ai-hint={heroFeaturedArticle.imageHint}
-                            priority
-                            />
-                        </div>
-                    </Link>
-                    <div className="p-4 flex flex-col flex-grow">
-                        <h2 className="font-headline text-2xl md:text-3xl font-bold leading-tight">
-                            <Link href={`/articles/${heroFeaturedArticle.id}`} className="hover:text-primary transition-colors">
-                                {heroFeaturedArticle.title}
-                            </Link>
-                        </h2>
-                        <p className="text-muted-foreground text-base mt-2 flex-grow">{heroFeaturedArticle.aiSummary}</p>
-                        <div className="p-0 pt-4 mt-auto">
-                            <p className="text-sm text-muted-foreground">{new Date(heroFeaturedArticle.publishedAt).toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                        </div>
-                    </div>
-                </Card>
-            </div>
-        )}
+        <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {heroGridArticles.map((article) => (
+            <ArticleCard key={article.id} article={article} />
+          ))}
+        </div>
         <div className="md:col-span-1 space-y-4">
           {heroSideArticles.map(article => (
             <Link key={article.id} href={`/articles/${article.id}`} className="block group border-b pb-4 last:border-b-0">
