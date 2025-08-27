@@ -7,8 +7,9 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { Article } from '@/lib/types';
-import { ArrowRight, PlayCircle, Film } from 'lucide-react';
+import { ArrowRight, PlayCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import PollSection from '@/components/poll-section';
 
 
 type HomePageProps = {
@@ -123,10 +124,8 @@ export default async function Home({ searchParams }: HomePageProps) {
         
         {/* Right Column */}
         <div className="md:col-span-1 space-y-4">
-           {/* Ad Placeholder */}
-           <div className="bg-gray-100 dark:bg-gray-800 h-60 w-full flex items-center justify-center rounded-md">
-             <span className="text-muted-foreground">Ad</span>
-           </div>
+           {/* Poll Section */}
+           <PollSection />
 
            {sideArticles.slice(2, 4).map((article) => (
             <div key={article.id} className="border-b pb-4">
