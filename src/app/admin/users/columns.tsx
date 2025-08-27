@@ -3,6 +3,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -90,9 +91,10 @@ export const columns: ColumnDef<User>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>অ্যাকশন</DropdownMenuLabel>
-            <DropdownMenuItem>প্রোফাইল দেখুন</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+                <Link href={`/admin/users/edit/${user.id}`}>প্রোফাইল এডিট করুন</Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>রোল পরিবর্তন করুন</DropdownMenuItem>
             <DropdownMenuItem>ব্লক করুন</DropdownMenuItem>
             <DropdownMenuItem className="text-destructive">ডিলিট করুন</DropdownMenuItem>
           </DropdownMenuContent>

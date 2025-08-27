@@ -220,6 +220,30 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
     return mockDb.articles.find((article) => article.slug === slug);
 }
 
+async function getMockUserById(id: string): Promise<User | undefined> {
+    return mockDb.users.find((user) => user.id === id);
+}
+
+export async function getUserById(id: string): Promise<User | undefined> {
+    if (useMockData) {
+        return getMockUserById(id);
+    }
+
+    const command = new GetCommand({
+        TableName: usersTableName,
+        Key: { id: id },
+    });
+
+    try {
+        const { Item } = await docClient.send(command);
+        return Item as User | undefined;
+    } catch (error) {
+        console.error(`Error fetching user by id ${id} from DynamoDB:`, error);
+        console.log(`Falling back to mock data for user with id ${id}.`);
+        return getMockUserById(id);
+    }
+}
+
 async function getMockUserByEmail(email: string): Promise<User | undefined> {
     return mockDb.users.find((user) => user.email === email);
 }
@@ -292,6 +316,30 @@ export async function getAuthorById(id: string): Promise<Author | undefined> {
     } catch(error) {
         console.error(`Error fetching author ${id} from DynamoDB:`, error);
         return mockDb.authors.find((author) => author.id === id);
+    }
+}
+
+
+export async function getAllAuthors(): Promise<Author[]> {
+    if (useMockData) {
+        return [...mockDb.authors];
+    }
+
+    // This is a placeholder. In a real app, you would query DynamoDB
+    // for all items with entityType = 'AUTHOR'.
+    try {
+        const command = new QueryCommand({
+            TableName: newsTableName,
+            IndexName: 'PublishedAtIndex', // This index might not be ideal for authors, but we reuse it for simplicity
+            KeyConditionExpression: 'entityType = :entityType',
+            ExpressionAttributeValues: { ':entityType': 'AUTHOR' },
+        });
+        const { Items } = await docClient.send(command);
+        return (Items || []) as Author[];
+    } catch (error) {
+        console.error("Error fetching all authors from DynamoDB:", error);
+        console.log("Falling back to mock data for getAllAuthors.");
+        return [...mockDb.authors];
     }
 }
 
@@ -405,5 +453,67 @@ export async function updateUser(userId: string, data: Partial<User>): Promise<U
     } catch (error) {
         console.error(`Error updating user ${userId} in DynamoDB:`, error);
         throw new Error('Failed to update user in the database.');
+    }
+}
+
+
+const generateSlug = (title: string) => {
+    return title
+        .toLowerCase()
+        .replace(/ /g, '-')
+        .replace(/[^\w-à-üÀ-Ü]/g, ''); // Keep bengali characters
+};
+
+export async function updateArticle(articleId: string, data: Partial<Article>): Promise<Article | undefined> {
+    
+    if (data.title && !data.slug) {
+        data.slug = generateSlug(data.title);
+    }
+    
+    if (useMockData) {
+        const articleIndex = mockDb.articles.findIndex(a => a.id === articleId);
+        if (articleIndex === -1) return undefined;
+        
+        const updatedArticle = { ...mockDb.articles[articleIndex], ...data };
+        mockDb.articles[articleIndex] = updatedArticle;
+        return updatedArticle;
+    }
+    
+    // DynamoDB Implementation
+    const updateExpressionParts: string[] = [];
+    const expressionAttributeValues: { [key: string]: any } = {};
+    const expressionAttributeNames: { [key: string]: string } = {};
+
+    for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key) && key !== 'id') {
+            const attrKey = `#${key}`;
+            const valueKey = `:${key}`;
+            updateExpressionParts.push(`${attrKey} = ${valueKey}`);
+            expressionAttributeNames[attrKey] = key;
+            expressionAttributeValues[valueKey] = (data as any)[key];
+        }
+    }
+    
+    if (updateExpressionParts.length === 0) {
+        const command = new GetCommand({ TableName: newsTableName, Key: { id: articleId } });
+        const { Item } = await docClient.send(command);
+        return Item as Article | undefined;
+    }
+
+    const command = new UpdateCommand({
+        TableName: newsTableName,
+        Key: { id: articleId },
+        UpdateExpression: `SET ${updateExpressionParts.join(', ')}`,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ReturnValues: 'ALL_NEW',
+    });
+
+    try {
+        const { Attributes } = await docClient.send(command);
+        return Attributes as Article | undefined;
+    } catch (error) {
+        console.error(`Error updating article ${articleId} in DynamoDB:`, error);
+        throw new Error('Failed to update article in the database.');
     }
 }

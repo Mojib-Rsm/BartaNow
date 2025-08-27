@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import type { Article } from "@/lib/types"
+import Link from "next/link"
 
 export const columns: ColumnDef<Article>[] = [
   {
@@ -108,8 +109,12 @@ export const columns: ColumnDef<Article>[] = [
               আর্টিকেল আইডি কপি করুন
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>আর্টিকেল দেখুন</DropdownMenuItem>
-            <DropdownMenuItem>এডিট করুন</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/articles/${article.slug}`} target="_blank">আর্টিকেল দেখুন</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/admin/articles/edit/${article.id}`}>এডিট করুন</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem className="text-destructive">ডিলিট করুন</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
