@@ -7,6 +7,9 @@ import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Target, Search } from 'lucide-react';
+
 
 type HomePageProps = {
   searchParams?: {
@@ -26,6 +29,53 @@ export default async function Home({ searchParams }: HomePageProps) {
   return (
     <div className="space-y-8">
       
+      {/* Local News Section */}
+      <section className="bg-muted/50 p-3 rounded-md">
+        <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2 text-primary font-bold">
+                <Target className="h-5 w-5" />
+                <span>আমার এলাকার খবর</span>
+            </div>
+            <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <Select>
+                    <SelectTrigger>
+                        <SelectValue placeholder="বিভাগ" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="dhaka">ঢাকা</SelectItem>
+                        <SelectItem value="chittagong">চট্টগ্রাম</SelectItem>
+                        <SelectItem value="khulna">খুলনা</SelectItem>
+                        <SelectItem value="rajshahi">রাজশাহী</SelectItem>
+                        <SelectItem value="sylhet">সিলেট</SelectItem>
+                        <SelectItem value="barisal">বরিশাল</SelectItem>
+                        <SelectItem value="rangpur">রংপুর</SelectItem>
+                        <SelectItem value="mymensingh">ময়মনসিংহ</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select>
+                    <SelectTrigger>
+                        <SelectValue placeholder="জেলা" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {/* District options would be populated based on division */}
+                    </SelectContent>
+                </Select>
+                <Select>
+                    <SelectTrigger>
+                        <SelectValue placeholder="উপজেলা" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {/* Upazila options would be populated based on district */}
+                    </SelectContent>
+                </Select>
+            </div>
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Search className="h-4 w-4" />
+                খুঁজুন
+            </Button>
+        </div>
+      </section>
+
       {/* Main News Section */}
       {mainArticle && (
         <section>
