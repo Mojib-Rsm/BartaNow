@@ -39,14 +39,14 @@ export default async function ArticlePage({ params }: { params: { id: string } }
     .map((n) => n[0])
     .join('');
     
-  const publishedDate = new Date(article.publishedAt).toLocaleDateString('en-US', {
+  const publishedDate = new Date(article.publishedAt).toLocaleDateString('bn-BD', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
 
   return (
-    <article className="max-w-4xl mx-auto bg-white dark:bg-card-dark p-6 sm:p-8 rounded-lg shadow-lg">
+    <article className="max-w-4xl mx-auto bg-card p-6 sm:p-8 rounded-lg shadow-lg">
       <header className="mb-8">
         <h1 className="text-3xl md:text-5xl font-bold font-headline text-primary mb-4">
           {article.title}

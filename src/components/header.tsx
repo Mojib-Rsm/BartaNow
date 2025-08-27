@@ -8,7 +8,7 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 text-2xl font-bold font-headline text-primary hover:opacity-80 transition-opacity">
             <Newspaper className="h-7 w-7" />
-            <span>BartaNow</span>
+            <span>বার্তা নাও</span>
           </Link>
           <nav>
             {/* Future navigation links can go here */}
