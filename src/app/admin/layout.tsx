@@ -64,6 +64,14 @@ export default function AdminLayout({
                     </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
+                 <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/admin/users')}>
+                    <Link href="/admin/users">
+                        <Users />
+                        ব্যবহারকারীগণ
+                    </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>

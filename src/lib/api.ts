@@ -1,9 +1,10 @@
 
+
 'use server';
 
 import type { Article, Author, Poll, MemeNews, User } from './types';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, QueryCommand, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, QueryCommand, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
 
@@ -207,16 +208,10 @@ export async function getArticleById(id: string): Promise<Article | undefined> {
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
-    if (useMockData) {
-        await generateSummariesForMockData();
-        return mockDb.articles.find((article) => article.slug === slug);
-    }
-    // This is not efficient. In a real DynamoDB setup, you'd likely have a GSI on the slug.
-    // For this starter, we'll scan, which is slow and expensive for large tables.
-    // It's better to get by ID if possible.
-    console.warn("getArticleBySlug is inefficient for DynamoDB without a GSI. Consider using getArticleById.");
-    
-    // We will use mock data for this to avoid implementing a scan
+    // In a real app, you would have a GSI on the slug for efficient lookups.
+    // Since this starter doesn't have one, we'll use the mock data approach for all environments
+    // to avoid a costly and slow Scan operation on the live DynamoDB table.
+    await generateSummariesForMockData();
     return mockDb.articles.find((article) => article.slug === slug);
 }
 
@@ -250,6 +245,29 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
         return getMockUserByEmail(email);
     }
 }
+
+async function getMockAllUsers(): Promise<User[]> {
+    return [...mockDb.users];
+}
+
+export async function getAllUsers(): Promise<User[]> {
+    if (useMockData) {
+        return getMockAllUsers();
+    }
+
+    try {
+        const command = new ScanCommand({
+            TableName: usersTableName,
+        });
+        const { Items } = await docClient.send(command);
+        return (Items || []) as User[];
+    } catch (error) {
+        console.error("Error fetching all users from DynamoDB:", error);
+        console.log("Falling back to mock data for getAllUsers.");
+        return getMockAllUsers();
+    }
+}
+
 
 export async function getAuthorById(id: string): Promise<Author | undefined> {
     if (useMockData) {
@@ -286,26 +304,16 @@ export async function getMemeNews(): Promise<MemeNews[]> {
   return mockDb.memeNews;
 }
 
-async function createMockUser(user: Omit<User, 'id' | 'role'>) {
-    const newUser: User = {
-        id: `user-${Date.now()}`,
-        ...user,
-        role: 'user',
-    };
-    mockDb.users.push(newUser);
-    return newUser;
-}
-
-
 export async function createUser(user: Omit<User, 'id' | 'role'>): Promise<User> {
     const newUser: User = {
-        id: `user-${Date.now()}`,
+        id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         role: 'user',
         ...user
     };
 
     if (useMockData) {
-        return createMockUser(user);
+        mockDb.users.push(newUser);
+        return newUser;
     }
     
     const command = new PutCommand({
