@@ -7,8 +7,9 @@ import { config } from 'dotenv';
 // Load environment variables from .env file at the root of the project
 config({ path: '.env' });
 
-const tableName = process.env.DYNAMODB_TABLE_NAME || 'BartaNow_News';
-const indexName = 'PublishedAtIndex';
+const newsTableName = process.env.DYNAMODB_TABLE_NAME || 'BartaNow_News';
+const usersTableName = 'BartaNow_Users';
+const newsIndexName = 'PublishedAtIndex';
 
 async function waitForTable(client: DynamoDBClient, tableName: string) {
     let tableStatus = '';
@@ -22,7 +23,7 @@ async function waitForTable(client: DynamoDBClient, tableName: string) {
                 await new Promise(resolve => setTimeout(resolve, 5000)); // wait 5 seconds
             }
         } catch (error) {
-            console.error("Error describing table:", error);
+            console.error(`Error describing table: ${tableName}:`, error);
             throw error;
         }
     } while (tableStatus !== 'ACTIVE');
@@ -30,22 +31,21 @@ async function waitForTable(client: DynamoDBClient, tableName: string) {
 }
 
 
-async function createBartaNowTable(client: DynamoDBClient) {
-    console.log(`Creating table '${tableName}' with index '${indexName}'...`);
+async function createBartaNowNewsTable(client: DynamoDBClient) {
+    console.log(`Creating table '${newsTableName}' with index '${newsIndexName}'...`);
     const command = new CreateTableCommand({
-        TableName: tableName,
+        TableName: newsTableName,
         AttributeDefinitions: [
             { AttributeName: 'id', AttributeType: 'S' },
             { AttributeName: 'entityType', AttributeType: 'S' },
             { AttributeName: 'publishedAt', AttributeType: 'S' },
-            { AttributeName: 'email', AttributeType: 'S' },
         ],
         KeySchema: [
             { AttributeName: 'id', KeyType: 'HASH' }
         ],
         GlobalSecondaryIndexes: [
             {
-                IndexName: indexName,
+                IndexName: newsIndexName,
                 KeySchema: [
                     { AttributeName: 'entityType', KeyType: 'HASH' },
                     { AttributeName: 'publishedAt', KeyType: 'RANGE' }
@@ -57,7 +57,38 @@ async function createBartaNowTable(client: DynamoDBClient) {
                     ReadCapacityUnits: 1,
                     WriteCapacityUnits: 1
                 }
-            },
+            }
+        ],
+        ProvisionedThroughput: {
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
+        }
+    });
+
+    try {
+        await client.send(command);
+        console.log(`Table '${newsTableName}' creation request sent. Waiting for it to become active...`);
+        await waitForTable(client, newsTableName);
+        console.log(`Table '${newsTableName}' created successfully.`);
+        return true;
+    } catch (error) {
+        console.error(`Error creating table '${newsTableName}':`, error);
+        throw error;
+    }
+}
+
+async function createBartaNowUsersTable(client: DynamoDBClient) {
+    console.log(`Creating table '${usersTableName}'...`);
+    const command = new CreateTableCommand({
+        TableName: usersTableName,
+        AttributeDefinitions: [
+            { AttributeName: 'id', AttributeType: 'S' },
+            { AttributeName: 'email', AttributeType: 'S' },
+        ],
+        KeySchema: [
+            { AttributeName: 'id', KeyType: 'HASH' }
+        ],
+        GlobalSecondaryIndexes: [
             {
                 IndexName: 'EmailIndex',
                 KeySchema: [
@@ -80,15 +111,38 @@ async function createBartaNowTable(client: DynamoDBClient) {
 
     try {
         await client.send(command);
-        console.log(`Table '${tableName}' creation request sent. Waiting for it to become active...`);
-        await waitForTable(client, tableName);
-        console.log(`Table '${tableName}' and indices created successfully.`);
+        console.log(`Table '${usersTableName}' creation request sent. Waiting for it to become active...`);
+        await waitForTable(client, usersTableName);
+        console.log(`Table '${usersTableName}' created successfully.`);
         return true;
     } catch (error) {
-        console.error(`Error creating table '${tableName}':`, error);
+        console.error(`Error creating table '${usersTableName}':`, error);
         throw error;
     }
 }
+
+async function checkAndCreateTable(client: DynamoDBClient, tableName: string, createTableFn: (client: DynamoDBClient) => Promise<boolean>) {
+     try {
+        const describeCommand = new DescribeTableCommand({ TableName: tableName });
+        await client.send(describeCommand);
+        console.log(`Table '${tableName}' already exists.`);
+    } catch (error) {
+        if (error instanceof ResourceNotFoundException) {
+            console.log(`Table '${tableName}' not found. Attempting to create it...`);
+            try {
+                await createTableFn(client);
+            } catch (creationError) {
+                const errorMessage = `Failed to create DynamoDB table ${tableName}. Please check your IAM permissions and AWS console. Error: ${creationError instanceof Error ? creationError.message : String(creationError)}`;
+                throw new Error(errorMessage);
+            }
+        } else {
+            console.error(`Error checking for table ${tableName}:`, error);
+            const errorMessage = `An error occurred while checking for the DynamoDB table ${tableName}: ${error instanceof Error ? error.message : String(error)}`;
+            throw new Error(errorMessage);
+        }
+    }
+}
+
 
 export async function seedDatabase() {
     const isAwsConfigured = process.env.AWS_REGION &&
@@ -113,47 +167,44 @@ export async function seedDatabase() {
     });
 
     try {
-        const describeCommand = new DescribeTableCommand({ TableName: tableName });
-        await client.send(describeCommand);
-        console.log(`Table '${tableName}' already exists.`);
+        await checkAndCreateTable(client, newsTableName, createBartaNowNewsTable);
+        await checkAndCreateTable(client, usersTableName, createBartaNowUsersTable);
     } catch (error) {
-        if (error instanceof ResourceNotFoundException) {
-            console.log(`Table '${tableName}' not found. Attempting to create it...`);
-            try {
-                await createBartaNowTable(client);
-            } catch (creationError) {
-                const errorMessage = `Failed to create DynamoDB table. Please check your IAM permissions and AWS console. Error: ${creationError instanceof Error ? creationError.message : String(creationError)}`;
-                return { success: false, message: errorMessage };
-            }
-        } else {
-            console.error("Error checking for table:", error);
-            const errorMessage = `An error occurred while checking for the DynamoDB table: ${error instanceof Error ? error.message : String(error)}`;
-            return { success: false, message: errorMessage };
-        }
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return { success: false, message: errorMessage };
     }
 
 
     const docClient = DynamoDBDocumentClient.from(client);
-    console.log(`Starting to seed database: ${tableName}`);
-
-    const allItems = [
+    
+    // Seed News Table
+    console.log(`Starting to seed database: ${newsTableName}`);
+    const newsItems = [
         ...mockDb.articles.map(item => ({ ...item, entityType: 'ARTICLE' })),
         ...mockDb.authors.map(item => ({ ...item, entityType: 'AUTHOR' })),
-        ...mockDb.users.map(item => ({ ...item, entityType: 'USER' })),
     ];
-
-    const putRequests = allItems.map(item => {
+    const newsPutRequests = newsItems.map(item => {
         const command = new PutCommand({
-            TableName: tableName,
+            TableName: newsTableName,
             Item: item
+        });
+        return docClient.send(command);
+    });
+
+     // Seed Users Table
+    console.log(`Starting to seed database: ${usersTableName}`);
+    const usersPutRequests = mockDb.users.map(user => {
+        const command = new PutCommand({
+            TableName: usersTableName,
+            Item: user,
         });
         return docClient.send(command);
     });
 
 
     try {
-        await Promise.all(putRequests);
-        const successMessage = `Successfully seeded ${mockDb.articles.length} articles, ${mockDb.authors.length} authors, and ${mockDb.users.length} users.`;
+        await Promise.all([...newsPutRequests, ...usersPutRequests]);
+        const successMessage = `Successfully seeded ${mockDb.articles.length} articles and ${mockDb.authors.length} authors into ${newsTableName}. Successfully seeded ${mockDb.users.length} users into ${usersTableName}.`;
         console.log(successMessage);
         return { success: true, message: successMessage };
     } catch (error) {
@@ -177,3 +228,5 @@ if (require.main === module) {
         process.exit(1);
     });
 }
+
+    

@@ -15,7 +15,8 @@ const useMockData = !process.env.AWS_REGION ||
                     process.env.AWS_SECRET_ACCESS_KEY === 'your_secret_key';
 
 let docClient: DynamoDBDocumentClient;
-const tableName = process.env.DYNAMODB_TABLE_NAME || 'BartaNow_News';
+const newsTableName = process.env.DYNAMODB_TABLE_NAME || 'BartaNow_News';
+const usersTableName = 'BartaNow_Users';
 
 if (!useMockData) {
     const client = new DynamoDBClient({ 
@@ -143,7 +144,7 @@ export async function getArticles({ page = 1, limit = 6, category, authorId, exc
         // This loop is for demonstration. For a real app, you would fetch only up to the requested page.
         for (let i = 0; i < page; i++) {
             const command = new QueryCommand({
-                TableName: tableName,
+                TableName: newsTableName,
                 IndexName: 'PublishedAtIndex',
                 KeyConditionExpression: 'entityType = :entityType',
                 ExpressionAttributeValues: {
@@ -188,7 +189,7 @@ export async function getArticleById(id: string): Promise<Article | undefined> {
     }
 
     const command = new GetCommand({
-        TableName: tableName,
+        TableName: newsTableName,
         Key: {
           id: id,
         },
@@ -229,7 +230,7 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
     }
 
     const command = new QueryCommand({
-        TableName: tableName,
+        TableName: usersTableName,
         IndexName: 'EmailIndex',
         KeyConditionExpression: 'email = :email',
         ExpressionAttributeValues: {
@@ -257,7 +258,7 @@ export async function getAuthorById(id: string): Promise<Author | undefined> {
     // In a real DynamoDB setup, you'd likely have a separate 'AUTHOR' entityType
     // and query it. This is a simplified example.
     const command = new GetCommand({
-        TableName: tableName,
+        TableName: newsTableName,
         Key: { id: id },
     });
      try {
@@ -284,3 +285,5 @@ export async function getPollById(id: string): Promise<Poll | undefined> {
 export async function getMemeNews(): Promise<MemeNews[]> {
   return mockDb.memeNews;
 }
+
+    
