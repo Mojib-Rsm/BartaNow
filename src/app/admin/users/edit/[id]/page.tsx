@@ -44,6 +44,8 @@ export default function UserEditPage({ params }: PageProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
+  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
+
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -58,6 +60,11 @@ export default function UserEditPage({ params }: PageProps) {
   });
 
   useEffect(() => {
+    const storedUser = localStorage.getItem('bartaNowUser');
+    if (storedUser) {
+        setLoggedInUser(JSON.parse(storedUser));
+    }
+
     const fetchUser = async () => {
         const userId = params.id;
         if (!userId) return;
@@ -113,6 +120,12 @@ export default function UserEditPage({ params }: PageProps) {
     setLoading(false);
 
     if (result.success && result.user) {
+        // If the edited user is the currently logged-in user, update localStorage
+        if (loggedInUser && loggedInUser.id === result.user.id) {
+            localStorage.setItem('bartaNowUser', JSON.stringify(result.user));
+            window.dispatchEvent(new Event('storage')); // Notify other components
+        }
+
       toast({
         title: 'সফল',
         description: 'ব্যবহারকারীর প্রোফাইল সফলভাবে আপডেট হয়েছে।',
@@ -225,5 +238,3 @@ export default function UserEditPage({ params }: PageProps) {
     </Card>
   );
 }
-
-    

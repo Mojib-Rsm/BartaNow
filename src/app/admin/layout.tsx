@@ -26,6 +26,7 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import type { User } from '@/lib/types';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function AdminLayout({
   children,
@@ -37,11 +38,24 @@ export default function AdminLayout({
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Check for user in localStorage
+    // Check for user in localStorage on initial load
     const storedUser = localStorage.getItem('bartaNowUser');
     if (storedUser) {
         setUser(JSON.parse(storedUser));
     }
+
+     // Listen for storage changes to sync across tabs/components
+    const handleStorageChange = (event: StorageEvent) => {
+        if (event.key === 'bartaNowUser') {
+            const newUser = event.newValue ? JSON.parse(event.newValue) : null;
+            setUser(newUser);
+        }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const hasAccessToUsers = user?.role === 'admin' || user?.role === 'editor';
@@ -50,6 +64,8 @@ export default function AdminLayout({
     if (path === '/admin') return pathname === '/admin';
     return pathname.startsWith(path);
   }
+  
+  const userInitials = user?.name.split(' ').map((n) => n[0]).join('');
 
   return (
     <div lang="en" dir="ltr">
@@ -111,11 +127,10 @@ export default function AdminLayout({
                 </div>
                 {user && (
                     <Button variant="ghost" size="icon" className="rounded-full">
-                    <img
-                        src={`https://i.pravatar.cc/150?u=${user.id}`}
-                        alt={user.name}
-                        className="h-8 w-8 rounded-full"
-                    />
+                    <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.id}`} alt={user.name} />
+                        <AvatarFallback>{userInitials}</AvatarFallback>
+                    </Avatar>
                     <span className="sr-only">Toggle user menu</span>
                     </Button>
                 )}
