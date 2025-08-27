@@ -7,18 +7,20 @@ import { config } from 'dotenv';
 config({ path: '.env' });
 
 export async function seedDatabase() {
-    const useMockData = !process.env.AWS_REGION || 
-                        process.env.AWS_REGION === 'your_aws_region' ||
-                        !process.env.AWS_ACCESS_KEY_ID ||
-                        process.env.AWS_ACCESS_KEY_ID === 'your_access_key' ||
-                        !process.env.AWS_SECRET_ACCESS_KEY ||
-                        process.env.AWS_SECRET_ACCESS_KEY === 'your_secret_key';
+    const isAwsConfigured = process.env.AWS_REGION &&
+                            process.env.AWS_REGION !== 'your_aws_region' &&
+                            process.env.AWS_ACCESS_KEY_ID &&
+                            process.env.AWS_ACCESS_KEY_ID !== 'your_access_key' &&
+                            process.env.AWS_SECRET_ACCESS_KEY &&
+                            process.env.AWS_SECRET_ACCESS_KEY !== 'your_secret_key';
 
-    if (useMockData) {
-        throw new Error("AWS credentials are not configured in your .env file.");
+    if (!isAwsConfigured) {
+        const message = "AWS credentials are not configured in your .env file. Please add valid credentials to seed the database.";
+        console.error(message);
+        return { success: false, message: message };
     }
 
-    const client = new DynamoDBClient({ 
+    const client = new DynamoDBClient({
         region: process.env.AWS_REGION,
         credentials: {
             accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
@@ -51,8 +53,16 @@ export async function seedDatabase() {
         return { success: true, message: successMessage };
     } catch (error) {
         console.error("Error seeding database:", error);
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-        return { success: false, message: `Error seeding database: ${errorMessage}` };
+        let errorMessage = "An unknown error occurred during seeding.";
+        if (error instanceof Error) {
+            // Check for common AWS credential errors
+            if (error.name === 'UnrecognizedClientException' || error.message.includes('Invalid security token')) {
+                errorMessage = "Error seeding database: The security token included in the request is invalid. Please check your AWS credentials in the .env file.";
+            } else {
+                errorMessage = `Error seeding database: ${error.message}`;
+            }
+        }
+        return { success: false, message: errorMessage };
     }
 }
 
