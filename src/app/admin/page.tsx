@@ -13,8 +13,10 @@ import {
   Legend,
   Line,
   Bar,
+  TooltipProps
 } from 'recharts';
 import type { ChartConfig } from '@/components/ui/chart';
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 const totalViewsData = [
   { month: 'Jan', views: 2400 },
@@ -64,6 +66,27 @@ const topCategoriesConfig = {
   },
 } satisfies ChartConfig;
 
+
+const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="rounded-lg border bg-background p-2 shadow-sm">
+          <div className="grid grid-cols-1 gap-2">
+            <div className="flex flex-col">
+              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                {label}
+              </span>
+              <span className="font-bold text-foreground">
+                {payload[0].value}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  
+    return null;
+  };
 
 export default function AdminPage() {
   return (
@@ -127,17 +150,7 @@ export default function AdminPage() {
                             <YAxis />
                             <Tooltip
                                 cursor={false}
-                                content={<div className="rounded-lg border bg-background p-2 shadow-sm">
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div className="flex flex-col">
-                                            <span className="text-[0.70rem] uppercase text-muted-foreground">Views</span>
-                                            <span className="font-bold text-muted-foreground">
-                                                {/* @ts-ignore */}
-                                                {totalViewsData.find(d => d.month === Tooltip.arguments?.[0]?.payload?.[0]?.payload?.month)?.views}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>}
+                                content={<CustomTooltip />}
                              />
                              <Line dataKey="views" type="monotone" stroke="hsl(var(--primary))" strokeWidth={2} dot={true} />
                         </RechartsLineChart>
@@ -157,7 +170,7 @@ export default function AdminPage() {
                            <CartesianGrid horizontal={false} />
                           <XAxis type="number" hide />
                           <YAxis dataKey="name" type="category" tickLine={false} axisLine={false} tickMargin={10} width={80}/>
-                          <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} />
+                          <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<CustomTooltip />} />
                           <Bar dataKey="articles" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                         </RechartsBarChart>
                     </ResponsiveContainer>
