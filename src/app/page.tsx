@@ -1,3 +1,4 @@
+
 import { getArticles } from '@/lib/api';
 import ArticleCard from '@/components/article-card';
 import Pagination from '@/components/pagination';
