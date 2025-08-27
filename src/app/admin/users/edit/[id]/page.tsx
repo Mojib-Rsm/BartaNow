@@ -65,8 +65,7 @@ export default function UserEditPage({ params }: PageProps) {
         setLoggedInUser(JSON.parse(storedUser));
     }
 
-    const fetchUser = async () => {
-        const userId = params.id;
+    const fetchUser = async (userId: string) => {
         if (!userId) return;
 
         const fetchedUser = await getUserById(userId);
@@ -91,8 +90,10 @@ export default function UserEditPage({ params }: PageProps) {
             router.push('/admin/users');
         }
     };
-    fetchUser();
-  }, [params, router, toast, form]);
+    if(params.id) {
+        fetchUser(params.id);
+    }
+  }, [params.id, router, toast, form]);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
