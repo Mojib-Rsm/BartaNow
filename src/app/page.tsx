@@ -1,5 +1,5 @@
 
-import { getArticles } from '@/lib/api';
+import { getArticles, getMemeNews } from '@/lib/api';
 import ArticleCard from '@/components/article-card';
 import SeedButton from '@/components/seed-button';
 import Image from 'next/image';
@@ -14,6 +14,7 @@ import AdSpot from '@/components/ad-spot';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import TrendingSidebar from '@/components/trending-sidebar';
 import FactCheckSidebar from '@/components/fact-check-sidebar';
+import MemeCard from '@/components/meme-card';
 
 
 type HomePageProps = {
@@ -48,6 +49,7 @@ export default async function Home({ searchParams }: HomePageProps) {
     videoArticlesResult,
     islamicLifeResult,
     factCheckResult,
+    memeNewsResult,
   ] = await Promise.all([
     getArticles({ page: 1, limit: 13 }),
     getArticles({ page: 1, limit: 6 }),
@@ -60,6 +62,7 @@ export default async function Home({ searchParams }: HomePageProps) {
     getArticles({ hasVideo: true, limit: 5 }),
     getArticles({ category: 'ইসলামী জীবন', limit: 4 }),
     getArticles({ category: 'তথ্য যাচাই', limit: 4 }),
+    getMemeNews(),
   ]);
   
   const { articles, totalPages } = initialArticles;
@@ -358,6 +361,17 @@ export default async function Home({ searchParams }: HomePageProps) {
         </aside>
       </div>
 
+       {/* Meme News Section */}
+      {memeNewsResult.length > 0 && (
+        <section>
+          <SectionHeader title="মিম নিউজ" href="/memes" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {memeNewsResult.slice(0,3).map((meme) => (
+              <MemeCard key={meme.id} meme={meme} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

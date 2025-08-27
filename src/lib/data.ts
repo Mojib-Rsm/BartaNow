@@ -1,4 +1,4 @@
-import type { Article, Author, Poll } from './types';
+import type { Article, Author, Poll, MemeNews } from './types';
 
 const authors: Author[] = [
   { id: 'author-1', name: 'জান্নাতুল ফেরদৌস', avatarUrl: 'https://i.pravatar.cc/150?u=author-1', bio: 'জান্নাতুল ফেরদৌস একজন অভিজ্ঞ সাংবাদিক যিনি প্রযুক্তি এবং রাজনীতি বিষয়ে লেখেন। তিনি জটিল বিষয় সহজভাবে উপস্থাপন করতে পারদর্শী।' },
@@ -135,7 +135,7 @@ const articles: Article[] = [
     title: 'স্বাস্থ্য: ডেঙ্গু প্রতিরোধে সামাজিক সচেতনতা জরুরি',
     category: 'স্বাস্থ্য',
     content: [
-      "বর্ষা মৌসুম শুরু হওয়ার সাথে সাথে ডেঙ্গুর প্রকোপ বাড়তে শুরু করেছে। এডিস মশার বংশবিস্তার রোধ করতে വീടിന്റെ চারপাশ পরিষ্কার রাখা এবং জমে থাকা পানি নিষ্কাশন করা অত্যন্ত গুরুত্বপূর্ণ।",
+      "বর্ষা মৌসুম শুরু হওয়ার সাথে সাথে ডেঙ্গুর প্রকোপ বাড়তে শুরু করেছে। এডিস মশার বংশবিস্তার রোধ করতে வீടിന്റെ চারপাশ পরিষ্কার রাখা এবং জমে থাকা পানি নিষ্কাশন করা অত্যন্ত গুরুত্বপূর্ণ।",
       "স্বাস্থ্য বিশেষজ্ঞরা বলছেন, জ্বর হলেই চিকিৎসকের পরামর্শ নেওয়া উচিত। ডেঙ্গু প্রতিরোধে ব্যক্তিগত সতর্কতার পাশাপাশি সামাজিক সচেতনতা গড়ে তোলা অপরিহার্য।"
     ],
     imageUrl: 'https://picsum.photos/seed/mosquito/600/400',
@@ -427,6 +427,37 @@ const articles: Article[] = [
   }
 ];
 
+const memeNews: MemeNews[] = [
+    {
+      id: 'meme-1',
+      title: "খেলা: বাংলাদেশের দুর্দান্ত জয়ে এশিয়া কাপ শুরু",
+      articleId: '1',
+      imageUrl: 'https://picsum.photos/seed/cricket-win-meme/500/500',
+      imageHint: 'happy fan',
+      topText: 'যখন বাংলাদেশ জিতে',
+      bottomText: 'আমার রিঅ্যাকশন',
+    },
+    {
+      id: 'meme-2',
+      title: "প্রযুক্তি: দেশজুড়ে 5G সেবা চালু হতে যাচ্ছে",
+      articleId: '2',
+      imageUrl: 'https://picsum.photos/seed/5g-speed-meme/500/500',
+      imageHint: 'fast running',
+      topText: 'আমি যখন 4G ব্যবহার করি',
+      bottomText: 'আমার বন্ধু যখন 5G ব্যবহার করে',
+    },
+     {
+      id: 'meme-3',
+      title: "রাজনীতি: বিএনপি’র নতুন কর্মসূচি ঘোষণা",
+      articleId: '4',
+      imageUrl: 'https://picsum.photos/seed/politics-meme/500/500',
+      imageHint: 'man thinking',
+      topText: 'যখন শুনি নতুন রাজনৈতিক কর্মসূচি',
+      bottomText: 'আমি ভাবছি: এবার কী হবে?',
+    },
+];
+
+
 export const mockDb = {
   authors,
   articles,
@@ -458,5 +489,6 @@ export const mockDb = {
         { id: 'option9', label: 'কার্যকর নয়', votes: 15 },
       ],
     },
-  ]
+  ],
+  memeNews,
 };

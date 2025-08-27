@@ -1,6 +1,6 @@
 
 import 'server-only';
-import type { Article, Author, Poll } from './types';
+import type { Article, Author, Poll, MemeNews } from './types';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { mockDb } from './data';
@@ -49,9 +49,10 @@ type GetArticlesOptions = {
     query?: string;
     hasVideo?: boolean;
     editorsPick?: boolean;
+    date?: string;
 };
 
-async function getMockArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick }: GetArticlesOptions) {
+async function getMockArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date }: GetArticlesOptions) {
     await generateSummariesForMockData();
     
     let filteredArticles = [...mockDb.articles];
@@ -85,6 +86,11 @@ async function getMockArticles({ page = 1, limit = 6, category, authorId, exclud
         filteredArticles = filteredArticles.filter(article => article.editorsPick);
     }
 
+    if (date) {
+        filteredArticles = filteredArticles.filter(article => article.publishedAt.startsWith(date));
+    }
+
+
     const sortedArticles = filteredArticles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
     
     const totalPages = Math.ceil(sortedArticles.length / limit);
@@ -94,9 +100,9 @@ async function getMockArticles({ page = 1, limit = 6, category, authorId, exclud
     return { articles: paginatedArticles, totalPages };
 }
 
-export async function getArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
+export async function getArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
     if (useMockData) {
-        return getMockArticles({ page, limit, category, authorId, excludeId, query, hasVideo, editorsPick });
+        return getMockArticles({ page, limit, category, authorId, excludeId, query, hasVideo, editorsPick, date });
     }
     
     // DynamoDB implementation for production
@@ -106,7 +112,7 @@ export async function getArticles({ page = 1, limit = 6, category, authorId, exc
             // with services like OpenSearch (fka Elasticsearch).
             // For this starter, we will fall back to mock data for search queries.
             console.warn("DynamoDB search query detected. Falling back to mock data for this query.");
-            return getMockArticles({ page, limit, category, excludeId, query, hasVideo, editorsPick });
+            return getMockArticles({ page, limit, category, excludeId, query, hasVideo, editorsPick, date });
         }
 
         // A full implementation would require another query to get the total count
@@ -159,7 +165,7 @@ export async function getArticles({ page = 1, limit = 6, category, authorId, exc
         console.error("Error fetching articles from DynamoDB:", error);
         // Fallback to mock data in case of any runtime error with DynamoDB
         console.log("Falling back to mock data.");
-        return getMockArticles({ page, limit, category, excludeId, hasVideo, editorsPick });
+        return getMockArticles({ page, limit, category, excludeId, hasVideo, editorsPick, date });
     }
 }
 
@@ -221,4 +227,8 @@ export async function getPolls(): Promise<Poll[]> {
 export async function getPollById(id: string): Promise<Poll | undefined> {
   // In a real app, this would fetch from a database.
   return mockDb.polls.find(poll => poll.id === id);
+}
+
+export async function getMemeNews(): Promise<MemeNews[]> {
+  return mockDb.memeNews;
 }
