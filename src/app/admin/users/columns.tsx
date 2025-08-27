@@ -1,9 +1,11 @@
 
 "use client"
 
+import { useState } from "react"
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Trash2 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -15,9 +17,75 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import type { User } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+import { deleteUserAction } from "@/app/actions"
+
+const DeleteConfirmationDialog = ({ user, onDeleted }: { user: User, onDeleted: () => void }) => {
+    const [isOpen, setIsOpen] = useState(false)
+    const { toast } = useToast()
+
+    const handleDelete = async () => {
+        const result = await deleteUserAction(user.id)
+        if (result.success) {
+            toast({
+                title: "সফল",
+                description: result.message,
+            })
+            onDeleted()
+        } else {
+            toast({
+                variant: "destructive",
+                title: "ব্যর্থ",
+                description: result.message,
+            })
+        }
+        setIsOpen(false)
+    }
+
+    return (
+        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+            <DropdownMenuItem
+                className="text-destructive"
+                onSelect={(e) => {
+                    e.preventDefault()
+                    setIsOpen(true)
+                }}
+            >
+                <Trash2 className="mr-2 h-4 w-4" />
+                ডিলিট করুন
+            </DropdownMenuItem>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>আপনি কি নিশ্চিত?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        এই কাজটি আনডু করা যাবে না। এটি স্থায়ীভাবে ব্যবহারকারী এবং তার সম্পর্কিত ডেটা ডিলিট করে দেবে।
+                        <br />
+                        <strong className="mt-2 block">{user.name} ({user.email})</strong>
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>বাতিল করুন</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+                        ডিলিট করুন
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    )
+}
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -80,6 +148,7 @@ export const columns: ColumnDef<User>[] = [
     id: "actions",
     cell: ({ row }) => {
       const user = row.original
+      const router = useRouter()
 
       const handleLoginAsUser = () => {
         // This is a simplified way to "login as user". 
@@ -87,6 +156,10 @@ export const columns: ColumnDef<User>[] = [
         // For this demo, we'll just use localStorage to switch the user context.
         localStorage.setItem('bartaNowUser', JSON.stringify(user));
         window.location.href = '/dashboard';
+      }
+
+      const handleDeleted = () => {
+        router.refresh()
       }
 
       return (
@@ -107,7 +180,7 @@ export const columns: ColumnDef<User>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>ব্লক করুন</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">ডিলিট করুন</DropdownMenuItem>
+            <DeleteConfirmationDialog user={user} onDeleted={handleDeleted} />
           </DropdownMenuContent>
         </DropdownMenu>
       )

@@ -2,8 +2,8 @@
 'use server';
 
 import type { Article, Author, Poll, MemeNews, User } from './types';
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, QueryCommand, GetCommand, PutCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBClient, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, QueryCommand, GetCommand, PutCommand, ScanCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
 import { sendMail } from './mailer';
@@ -554,4 +554,48 @@ export async function createArticle(data: Omit<Article, 'id' | 'publishedAt' | '
     }
 
     return newArticle;
+}
+
+export async function deleteArticle(articleId: string): Promise<void> {
+    if (useMockData) {
+        const index = mockDb.articles.findIndex(a => a.id === articleId);
+        if (index > -1) {
+            mockDb.articles.splice(index, 1);
+        }
+        return;
+    }
+
+    const command = new DeleteCommand({
+        TableName: newsTableName,
+        Key: { id: articleId },
+    });
+
+    try {
+        await docClient.send(command);
+    } catch (error) {
+        console.error(`Error deleting article ${articleId} from DynamoDB:`, error);
+        throw new Error('Failed to delete article from the database.');
+    }
+}
+
+export async function deleteUser(userId: string): Promise<void> {
+    if (useMockData) {
+        const index = mockDb.users.findIndex(u => u.id === userId);
+        if (index > -1) {
+            mockDb.users.splice(index, 1);
+        }
+        return;
+    }
+
+    const command = new DeleteCommand({
+        TableName: usersTableName,
+        Key: { id: userId },
+    });
+
+    try {
+        await docClient.send(command);
+    } catch (error) {
+        console.error(`Error deleting user ${userId} from DynamoDB:`, error);
+        throw new Error('Failed to delete user from the database.');
+    }
 }

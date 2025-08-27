@@ -2,8 +2,8 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
-
+import { ArrowUpDown, MoreHorizontal, Trash2 } from "lucide-react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -14,9 +14,76 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import type { Article } from "@/lib/types"
 import Link from "next/link"
+import { useToast } from "@/hooks/use-toast"
+import { deleteArticleAction } from "@/app/actions"
+import { useRouter } from "next/navigation"
+
+const DeleteConfirmationDialog = ({ article, onDeleted }: { article: Article, onDeleted: () => void }) => {
+    const [isOpen, setIsOpen] = useState(false)
+    const { toast } = useToast()
+
+    const handleDelete = async () => {
+        const result = await deleteArticleAction(article.id)
+        if (result.success) {
+            toast({
+                title: "সফল",
+                description: result.message,
+            })
+            onDeleted()
+        } else {
+            toast({
+                variant: "destructive",
+                title: "ব্যর্থ",
+                description: result.message,
+            })
+        }
+        setIsOpen(false)
+    }
+
+    return (
+        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+            <DropdownMenuItem
+                className="text-destructive"
+                onSelect={(e) => {
+                    e.preventDefault()
+                    setIsOpen(true)
+                }}
+            >
+                <Trash2 className="mr-2 h-4 w-4" />
+                ডিলিট করুন
+            </DropdownMenuItem>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>আপনি কি নিশ্চিত?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        এই কাজটি আনডু করা যাবে না। এটি স্থায়ীভাবে আর্টিকেলটি ডিলিট করে দেবে।
+                        <br />
+                        <strong className="mt-2 block">"{article.title}"</strong>
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>বাতিল করুন</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+                        ডিলিট করুন
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    )
+}
 
 export const columns: ColumnDef<Article>[] = [
   {
@@ -90,8 +157,13 @@ export const columns: ColumnDef<Article>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const article = row.original
+      const router = useRouter()
+
+      const handleDeleted = () => {
+        router.refresh()
+      }
 
       return (
         <DropdownMenu>
@@ -115,7 +187,7 @@ export const columns: ColumnDef<Article>[] = [
             <DropdownMenuItem asChild>
               <Link href={`/admin/articles/edit/${article.id}`}>এডিট করুন</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">ডিলিট করুন</DropdownMenuItem>
+            <DeleteConfirmationDialog article={article} onDeleted={handleDeleted} />
           </DropdownMenuContent>
         </DropdownMenu>
       )

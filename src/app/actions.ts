@@ -3,7 +3,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser } from '@/lib/api';
 import type { Article, User } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -265,6 +265,32 @@ export async function createArticleAction(data: CreateArticleFormValues) {
     } catch (error) {
         console.error("Create Article Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'আর্টিকেল তৈরি করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
+
+export async function deleteArticleAction(articleId: string) {
+    try {
+        await deleteArticle(articleId);
+        revalidatePath('/admin/articles');
+        revalidatePath('/');
+        return { success: true, message: 'আর্টিকেল সফলভাবে ডিলিট হয়েছে।' };
+    } catch (error) {
+        console.error("Delete Article Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'আর্টিকেল ডিলিট করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
+export async function deleteUserAction(userId: string) {
+    try {
+        await deleteUser(userId);
+        revalidatePath('/admin/users');
+        return { success: true, message: 'ব্যবহারকারী সফলভাবে ডিলিট হয়েছে।' };
+    } catch (error) {
+        console.error("Delete User Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'ব্যবহারকারী ডিলিট করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
     }
 }
