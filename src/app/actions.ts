@@ -1,3 +1,4 @@
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -128,7 +129,7 @@ export async function updateUserAction(data: UpdateUserFormValues) {
 
         if (data.avatarUrl && data.avatarUrl.startsWith('data:image')) {
             updateData.avatarUrl = await uploadImage(data.avatarUrl, `${data.id}-avatar.png`);
-        } else {
+        } else if (data.avatarUrl !== undefined) {
             updateData.avatarUrl = data.avatarUrl;
         }
 
