@@ -15,6 +15,7 @@ import {
   Send,
   Rss,
   Palette,
+  UploadCloud,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -80,6 +81,12 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'মিডিয়া',
     icon: ImageIcon,
     roles: ['admin', 'editor', 'reporter'],
+  },
+   {
+    path: '/admin/import',
+    label: 'WordPress ইম্পোর্ট',
+    icon: UploadCloud,
+    roles: ['admin'],
   },
   {
     path: '/admin/appearance',

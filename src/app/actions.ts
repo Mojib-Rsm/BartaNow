@@ -4,7 +4,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -13,6 +13,8 @@ import { uploadImage } from '@/lib/imagekit';
 import { sendMail } from '@/lib/mailer';
 import { getWelcomeEmailHtml } from '@/lib/email-templates/welcome-email.js';
 import { getNewsletterHtml } from '@/lib/email-templates/newsletter-email.js';
+import { parseStringPromise } from 'xml2js';
+
 
 export async function seedAction() {
   const result = await seedDatabase();
@@ -685,5 +687,78 @@ export async function triggerRssImportAction() {
         console.error("RSS Import Trigger Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'RSS ইম্পোর্ট শুরু করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
+    }
+}
+
+export async function importWordPressAction(xmlContent: string) {
+    try {
+        const data = await parseStringPromise(xmlContent, {
+            explicitArray: false,
+            trim: true,
+        });
+
+        const items = data.rss.channel.item;
+        if (!items) {
+            return { success: false, message: 'XML ফাইলে কোনো পোস্ট খুঁজে পাওয়া যায়নি।' };
+        }
+
+        const posts = Array.isArray(items) ? items : [items];
+        let importedCount = 0;
+        let skippedCount = 0;
+
+        for (const post of posts) {
+            // We only care about published posts
+            if (post['wp:status'] !== 'publish' || post['wp:post_type'] !== 'post') {
+                continue;
+            }
+
+            const slug = post['wp:post_name'];
+            const existingArticle = await getArticleBySlug(slug);
+
+            if (existingArticle) {
+                skippedCount++;
+                continue;
+            }
+
+            const authorLogin = post['dc:creator'];
+            let author = await getUserByEmail(`${authorLogin}@example.com`); // Assume an email pattern
+            if (!author) {
+                author = await createUser({
+                    name: authorLogin,
+                    email: `${authorLogin}@example.com`,
+                    password: 'password123', // Assign a default password
+                });
+            }
+
+            // Extract content and clean it up
+            const contentHtml = post['content:encoded'];
+            const contentText = contentHtml.replace(/<[^>]*>?/gm, ''); // Basic HTML strip
+            const paragraphs = contentText.split('\n').filter(p => p.trim() !== '');
+
+            const newArticleData: Omit<Article, 'id' | 'slug' | 'publishedAt' | 'aiSummary'> = {
+                title: post.title,
+                content: paragraphs,
+                category: 'সর্বশেষ', // Default category
+                imageUrl: 'https://picsum.photos/seed/wp-import/800/600',
+                authorId: author.id,
+                authorName: author.name,
+                authorAvatarUrl: author.avatarUrl || '',
+                // publishedAt: new Date(post.pubDate).toISOString(), // Use original date
+            };
+
+            await createArticle(newArticleData);
+            importedCount++;
+        }
+
+        return {
+            success: true,
+            message: `${importedCount} টি পোস্ট সফলভাবে ইম্পোর্ট করা হয়েছে। ${skippedCount} টি পোস্ট ডুপ্লিকেট হওয়ার কারণে স্কিপ করা হয়েছে।`,
+        };
+    } catch (error) {
+        console.error('WordPress Import Error:', error);
+        return {
+            success: false,
+            message: 'XML ফাইল পার্স করতে বা পোস্ট ইম্পোর্ট করতে সমস্যা হয়েছে। ফাইলটি সঠিক ফরম্যাটে আছে কি না তা পরীক্ষা করুন।',
+        };
     }
 }
