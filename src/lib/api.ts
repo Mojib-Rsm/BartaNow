@@ -167,10 +167,9 @@ async function updateMockUser(userId: string, data: Partial<User>): Promise<User
     return updatedUser;
 }
 
-async function createMockArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiSummary' | 'slug'>): Promise<Article> {
+async function createMockArticle(data: Omit<Article, 'id' | 'aiSummary' | 'slug'>): Promise<Article> {
      const newArticle: Article = {
         id: `article-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        publishedAt: new Date().toISOString(),
         slug: await translateForSlug(data.title),
         aiSummary: data.content.join('\n\n').substring(0, 150) + '...', // Basic summary
         ...data,
@@ -472,11 +471,10 @@ async function updateFirestoreUser(userId: string, data: Partial<User>): Promise
     return updatedDoc.data() as User | undefined;
 }
 
-async function createFirestoreArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiSummary' | 'slug'>): Promise<Article> {
+async function createFirestoreArticle(data: Omit<Article, 'id' | 'aiSummary' | 'slug'>): Promise<Article> {
     const slug = await translateForSlug(data.title);
     const newArticle: Article = {
         id: `article-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        publishedAt: new Date().toISOString(),
         slug: slug,
         aiSummary: data.content.join('\n\n').substring(0, 150) + '...', // Basic summary
         ...data,
@@ -724,7 +722,7 @@ export async function updateUser(userId: string, data: Partial<User>): Promise<U
     return updateFirestoreUser(userId, data);
 }
 
-export async function createArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiSummary' | 'slug'>): Promise<Article> {
+export async function createArticle(data: Omit<Article, 'id' | 'aiSummary' | 'slug'>): Promise<Article> {
     const newArticle = (!useFirestore || !db) ? await createMockArticle(data) : await createFirestoreArticle(data);
 
     // AI Summary generation can be slow, so we do it after creating the article

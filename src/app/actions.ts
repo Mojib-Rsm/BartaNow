@@ -241,7 +241,7 @@ export async function createArticleAction(data: Omit<CreateArticleFormValues, 'a
             finalImageUrl = await uploadImage(data.imageUrl, `article-${Date.now()}.png`);
         }
         
-        const newArticleData: Omit<Article, 'id' | 'publishedAt' | 'aiSummary' | 'slug'> = {
+        const newArticleData: Omit<Article, 'id' | 'slug' | 'aiSummary'> = {
             title: data.title,
             content: data.content.split('\n').filter(p => p.trim() !== ''),
             category: data.category,
@@ -249,6 +249,7 @@ export async function createArticleAction(data: Omit<CreateArticleFormValues, 'a
             authorId: author.id,
             authorName: author.name,
             authorAvatarUrl: author.avatarUrl || '',
+            publishedAt: new Date().toISOString(),
         };
 
         const newArticle = await createArticle(newArticleData);
@@ -702,6 +703,8 @@ export async function importWordPressAction(xmlContent: string) {
             return { success: false, message: 'XML ফাইলে কোনো পোস্ট খুঁজে পাওয়া যায়নি।' };
         }
 
+        const allCategories = ['রাজনীতি', 'খেলা', 'প্রযুক্তি', 'বিনোদন', 'অর্থনীতি', 'আন্তর্জাতিক', 'মতামত', 'স্বাস্থ্য', 'শিক্ষা', 'পরিবেশ', 'বিশেষ-কভারেজ', 'জাতীয়', 'ইসলামী-জীবন', 'তথ্য-যাচাই', 'মিম-নিউজ', 'ভিডিও', 'সর্বশেষ', 'সম্পাদকের-পছন্দ'];
+
         const posts = Array.isArray(items) ? items : [items];
         let importedCount = 0;
         let skippedCount = 0;
@@ -713,6 +716,8 @@ export async function importWordPressAction(xmlContent: string) {
             }
 
             const slug = post['wp:post_name'];
+            if(!slug) continue;
+
             const existingArticle = await getArticleBySlug(slug);
 
             if (existingArticle) {
@@ -723,7 +728,8 @@ export async function importWordPressAction(xmlContent: string) {
             const authorLogin = post['dc:creator'];
             let author = await getUserByEmail(`${authorLogin}@example.com`); // Assume an email pattern
             if (!author) {
-                author = await createUser({
+                // Create a new user if the author doesn't exist
+                 author = await createUser({
                     name: authorLogin,
                     email: `${authorLogin}@example.com`,
                     password: 'password123', // Assign a default password
@@ -731,19 +737,40 @@ export async function importWordPressAction(xmlContent: string) {
             }
 
             // Extract content and clean it up
-            const contentHtml = post['content:encoded'];
-            const contentText = contentHtml.replace(/<[^>]*>?/gm, ''); // Basic HTML strip
+            const contentHtml = post['content:encoded'] || '';
+            
+            // Extract the first image URL from the content
+            const imgMatch = contentHtml.match(/<img.*?src=["'](.*?)["']/);
+            const imageUrl = imgMatch ? imgMatch[1] : 'https://picsum.photos/seed/wp-import/800/600';
+            
+            // Basic HTML strip to get text content
+            const contentText = contentHtml.replace(/<[^>]*>?/gm, ''); 
             const paragraphs = contentText.split('\n').filter(p => p.trim() !== '');
+            
+            // Extract and map category
+            let postCategory: Article['category'] = 'সর্বশেষ'; // Default category
+            if (post.category && Array.isArray(post.category)) {
+                const wpCategory = post.category.find((c: any) => c.$.domain === 'category');
+                if (wpCategory) {
+                    const categoryName = wpCategory._;
+                    // Simple mapping logic (can be improved)
+                    const foundCategory = allCategories.find(c => c.toLowerCase() === categoryName.toLowerCase());
+                    if (foundCategory) {
+                        postCategory = foundCategory as Article['category'];
+                    }
+                }
+            }
 
-            const newArticleData: Omit<Article, 'id' | 'slug' | 'publishedAt' | 'aiSummary'> = {
+
+            const newArticleData: Omit<Article, 'id' | 'slug' | 'aiSummary'> = {
                 title: post.title,
                 content: paragraphs,
-                category: 'সর্বশেষ', // Default category
-                imageUrl: 'https://picsum.photos/seed/wp-import/800/600',
+                category: postCategory,
+                imageUrl: imageUrl,
                 authorId: author.id,
                 authorName: author.name,
                 authorAvatarUrl: author.avatarUrl || '',
-                // publishedAt: new Date(post.pubDate).toISOString(), // Use original date
+                publishedAt: new Date(post.pubDate).toISOString(), // Use original date
             };
 
             await createArticle(newArticleData);
