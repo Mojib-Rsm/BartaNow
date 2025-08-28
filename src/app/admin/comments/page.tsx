@@ -1,6 +1,6 @@
 import { getAllComments } from "@/lib/api"
 import { columns } from "./columns"
-import { DataTable } from "../articles/data-table"
+import { DataTable } from "./data-table"
 
 export default async function CommentsManagementPage() {
   const comments = await getAllComments();

@@ -1,7 +1,7 @@
 
 import { getAllPages } from "@/lib/api"
 import { columns } from "./columns"
-import { DataTable } from "../articles/data-table"
+import { DataTable } from "./data-table"
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
 import Link from "next/link"

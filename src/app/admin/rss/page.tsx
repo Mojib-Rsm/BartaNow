@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { columns } from "./columns";
-import { DataTable } from "../articles/data-table";
+import { DataTable } from "./data-table";
 
 export default async function RssManagementPage() {
   const feeds = await getAllRssFeeds();
