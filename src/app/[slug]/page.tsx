@@ -32,6 +32,13 @@ export async function generateMetadata(
     }
   }
  
+  const openGraphImages = article.imageUrl ? [{
+        url: article.imageUrl,
+        width: 800,
+        height: 600,
+        alt: article.title,
+    }] : [];
+
   return {
     title: article.title,
     description: article.aiSummary,
@@ -41,20 +48,13 @@ export async function generateMetadata(
         type: 'article',
         publishedTime: article.publishedAt,
         authors: [article.authorName],
-        images: [
-            {
-                url: article.imageUrl,
-                width: 800,
-                height: 600,
-                alt: article.title,
-            },
-        ],
+        images: openGraphImages,
     },
     twitter: {
         card: 'summary_large_image',
         title: article.title,
         description: article.aiSummary,
-        images: [article.imageUrl],
+        images: article.imageUrl ? [article.imageUrl] : [],
     },
   }
 }
@@ -87,7 +87,27 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     day: 'numeric',
   });
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: article.title,
+    image: [article.imageUrl],
+    datePublished: article.publishedAt,
+    dateModified: article.publishedAt, // Or a last updated field if you have one
+    author: [{
+        '@type': 'Person',
+        name: article.authorName,
+        url: `/authors/${article.authorId}`,
+    }],
+    description: article.aiSummary,
+  };
+
   return (
+    <>
+    <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-12">
         <div className="lg:col-span-2 space-y-8">
             <article className="bg-card p-6 sm:p-8 rounded-lg shadow-lg">
@@ -166,7 +186,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
              </div>
         </aside>
     </div>
+    </>
   );
 }
-
-    

@@ -6,6 +6,7 @@ import Footer from '@/components/footer';
 import './globals.css';
 import PushNotificationManager from '@/components/push-notification-manager';
 import { ThemeProvider } from '@/components/theme-provider';
+import GoogleAnalytics from '@/components/google-analytics';
 
 export const metadata: Metadata = {
   title: {
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
     description: 'রাজনীতি, প্রযুক্তি, খেলা, বিনোদন, এবং আরও অনেক কিছুর উপর সর্বশেষ খবর ও আপডেট পান।',
   },
   manifest: '/manifest.json',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002'),
 };
 
 export default function RootLayout({
@@ -47,6 +49,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
+          {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+            <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+          )}
           {children}
           <Toaster />
         </ThemeProvider>
@@ -54,5 +59,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-    

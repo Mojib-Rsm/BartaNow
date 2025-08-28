@@ -1,0 +1,9 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /install/
+Disallow: /login/
+Disallow: /api/
+
+Sitemap: https://bartanow.com/sitemap.xml
