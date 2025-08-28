@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { PanelLeft } from 'lucide-react';
+import { Home, PanelLeft } from 'lucide-react';
 import {
   SidebarProvider,
   Sidebar,
@@ -51,11 +51,13 @@ export default function AdminLayout({
   }, []);
 
   const isActive = (path: string) => {
+    // Exact match for the admin dashboard root
     if (path === '/admin' && pathname === '/admin') return true;
+    // Match for child routes, but not the root itself unless it's the only path part
     return path !== '/admin' && pathname.startsWith(path);
   };
   
-  const userInitials = user?.name.split(' ').map((n) => n[0]).join('');
+  const userInitials = user?.name ? user.name.split(' ').map((n) => n[0]).join('') : '';
 
   return (
     <div lang="en" dir="ltr">
@@ -70,6 +72,9 @@ export default function AdminLayout({
             <SidebarContent>
                 <SidebarMenu>
                     {adminMenuConfig.map((item) => {
+                        // Hide "Go to website" from the main menu
+                        if (item.path === '/') return null;
+
                         const hasAccess = !item.roles || (user?.role && item.roles.includes(user.role));
                         if (!hasAccess) return null;
 
@@ -91,7 +96,7 @@ export default function AdminLayout({
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
                             <Link href="/">
-                                <adminMenuConfig.find(item => item.path === '/')?.icon />
+                                <Home />
                                  ওয়েবসাইটে ফিরে যান
                             </Link>
                         </SidebarMenuButton>
