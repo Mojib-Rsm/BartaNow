@@ -1,9 +1,10 @@
 
 import { NextResponse } from 'next/server';
 import { parseStringPromise } from 'xml2js';
-import { getArticleBySlug, createArticle, getAllRssFeeds } from '@/lib/api';
+import { getArticleBySlug, createArticle, getAllRssFeeds, createMedia } from '@/lib/api';
 import type { Article } from '@/lib/types';
 import { mockDb } from '@/lib/data'; // for mock user
+import { uploadImage } from '@/lib/imagekit';
 
 export async function GET() {
   const results = [];
@@ -50,7 +51,32 @@ export async function GET() {
         }
         
         // Extract image from various possible tags
-        const imageUrl = item['media:content']?.$.url || item.enclosure?.$.url || 'https://picsum.photos/seed/placeholder/800/600';
+        const sourceImageUrl = item['media:content']?.$?.url || item.enclosure?.$?.url;
+        let finalImageUrl = 'https://picsum.photos/seed/placeholder/800/600'; // Default placeholder
+
+        if (sourceImageUrl) {
+            try {
+                const imageResponse = await fetch(sourceImageUrl);
+                if (imageResponse.ok) {
+                    const blob = await imageResponse.blob();
+                    const buffer = Buffer.from(await blob.arrayBuffer());
+                    const base64String = `data:${blob.type};base64,${buffer.toString('base64')}`;
+                    
+                    finalImageUrl = await uploadImage(base64String, `${slug}-featured-image.png`);
+                    
+                    // Also save to media library
+                    await createMedia({
+                        fileName: `${slug}-featured-image.png`,
+                        url: finalImageUrl,
+                        mimeType: blob.type,
+                        size: blob.size,
+                        uploadedBy: defaultAuthor.id,
+                    });
+                }
+            } catch (e) {
+                console.error(`Could not download or upload image from RSS for post "${item.title}":`, e);
+            }
+        }
         
         // Extract description and clean up HTML
         const descriptionHtml = item.description || item['content:encoded'] || '';
@@ -60,7 +86,7 @@ export async function GET() {
         const newArticleData: Omit<Article, 'id' | 'aiSummary' | 'slug'> = {
           title: item.title,
           content: paragraphs.length > 0 ? paragraphs : [descriptionText.substring(0, 400)], // Fallback content
-          imageUrl: imageUrl,
+          imageUrl: finalImageUrl,
           authorId: defaultAuthor.id,
           authorName: defaultAuthor.name,
           authorAvatarUrl: defaultAuthor.avatarUrl || '',

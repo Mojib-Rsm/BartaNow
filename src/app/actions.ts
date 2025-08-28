@@ -743,7 +743,32 @@ export async function importWordPressAction(xmlContent: string) {
             
             // Extract the first image URL from the content
             const imgMatch = contentHtml.match(/<img.*?src=["'](.*?)["']/);
-            const imageUrl = imgMatch ? imgMatch[1] : 'https://picsum.photos/seed/wp-import/800/600';
+            let imageUrl = 'https://picsum.photos/seed/wp-import/800/600'; // Default placeholder
+
+            if (imgMatch && imgMatch[1]) {
+                try {
+                    const response = await fetch(imgMatch[1]);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const buffer = Buffer.from(await blob.arrayBuffer());
+                        const base64String = `data:${blob.type};base64,${buffer.toString('base64')}`;
+                        
+                        const uploadedUrl = await uploadImage(base64String, `${slug}-featured-image.png`);
+                        imageUrl = uploadedUrl;
+                        
+                        // Also save to media library
+                        await createMedia({
+                            fileName: `${slug}-featured-image.png`,
+                            url: uploadedUrl,
+                            mimeType: blob.type,
+                            size: blob.size,
+                            uploadedBy: author.id,
+                        });
+                    }
+                } catch (e) {
+                    console.error(`Could not download or upload image for post "${post.title}":`, e);
+                }
+            }
             
             // Basic HTML strip to get text content
             const contentText = contentHtml.replace(/<[^>]*>?/gm, ''); 
