@@ -67,7 +67,7 @@ const PushNotificationManagerComponent = () => {
   // Example of how to add a subscription button to the UI
   // In a real app, this would be placed in a more appropriate location (e.g., header, settings page)
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-20 right-4 md:bottom-8 md:right-8 z-50">
        <Button
         onClick={handleSubscription}
         disabled={loading}
@@ -93,3 +93,4 @@ const PushNotificationManager = dynamic(() => Promise.resolve(PushNotificationMa
 });
 
 export default PushNotificationManager;
+
