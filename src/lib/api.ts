@@ -389,9 +389,10 @@ async function deleteFirestoreUser(userId: string): Promise<void> {
 async function getFirestoreNotificationsForUser(userId: string): Promise<Notification[]> {
     const snapshot = await db.collection('notifications')
         .where('userId', '==', userId)
-        .orderBy('timestamp', 'desc')
         .get();
-    return snapshot.docs.map(doc => doc.data() as Notification);
+    const notifications = snapshot.docs.map(doc => doc.data() as Notification);
+    // Sort in-memory to avoid needing a composite index
+    return notifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 }
 
 async function getFirestoreAllMedia(): Promise<Media[]> {
