@@ -25,12 +25,6 @@ const PushNotificationManagerComponent = () => {
   } = usePushNotifications();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (isClient) {
-        console.log('Push Notification Permission Status:', permissionStatus);
-    }
-  }, [permissionStatus, isClient]);
-
   const handleSubscription = async () => {
     if (isSubscribed) {
       await unsubscribe();
@@ -55,19 +49,18 @@ const PushNotificationManagerComponent = () => {
     }
   };
 
-  if (!isClient) {
+  if (!isClient || !(typeof window !== 'undefined' && 'PushManager' in window && 'serviceWorker' in navigator)) {
     return null;
   }
   
-  // We don't render the button if permission is not determined yet or not supported
-  if (permissionStatus === 'prompt' || (typeof window !== 'undefined' && !('PushManager' in window))) {
+  // Do not render the button if the user has explicitly denied permission.
+  // They must manually enable it in browser settings.
+  if (permissionStatus === 'denied') {
     return null;
   }
   
-  // Example of how to add a subscription button to the UI
-  // In a real app, this would be placed in a more appropriate location (e.g., header, settings page)
   return (
-    <div className="fixed bottom-20 right-4 md:bottom-8 md:right-8 z-50">
+    <div className="fixed bottom-20 right-4 z-50 md:bottom-8 md:right-8">
        <Button
         onClick={handleSubscription}
         disabled={loading}
@@ -93,4 +86,3 @@ const PushNotificationManager = dynamic(() => Promise.resolve(PushNotificationMa
 });
 
 export default PushNotificationManager;
-
