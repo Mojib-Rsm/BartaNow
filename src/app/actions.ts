@@ -4,8 +4,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug } from '@/lib/api';
-import type { Article, User, Page, Poll, PollOption } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed } from '@/lib/api';
+import type { Article, User, Page, Poll, PollOption, RssFeed } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -682,7 +682,9 @@ export async function triggerRssImportAction() {
         }
 
         const result = await response.json();
-        return { success: true, message: 'RSS ইম্পোর্ট সফলভাবে শুরু হয়েছে।', data: result };
+        revalidatePath('/admin/articles');
+        revalidatePath('/');
+        return { success: true, message: 'RSS ইম্পোর্ট সফলভাবে সম্পন্ন হয়েছে।', data: result };
 
     } catch (error) {
         console.error("RSS Import Trigger Error:", error);
@@ -777,6 +779,7 @@ export async function importWordPressAction(xmlContent: string) {
             importedCount++;
         }
 
+        revalidatePath('/');
         return {
             success: true,
             message: `${importedCount} টি পোস্ট সফলভাবে ইম্পোর্ট করা হয়েছে। ${skippedCount} টি পোস্ট ডুপ্লিকেট হওয়ার কারণে স্কিপ করা হয়েছে।`,
@@ -787,5 +790,69 @@ export async function importWordPressAction(xmlContent: string) {
             success: false,
             message: 'XML ফাইল পার্স করতে বা পোস্ট ইম্পোর্ট করতে সমস্যা হয়েছে। ফাইলটি সঠিক ফরম্যাটে আছে কি না তা পরীক্ষা করুন।',
         };
+    }
+}
+
+// --- RSS FEED ACTIONS ---
+const rssFeedSchema = z.object({
+    id: z.string().optional(),
+    name: z.string().min(3, "ফিডের নাম কমপক্ষে ৩ অক্ষরের হতে হবে।"),
+    url: z.string().url("অনুগ্রহ করে একটি সঠিক URL দিন।"),
+    defaultCategory: z.enum(['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ']),
+    categoryMap: z.record(z.string()).default({}),
+});
+
+type RssFeedFormValues = z.infer<typeof rssFeedSchema>;
+
+export async function createRssFeedAction(data: RssFeedFormValues) {
+    const validation = rssFeedSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+
+    try {
+        const newFeed = await createRssFeed(data);
+        if (!newFeed) {
+            return { success: false, message: 'RSS ফিড তৈরি করা যায়নি।' };
+        }
+        revalidatePath('/admin/rss');
+        return { success: true, message: 'RSS ফিড সফলভাবে তৈরি হয়েছে।', feed: newFeed };
+    } catch (error) {
+        console.error("Create RSS Feed Error:", error);
+        return { success: false, message: 'RSS ফিড তৈরি করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function updateRssFeedAction(data: RssFeedFormValues) {
+    if (!data.id) return { success: false, message: 'ফিড আইডি পাওয়া যায়নি।' };
+    
+    const validation = rssFeedSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+
+    try {
+        const updatedFeed = await updateRssFeed(data.id, data);
+        if (!updatedFeed) {
+            return { success: false, message: 'RSS ফিড আপডেট করা যায়নি।' };
+        }
+        revalidatePath('/admin/rss');
+        revalidatePath(`/admin/rss/edit/${data.id}`);
+        return { success: true, message: 'RSS ফিড সফলভাবে আপডেট হয়েছে।', feed: updatedFeed };
+    } catch (error) {
+        console.error("Update RSS Feed Error:", error);
+        return { success: false, message: 'RSS ফিড আপডেট করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function deleteRssFeedAction(feedId: string) {
+    try {
+        await deleteRssFeed(feedId);
+        revalidatePath('/admin/rss');
+        return { success: true, message: 'RSS ফিড সফলভাবে ডিলিট হয়েছে।' };
+    } catch (error) {
+        console.error("Delete RSS Feed Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'RSS ফিড ডিলিট করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
     }
 }

@@ -2,7 +2,7 @@
 
 'use server';
 
-import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber } from './types';
+import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed } from './types';
 import admin from 'firebase-admin';
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
@@ -334,6 +334,36 @@ async function deleteMockSubscriber(subscriberId: string): Promise<void> {
     }
 }
 
+async function getMockAllRssFeeds(): Promise<RssFeed[]> {
+    return [...mockDb.rssFeeds];
+}
+
+async function getMockRssFeedById(id: string): Promise<RssFeed | undefined> {
+    return mockDb.rssFeeds.find(feed => feed.id === id);
+}
+
+async function createMockRssFeed(data: Omit<RssFeed, 'id'>): Promise<RssFeed> {
+    const newFeed: RssFeed = {
+        id: `rss-${Date.now()}`,
+        ...data,
+    };
+    mockDb.rssFeeds.unshift(newFeed);
+    return newFeed;
+}
+
+async function updateMockRssFeed(feedId: string, data: Partial<RssFeed>): Promise<RssFeed | undefined> {
+    const feedIndex = mockDb.rssFeeds.findIndex(f => f.id === feedId);
+    if (feedIndex === -1) return undefined;
+    const updatedFeed = { ...mockDb.rssFeeds[feedIndex], ...data };
+    mockDb.rssFeeds[feedIndex] = updatedFeed;
+    return updatedFeed;
+}
+
+async function deleteMockRssFeed(feedId: string): Promise<void> {
+    const index = mockDb.rssFeeds.findIndex(f => f.id === feedId);
+    if (index > -1) mockDb.rssFeeds.splice(index, 1);
+}
+
 
 // --- FIRESTORE IMPLEMENTATIONS ---
 
@@ -654,7 +684,36 @@ async function deleteFirestoreSubscriber(subscriberId: string): Promise<void> {
     await db.collection('subscribers').doc(subscriberId).delete();
 }
 
+async function getFirestoreAllRssFeeds(): Promise<RssFeed[]> {
+    const snapshot = await db.collection('rssFeeds').get();
+    return snapshot.docs.map(doc => doc.data() as RssFeed);
+}
 
+async function getFirestoreRssFeedById(id: string): Promise<RssFeed | undefined> {
+    const doc = await db.collection('rssFeeds').doc(id).get();
+    return doc.exists ? doc.data() as RssFeed : undefined;
+}
+
+async function createFirestoreRssFeed(data: Omit<RssFeed, 'id'>): Promise<RssFeed> {
+    const newFeed: RssFeed = {
+        id: `rss-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        entityType: 'RSS_FEED',
+        ...data,
+    };
+    await db.collection('rssFeeds').doc(newFeed.id).set(newFeed);
+    return newFeed;
+}
+
+async function updateFirestoreRssFeed(feedId: string, data: Partial<RssFeed>): Promise<RssFeed | undefined> {
+    const feedRef = db.collection('rssFeeds').doc(feedId);
+    await feedRef.update(data);
+    const updatedDoc = await feedRef.get();
+    return updatedDoc.data() as RssFeed | undefined;
+}
+
+async function deleteFirestoreRssFeed(feedId: string): Promise<void> {
+    await db.collection('rssFeeds').doc(feedId).delete();
+}
 
 // --- PUBLIC API ---
 
@@ -825,6 +884,30 @@ export async function deleteSubscriber(subscriberId: string): Promise<void> {
     return deleteFirestoreSubscriber(subscriberId);
 }
 
+export async function getAllRssFeeds(): Promise<RssFeed[]> {
+    if (!useFirestore || !db) return getMockAllRssFeeds();
+    return getFirestoreAllRssFeeds();
+}
+
+export async function getRssFeedById(id: string): Promise<RssFeed | undefined> {
+    if (!useFirestore || !db) return getMockRssFeedById(id);
+    return getFirestoreRssFeedById(id);
+}
+
+export async function createRssFeed(data: Omit<RssFeed, 'id'>): Promise<RssFeed> {
+    if (!useFirestore || !db) return createMockRssFeed(data);
+    return createFirestoreRssFeed(data);
+}
+
+export async function updateRssFeed(feedId: string, data: Partial<RssFeed>): Promise<RssFeed | undefined> {
+    if (!useFirestore || !db) return updateMockRssFeed(feedId, data);
+    return updateFirestoreRssFeed(feedId, data);
+}
+
+export async function deleteRssFeed(feedId: string): Promise<void> {
+    if (!useFirestore || !db) return deleteMockRssFeed(feedId);
+    return deleteFirestoreRssFeed(feedId);
+}
 
 // --- NON-CRUD APIs ---
 

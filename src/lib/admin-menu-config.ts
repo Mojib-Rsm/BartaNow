@@ -64,7 +64,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     icon: BarChartHorizontal,
     roles: ['admin', 'editor', 'reporter'],
   },
-    {
+  {
     path: '/admin/subscribers',
     label: 'সাবস্ক্রাইবার',
     icon: Users,
@@ -82,16 +82,10 @@ export const adminMenuConfig: AdminMenuItem[] = [
     icon: ImageIcon,
     roles: ['admin', 'editor', 'reporter'],
   },
-   {
+  {
     path: '/admin/import',
     label: 'WordPress ইম্পোর্ট',
     icon: UploadCloud,
-    roles: ['admin'],
-  },
-  {
-    path: '/admin/appearance',
-    label: 'Appearance',
-    icon: Palette,
     roles: ['admin'],
   },
   {
@@ -99,6 +93,12 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'RSS ফিড',
     icon: Rss,
     roles: ['admin', 'editor'],
+  },
+  {
+    path: '/admin/appearance',
+    label: 'Appearance',
+    icon: Palette,
+    roles: ['admin'],
   },
   {
     path: '/admin/ads',

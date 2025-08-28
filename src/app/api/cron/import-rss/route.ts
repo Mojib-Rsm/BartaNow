@@ -1,14 +1,15 @@
 
 import { NextResponse } from 'next/server';
 import { parseStringPromise } from 'xml2js';
-import { getArticles, createArticle, getArticleBySlug } from '@/lib/api';
-import { rssFeeds } from '@/lib/rss-feeds';
+import { getArticleBySlug, createArticle, getAllRssFeeds } from '@/lib/api';
 import type { Article } from '@/lib/types';
 import { mockDb } from '@/lib/data'; // for mock user
 
 export async function GET() {
   const results = [];
   const defaultAuthor = mockDb.users.find(u => u.role === 'editor') || mockDb.users[0];
+
+  const rssFeeds = await getAllRssFeeds();
 
   for (const feedConfig of rssFeeds) {
     try {
@@ -43,7 +44,7 @@ export async function GET() {
             const feedCategory = Array.isArray(item.category) ? item.category[0] : item.category;
             // Attempt to map category, case-insensitively
             const foundCategoryKey = Object.keys(feedConfig.categoryMap).find(key => key.toLowerCase() === feedCategory.toLowerCase());
-            if(foundCategoryKey) {
+            if(foundCategoryKey && feedConfig.categoryMap[foundCategoryKey]) {
                 category = feedConfig.categoryMap[foundCategoryKey];
             }
         }

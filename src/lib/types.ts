@@ -7,7 +7,7 @@ export type Permission =
   | 'manage_comments' | 'approve_comment' | 'delete_comment'
   | 'view_users' | 'create_user' | 'edit_user_profile' | 'delete_user' | 'change_user_role' | 'block_user'
   | 'manage_media' | 'upload_media' | 'delete_media'
-  | 'manage_settings' | 'manage_ads' | 'send_notification' | 'manage_newsletter' | 'manage_rss'
+  | 'manage_settings' | 'manage_ads' | 'send_notification' | 'manage_newsletter' | 'manage_rss' | 'create_rss' | 'edit_rss' | 'delete_rss'
   | 'login_as_user';
 
 export interface Role {
@@ -178,4 +178,5 @@ export interface RssFeed {
   url: string;
   categoryMap: Record<string, Article['category']>;
   defaultCategory: Article['category'];
+  entityType?: 'RSS_FEED';
 }

@@ -37,6 +37,9 @@ const allPermissions: Record<Permission, string> = {
     'send_notification': 'নোটিফিকেশন পাঠান',
     'manage_newsletter': 'নিউজলেটার পরিচালনা করুন',
     'manage_rss': 'RSS ফিড পরিচালনা করুন',
+    'create_rss': 'RSS ফিড তৈরি করুন',
+    'edit_rss': 'RSS ফিড এডিট করুন',
+    'delete_rss': 'RSS ফিড ডিলিট করুন',
     
     'login_as_user': 'অন্য ব্যবহারকারী হিসেবে লগইন করুন',
 };
@@ -70,6 +73,9 @@ export const roles: Record<User['role'], Role> = {
       'send_notification',
       'manage_newsletter',
       'manage_rss',
+      'create_rss',
+      'edit_rss',
+      'delete_rss',
     ],
   },
   reporter: {
