@@ -30,12 +30,12 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = await headers();
+  const headersList = headers();
   const pathname = headersList.get('x-pathname') || '';
   const isAdminRoute = pathname.startsWith('/admin');
 
