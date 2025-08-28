@@ -8,6 +8,8 @@ import {
   Settings,
   LogOut,
   Home,
+  Bookmark,
+  History,
 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -98,6 +100,20 @@ export default function DashboardLayout({
                 <User className="h-4 w-4" />
                 আমার প্রোফাইল
               </Link>
+              <Link
+                href="/dashboard/saved-articles"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${isActive('/dashboard/saved-articles') ? 'bg-muted text-primary' : ''}`}
+              >
+                <Bookmark className="h-4 w-4" />
+                সংরক্ষিত আর্টিকেল
+              </Link>
+              <Link
+                href="/dashboard/reading-history"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${isActive('/dashboard/reading-history') ? 'bg-muted text-primary' : ''}`}
+              >
+                <History className="h-4 w-4" />
+                পঠিত ইতিহাস
+              </Link>
                <Link
                 href="/dashboard/profile/edit"
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${isActive('/dashboard/profile/edit') ? 'bg-muted text-primary' : ''}`}
@@ -125,6 +141,8 @@ export default function DashboardLayout({
                 {pathname === '/dashboard' && 'ড্যাশবোর্ড'}
                 {pathname === '/dashboard/profile' && 'আমার প্রোফাইল'}
                 {pathname === '/dashboard/profile/edit' && 'প্রোফাইল এডিট করুন'}
+                 {pathname === '/dashboard/saved-articles' && 'সংরক্ষিত আর্টিকেল'}
+                {pathname === '/dashboard/reading-history' && 'পঠিত ইতিহাস'}
             </h1>
           </div>
           <div className="flex items-center gap-4">

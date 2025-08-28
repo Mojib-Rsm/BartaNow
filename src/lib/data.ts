@@ -25,6 +25,8 @@ const users: User[] = [
         bio: 'বার্তা নাও ওয়েবসাইটের অ্যাডমিন। আমি প্রযুক্তি, সংবাদ এবং লেখালেখি ভালোবাসি।',
         bloodGroup: 'A+',
         preferredTopics: ['প্রযুক্তি', 'রাজনীতি'],
+        savedArticles: ['2', '10', '18'],
+        readingHistory: ['1', '2', '3', '4', '5', '10', '18'],
     },
     { 
         id: 'user-2', 
@@ -36,6 +38,8 @@ const users: User[] = [
         bio: 'আমি একজন সাধারণ পাঠক। খেলা এবং বিনোদনের খবর পড়তে ভালোবাসি।',
         bloodGroup: 'O+',
         preferredTopics: ['খেলা', 'বিনোদন'],
+        savedArticles: ['1', '5', '15'],
+        readingHistory: ['1', '5', '8', '13', '15', '16'],
     },
     { 
         id: 'user-3', 
@@ -47,6 +51,8 @@ const users: User[] = [
         bio: 'বার্তা নাও এর একজন সম্পাদক। আমি সংবাদ সম্পাদনা এবং গুণমান নিশ্চিত করতে কাজ করি।',
         bloodGroup: 'B+',
         preferredTopics: ['জাতীয়', 'আন্তর্জাতিক'],
+        savedArticles: [],
+        readingHistory: [],
     },
     { 
         id: 'user-4', 
@@ -58,6 +64,8 @@ const users: User[] = [
         bio: 'আমি একজন প্রতিবেদক। মাঠ থেকে সরাসরি খবর সংগ্রহ এবং রিপোর্ট করাই আমার কাজ।',
         bloodGroup: 'AB+',
         preferredTopics: ['বিশেষ-কভারেজ', 'স্বাস্থ্য'],
+        savedArticles: [],
+        readingHistory: [],
     },
 ];
 

@@ -141,6 +141,8 @@ async function createMockUser(user: Omit<User, 'id' | 'role'>): Promise<User> {
     const newUser: User = {
         id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         role: 'user',
+        savedArticles: [],
+        readingHistory: [],
         ...user
     };
     mockDb.users.push(newUser);
@@ -152,6 +154,16 @@ async function updateMockUser(userId: string, data: Partial<User>): Promise<User
     if (userIndex === -1) return undefined;
     const updatedUser = { ...mockDb.users[userIndex], ...data };
     mockDb.users[userIndex] = updatedUser;
+    
+    // Update localStorage simulation for client-side components
+    if (typeof window !== 'undefined' && window.localStorage) {
+        const storedUser = JSON.parse(window.localStorage.getItem('bartaNowUser') || '{}');
+        if (storedUser.id === userId) {
+            window.localStorage.setItem('bartaNowUser', JSON.stringify(updatedUser));
+            window.dispatchEvent(new Event('storage'));
+        }
+    }
+    
     return updatedUser;
 }
 
@@ -205,8 +217,7 @@ async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, e
             countQueryRef = countQueryRef.where('authorId', '==', authorId);
         }
         if (hasVideo) {
-            queryRef = queryRef.where('videoUrl', '>', '');
-            queryRef = queryRef.orderBy('videoUrl').orderBy('publishedAt', 'desc');
+            queryRef = queryRef.where('videoUrl', '>', '').orderBy('videoUrl').orderBy('publishedAt', 'desc');
             countQueryRef = countQueryRef.where('videoUrl', '>', '');
         }
         if (editorsPick) {
@@ -294,6 +305,8 @@ async function createFirestoreUser(user: Omit<User, 'id' | 'role'>): Promise<Use
     const newUser: User = {
         id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         role: 'user',
+        savedArticles: [],
+        readingHistory: [],
         ...user
     };
 
@@ -307,7 +320,19 @@ async function createFirestoreUser(user: Omit<User, 'id' | 'role'>): Promise<Use
 
 async function updateFirestoreUser(userId: string, data: Partial<User>): Promise<User | undefined> {
     const userRef = db.collection('users').doc(userId);
-    await userRef.update(data);
+    
+    // Firestore cannot accept undefined values. We need to clean the data object.
+    const cleanedData = Object.entries(data).reduce((acc, [key, value]) => {
+        if (value !== undefined) {
+            acc[key as keyof Partial<User>] = value;
+        }
+        return acc;
+    }, {} as Partial<User>);
+
+    if(Object.keys(cleanedData).length > 0) {
+        await userRef.update(cleanedData);
+    }
+    
     const updatedDoc = await userRef.get();
     return updatedDoc.data() as User | undefined;
 }

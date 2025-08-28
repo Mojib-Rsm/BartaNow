@@ -317,3 +317,55 @@ export async function sendNotificationAction(payload: { title: string; body: str
     return { success: false, message: errorMessage };
   }
 }
+
+export async function toggleBookmarkAction(userId: string, articleId: string) {
+    try {
+        const user = await getUserById(userId);
+        if (!user) {
+            return { success: false, message: 'ব্যবহারকারী খুঁজে পাওয়া যায়নি।' };
+        }
+
+        const savedArticles = user.savedArticles || [];
+        const isBookmarked = savedArticles.includes(articleId);
+
+        let updatedSavedArticles;
+        if (isBookmarked) {
+            updatedSavedArticles = savedArticles.filter(id => id !== articleId);
+        } else {
+            updatedSavedArticles = [...savedArticles, articleId];
+        }
+
+        const updatedUser = await updateUser(userId, { savedArticles: updatedSavedArticles });
+
+        if (!updatedUser) {
+            return { success: false, message: 'বুকমার্ক আপডেট করা যায়নি।' };
+        }
+        
+        return { success: true, user: updatedUser, isBookmarked: !isBookmarked };
+
+    } catch (error) {
+        console.error("Toggle Bookmark Error:", error);
+        return { success: false, message: 'একটি সমস্যা হয়েছে।' };
+    }
+}
+
+
+export async function getSavedArticlesAction(userId: string): Promise<Article[]> {
+    const user = await getUserById(userId);
+    if (!user || !user.savedArticles || user.savedArticles.length === 0) {
+        return [];
+    }
+    const articlePromises = user.savedArticles.map(id => getArticleById(id));
+    const articles = await Promise.all(articlePromises);
+    return articles.filter((article): article is Article => article !== undefined);
+}
+
+export async function getReadingHistoryAction(userId: string): Promise<Article[]> {
+    const user = await getUserById(userId);
+    if (!user || !user.readingHistory || user.readingHistory.length === 0) {
+        return [];
+    }
+    const articlePromises = user.readingHistory.map(id => getArticleById(id));
+    const articles = await Promise.all(articlePromises);
+    return articles.filter((article): article is Article => article !== undefined);
+}

@@ -40,6 +40,8 @@ export interface User {
     bio?: string;
     bloodGroup?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
     preferredTopics?: string[];
+    savedArticles?: string[]; // Array of article IDs
+    readingHistory?: string[]; // Array of article IDs
     entityType?: 'USER';
 }
 

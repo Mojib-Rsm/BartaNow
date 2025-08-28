@@ -13,6 +13,7 @@ import AdSpot from '@/components/ad-spot';
 import TrendingSidebar from '@/components/trending-sidebar';
 import AudioPlayer from '@/components/audio-player';
 import FactCheckMeter from '@/components/fact-check-meter';
+import BookmarkButton from '@/components/bookmark-button';
  
 type Props = {
   params: { slug: string }
@@ -73,18 +74,21 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                     <h1 className="text-3xl md:text-5xl font-bold font-headline text-primary mb-4">
                     {article.title}
                     </h1>
-                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground text-sm mb-4">
-                        <Link href={`/authors/${article.authorId}`} className="flex items-center gap-2 hover:text-primary">
-                            <Avatar className="h-8 w-8">
-                                <AvatarImage src={article.authorAvatarUrl} alt={article.authorName} />
-                                <AvatarFallback>{authorInitials}</AvatarFallback>
-                            </Avatar>
-                            <span>{article.authorName}</span>
-                        </Link>
-                        <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <time dateTime={article.publishedAt}>{publishedDate}</time>
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground text-sm">
+                            <Link href={`/authors/${article.authorId}`} className="flex items-center gap-2 hover:text-primary">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarImage src={article.authorAvatarUrl} alt={article.authorName} />
+                                    <AvatarFallback>{authorInitials}</AvatarFallback>
+                                </Avatar>
+                                <span>{article.authorName}</span>
+                            </Link>
+                            <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4" />
+                                <time dateTime={article.publishedAt}>{publishedDate}</time>
+                            </div>
                         </div>
+                        <BookmarkButton articleId={article.id} />
                     </div>
                     <AudioPlayer articleId={article.id} />
                 </header>
