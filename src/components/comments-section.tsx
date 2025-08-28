@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -39,7 +40,7 @@ export default function CommentsSection({ articleId }: { articleId: string }) {
             const comment: Comment = {
                 id: Date.now(),
                 author: user.name,
-                avatar: user.avatarUrl || `https://i.pravatar.cc/150?u=${user.id}`,
+                avatar: user.avatarUrl || `/user.png`,
                 text: newComment,
                 timestamp: 'এখন',
             };

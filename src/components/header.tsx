@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -175,7 +176,7 @@ export default function Header() {
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                                 <Avatar className="h-8 w-8">
-                                    <AvatarImage src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.id}`} alt={user.name} />
+                                    <AvatarImage src={user.avatarUrl || `/user.png`} alt={user.name} />
                                     <AvatarFallback>{userInitials}</AvatarFallback>
                                 </Avatar>
                             </Button>

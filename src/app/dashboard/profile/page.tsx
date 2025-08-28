@@ -52,7 +52,7 @@ export default function ProfilePage() {
   }
 
   const userInitials = user.name.split(' ').map((n) => n[0]).join('');
-  const avatarSrc = user.avatarUrl || `https://i.pravatar.cc/150?u=${user.id}`;
+  const avatarSrc = user.avatarUrl || `/user.png`;
 
   return (
     <Card>

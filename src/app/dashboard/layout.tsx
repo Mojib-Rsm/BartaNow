@@ -71,7 +71,7 @@ export default function DashboardLayout({
   }
 
   const userInitials = user.name.split(' ').map((n) => n[0]).join('');
-  const avatarSrc = user.avatarUrl || `https://i.pravatar.cc/150?u=${user.id}`;
+  const avatarSrc = user.avatarUrl || `/user.png`;
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">

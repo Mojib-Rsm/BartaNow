@@ -159,7 +159,7 @@ export default function UserEditPage({ params }: PageProps) {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="flex flex-col items-center gap-4">
                 <Avatar className="h-24 w-24 text-3xl">
-                    <AvatarImage src={previewImage || `https://i.pravatar.cc/150?u=${user.id}`} alt={user.name} />
+                    <AvatarImage src={previewImage || `/user.png`} alt={user.name} />
                     <AvatarFallback>{userInitials}</AvatarFallback>
                 </Avatar>
                  <Input id="picture" type="file" className="hidden" onChange={handleFileChange} accept="image/*"/>
