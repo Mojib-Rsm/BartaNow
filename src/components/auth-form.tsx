@@ -58,13 +58,14 @@ export default function AuthForm() {
       });
       // Store user info in localStorage
       localStorage.setItem('bartaNowUser', JSON.stringify(result.user));
+      // Manually dispatch a storage event to notify other components (like the header)
+      window.dispatchEvent(new Event('storage'));
       
-      if (result.user.role === 'admin') {
+      if (result.user.role === 'admin' || result.user.role === 'editor' || result.user.role === 'reporter') {
         router.push('/admin');
       } else {
-        router.push('/');
+        router.push('/dashboard');
       }
-      router.refresh(); // To make the header re-render with user state
     } else {
       toast({
         variant: "destructive",

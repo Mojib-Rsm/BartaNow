@@ -20,6 +20,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { useRouter } from 'next/navigation';
 
 
 const topNavLinks = [
@@ -45,6 +46,7 @@ const mainNavLinks = [
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<UserType | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,7 +80,7 @@ export default function Header() {
     localStorage.removeItem('bartaNowUser');
     setUser(null);
     window.dispatchEvent(new Event('storage')); // Notify other tabs
-    window.location.href = '/'; // Redirect to home page
+    router.push('/');
   };
 
   const logoUrl = "https://bartanow.com/wp-content/uploads/2025/04/BartaNow.png";
@@ -197,7 +199,7 @@ export default function Header() {
                                     <span>ড্যাশবোর্ড</span>
                                 </Link>
                             </DropdownMenuItem>
-                            {user.role === 'admin' && (
+                            {(user.role === 'admin' || user.role === 'editor' || user.role === 'reporter') && (
                                 <DropdownMenuItem asChild>
                                     <Link href="/admin">
                                         <LayoutDashboard className="mr-2 h-4 w-4" />
