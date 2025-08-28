@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 
 export default function SettingsPage() {
   return (
-    <div className="container mx-auto py-10 space-y-8">
+    <div className="w-full space-y-8">
       <div>
         <h1 className="text-3xl font-bold">সেটিংস ও কনফিগারেশন</h1>
         <p className="text-muted-foreground">এখান থেকে ওয়েবসাইটের সাধারণ সেটিংস পরিচালনা করুন।</p>

@@ -5,7 +5,7 @@ import Link from "next/link"
 
 export default async function AdsManagementPage() {
   return (
-    <div className="container mx-auto py-10">
+    <div className="w-full">
       <div className="flex justify-between items-center mb-6">
         <div>
             <h1 className="text-3xl font-bold">বিজ্ঞাপন ম্যানেজমেন্ট</h1>
