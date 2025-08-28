@@ -17,5 +17,21 @@ export const rssFeeds: RssFeed[] = [
       'রাজনীতি': 'রাজনীতি',
     },
   },
-  // Add other RSS feeds here
+  {
+    id: 'the-daily-star',
+    name: 'The Daily Star (English)',
+    url: 'https://www.thedailystar.net/supplements/rss.xml',
+    defaultCategory: 'আন্তর্জাতিক',
+    categoryMap: {
+        'Sports': 'খেলা',
+        'Entertainment': 'বিনোদন',
+        'Sci-Tech': 'প্রযুক্তি',
+        'Business': 'অর্থনীতি',
+        'Politics': 'রাজনীতি',
+        'Bangladesh': 'জাতীয়',
+        'World': 'আন্তর্জাতিক',
+        'Environment': 'পরিবেশ',
+        'Health': 'স্বাস্থ্য',
+    }
+  }
 ];
