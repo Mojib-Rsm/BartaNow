@@ -552,7 +552,7 @@ const comments: Comment[] = [
         timestamp: '2024-07-22T11:00:00Z',
         isApproved: true,
     },
-    { _modified an existing one. It should now have the latest and greatest content.
+    {
         id: 'comment-2', 
         articleId: '2', 
         userId: 'user-1', 
