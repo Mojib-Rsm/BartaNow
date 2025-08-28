@@ -19,13 +19,26 @@ export async function generateMetadata(
     }
   }
  
+  const description = page.content[0]?.substring(0, 160) || 'বার্তা নাও-এর একটি পেজ';
+
   return {
     title: page.title,
-    description: page.content[0]?.substring(0, 160) || 'বার্তা নাও-এর একটি পেজ',
+    description: description,
+    openGraph: {
+        title: page.title,
+        description: description,
+        type: 'article',
+        url: `/p/${page.slug}`,
+    },
+    twitter: {
+        card: 'summary',
+        title: page.title,
+        description: description,
+    },
   }
 }
 
-export default async function StaticPage({ params }: { params: { slug: string } }) {
+export default async function StaticPage({ params }: { params: { slug:string } }) {
   const page = await getPageBySlug(decodeURIComponent(params.slug));
 
   if (!page) {
@@ -59,3 +72,5 @@ export default async function StaticPage({ params }: { params: { slug: string } 
     </div>
   );
 }
+
+    

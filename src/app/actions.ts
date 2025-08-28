@@ -235,9 +235,8 @@ export async function createArticleAction(data: Omit<CreateArticleFormValues, 'a
             finalImageUrl = await uploadImage(data.imageUrl, `article-${Date.now()}.png`);
         }
         
-        const newArticleData: Omit<Article, 'id' | 'publishedAt' | 'aiSummary'> = {
+        const newArticleData: Omit<Article, 'id' | 'publishedAt' | 'aiSummary' | 'slug'> = {
             title: data.title,
-            slug: '', // Will be generated in createArticle
             content: data.content.split('\n').filter(p => p.trim() !== ''),
             category: data.category,
             imageUrl: finalImageUrl,
@@ -571,3 +570,5 @@ export async function deletePollAction(pollId: string) {
         return { success: false, message: errorMessage };
     }
 }
+
+    

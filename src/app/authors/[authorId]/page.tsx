@@ -1,3 +1,4 @@
+
 import { getAuthorById, getArticles } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -17,10 +18,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: 'লেখক খুঁজে পাওয়া যায়নি',
     };
   }
+  
+  const description = author.bio || `${author.name} এর লেখা আর্টিকেলসমূহ।`;
 
   return {
     title: `${author.name} এর সকল লেখা`,
-    description: author.bio || `${author.name} এর লেখা আর্টিকেলসমূহ।`,
+    description: description,
+    openGraph: {
+        title: `${author.name} | বার্তা নাও`,
+        description: description,
+        type: 'profile',
+        images: [
+          {
+            url: author.avatarUrl,
+            width: 150,
+            height: 150,
+            alt: author.name,
+          },
+        ],
+    },
+    twitter: {
+        card: 'summary',
+        title: `${author.name} | বার্তা নাও`,
+        description: description,
+    },
   };
 }
 
@@ -71,3 +92,5 @@ export default async function AuthorPage({ params }: Props) {
     </div>
   );
 }
+
+    

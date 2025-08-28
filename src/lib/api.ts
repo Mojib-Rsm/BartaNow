@@ -167,7 +167,7 @@ async function updateMockUser(userId: string, data: Partial<User>): Promise<User
     return updatedUser;
 }
 
-async function createMockArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiSummary'>): Promise<Article> {
+async function createMockArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiSummary' | 'slug'>): Promise<Article> {
      const newArticle: Article = {
         id: `article-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         publishedAt: new Date().toISOString(),
@@ -699,7 +699,7 @@ export async function getPageBySlug(slug: string): Promise<Page | undefined> {
     return getFirestorePageBySlug(slug);
 }
 
-export async function createPage(data: Omit<Page, 'id' | 'slug' | 'publishedAt' | 'lastUpdatedAt' | 'entityType'>): Promise<Page> {
+export async function createPage(data: Omit<Page, 'id' | 'slug' | 'publishedAt' | 'lastUpdatedAt'>): Promise<Page> {
     if (!useFirestore || !db) return createMockPage(data);
     return createFirestorePage(data);
 }
@@ -724,7 +724,7 @@ export async function getPollById(id: string): Promise<Poll | undefined> {
     return getFirestorePollById(id);
 }
 
-export async function createPoll(data: Omit<Poll, 'id' | 'createdAt' | 'entityType'>): Promise<Poll> {
+export async function createPoll(data: Omit<Poll, 'id' | 'createdAt'>): Promise<Poll> {
     if (!useFirestore || !db) return createMockPoll(data);
     return createFirestorePoll(data);
 }
@@ -757,7 +757,7 @@ export async function getAllMedia(): Promise<Media[]> {
     return getFirestoreAllMedia();
 }
 
-export async function createMedia(data: Omit<Media, 'id' | 'uploadedAt' | 'entityType'>): Promise<Media> {
+export async function createMedia(data: Omit<Media, 'id' | 'uploadedAt'>): Promise<Media> {
     if (!useFirestore || !db) return createMockMedia(data);
     return createFirestoreMedia(data);
 }

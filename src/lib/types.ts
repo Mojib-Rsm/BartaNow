@@ -138,3 +138,5 @@ export interface Ad {
   endDate?: string;
   entityType?: 'AD';
 }
+
+    

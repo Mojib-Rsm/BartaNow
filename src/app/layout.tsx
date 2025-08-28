@@ -6,7 +6,6 @@ import Footer from '@/components/footer';
 import './globals.css';
 import PushNotificationManager from '@/components/push-notification-manager';
 import { ThemeProvider } from '@/components/theme-provider';
-import { headers } from 'next/headers';
 
 export const metadata: Metadata = {
   title: {
@@ -22,7 +21,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'বার্তা নাও - সর্বশেষ সংবাদ ও বিশ্লেষণ',
     description: 'রাজনীতি, প্রযুক্তি, খেলা, বিনোদন, এবং আরও অনেক কিছুর উপর সর্বশেষ খবর ও আপডেট পান।',
   },
@@ -34,33 +33,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = headers();
-  const pathname = headersList.get('x-pathname') || '';
-  const isAdminRoute = pathname.startsWith('/admin');
-
-  if (isAdminRoute) {
-    return (
-      <html lang="bn" dir="ltr" className="h-full" suppressHydrationWarning>
-        <head>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&family=Playfair+Display:wght@700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
-        </head>
-        <body className="font-body antialiased bg-background">
-           <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-           >
-              {children}
-              <Toaster />
-           </ThemeProvider>
-        </body>
-      </html>
-    )
-  }
-
   return (
     <html lang="bn" dir="ltr" className="h-full" suppressHydrationWarning>
       <head>
@@ -75,17 +47,12 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-          <div className="flex flex-col min-h-screen">
-            <PushNotificationManager />
-            <Header />
-            <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          {children}
           <Toaster />
         </ThemeProvider>
       </body>
     </html>
   );
 }
+
+    

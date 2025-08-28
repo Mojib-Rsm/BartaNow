@@ -1,3 +1,4 @@
+
 import { getArticleBySlug, getArticles } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -34,6 +35,27 @@ export async function generateMetadata(
   return {
     title: article.title,
     description: article.aiSummary,
+    openGraph: {
+        title: article.title,
+        description: article.aiSummary,
+        type: 'article',
+        publishedTime: article.publishedAt,
+        authors: [article.authorName],
+        images: [
+            {
+                url: article.imageUrl,
+                width: 800,
+                height: 600,
+                alt: article.title,
+            },
+        ],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: article.title,
+        description: article.aiSummary,
+        images: [article.imageUrl],
+    },
   }
 }
 
@@ -146,3 +168,5 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     </div>
   );
 }
+
+    

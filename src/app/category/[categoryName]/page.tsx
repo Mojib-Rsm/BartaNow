@@ -1,3 +1,4 @@
+
 import { getArticles } from '@/lib/api';
 import ArticleCard from '@/components/article-card';
 import { notFound } from 'next/navigation';
@@ -12,10 +13,22 @@ type CategoryPageProps = {
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const displayName = decodeURIComponent(params.categoryName);
+  const description = `বার্তা নাও থেকে ${displayName} ক্যাটাগরির সর্বশেষ সংবাদ এবং আপডেট।`;
 
   return {
     title: `${displayName} বিষয়ক সকল খবর`,
-    description: `বার্তা নাও থেকে ${displayName} ক্যাটাগরির সর্বশেষ সংবাদ এবং আপডেট।`,
+    description: description,
+    openGraph: {
+        title: `${displayName} | বার্তা নাও`,
+        description: description,
+        type: 'website',
+        url: `/category/${params.categoryName}`,
+    },
+    twitter: {
+        card: 'summary',
+        title: `${displayName} | বার্তা নাও`,
+        description: description,
+    },
   };
 }
 
@@ -53,3 +66,5 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     </div>
   );
 }
+
+    
