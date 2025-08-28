@@ -1,4 +1,3 @@
-
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
@@ -182,7 +181,7 @@ export const columns: ColumnDef<Article>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/articles/${article.slug}`} target="_blank">আর্টিকেল দেখুন</Link>
+              <Link href={`/${article.slug}`} target="_blank">আর্টিকেল দেখুন</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={`/admin/articles/edit/${article.id}`}>এডিট করুন</Link>

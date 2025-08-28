@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { Article } from '@/lib/types';
@@ -38,7 +37,7 @@ export default function FactCheckSidebar({ articles }: FactCheckSidebarProps) {
             return (
                  <li key={article.id} className="flex items-start gap-3">
                     {verdictInfo && <Icon className={cn("h-5 w-5 mt-1 shrink-0", verdictInfo.color)} />}
-                    <Link href={`/articles/${article.slug}`} className="group">
+                    <Link href={`/${article.slug}`} className="group">
                         <h3 className="font-semibold text-sm leading-snug group-hover:text-primary transition-colors">
                             {article.title}
                         </h3>

@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Article } from '@/lib/types';
@@ -13,7 +12,7 @@ type ArticleCardProps = {
 
 export default function ArticleCard({ article }: ArticleCardProps) {
   const formattedDate = format(new Date(article.publishedAt), "d MMMM, yyyy", { locale: bn });
-  const articleUrl = `/articles/${article.slug}`;
+  const articleUrl = `/${article.slug}`;
 
   return (
     <Card className="flex flex-col overflow-hidden bg-card rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 group border">
@@ -54,5 +53,3 @@ export default function ArticleCard({ article }: ArticleCardProps) {
     </Card>
   );
 }
-
-    

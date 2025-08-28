@@ -50,7 +50,7 @@ export default async function SpecialCoveragePage() {
               </div>
               <div className="p-6 flex flex-col justify-center">
                 <h2 className="text-2xl md:text-3xl font-bold font-headline mb-2">
-                  <Link href={`/articles/${featuredArticle.slug}`} className="hover:text-primary">
+                  <Link href={`/${featuredArticle.slug}`} className="hover:text-primary">
                     {featuredArticle.title}
                   </Link>
                 </h2>

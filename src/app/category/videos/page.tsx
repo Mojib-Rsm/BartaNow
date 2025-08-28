@@ -51,7 +51,7 @@ export default async function VideoGalleryPage() {
               </div>
               <div className="p-6 flex flex-col justify-center">
                 <h2 className="text-2xl md:text-3xl font-bold font-headline mb-2">
-                  <Link href={`/articles/${featuredVideo.slug}`} className="hover:text-primary">
+                  <Link href={`/${featuredVideo.slug}`} className="hover:text-primary">
                     {featuredVideo.title}
                   </Link>
                 </h2>
@@ -70,7 +70,7 @@ export default async function VideoGalleryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {otherVideos.map((article) => (
               <Card key={article.id} className="group overflow-hidden">
-                <Link href={`/articles/${article.slug}`}>
+                <Link href={`/${article.slug}`}>
                   <div className="relative aspect-video">
                     <Image
                       src={article.imageUrl}

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,9 +22,9 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 
 const topNavLinks = [
-    { title: 'খেলা: বাংলাদেশের দুর্দান্ত জয়ে এশিয়া কাপ শুরু', image: 'https://picsum.photos/seed/bangles/50/50', href: '/articles/খেলা-বাংলাদেশের-দুর্দান্ত-জয়ে-এশিয়া-কাপ-শুরু' },
-    { title: 'মিথিলার গর্ব: পেলেন \'ডক্টর\' উপাধি', image: 'https://picsum.photos/seed/mithila/50/50', href: '/articles/প্রযুক্তি-দেশজুড়ে-5g-সেবা-চালু-হতে-যাচ্ছে' },
-    { title: 'আগুন নেভানোর জন্য পানি আনতে গিয়ে পুকুরেই ডুবল...', image: 'https://picsum.photos/seed/firefighter/50/50', href: '/articles/অর্থনীতি-ডলারের-বাজারে-অস্থিরতা-অর্থনীতিতে-প্রভাব' },
+    { title: 'খেলা: বাংলাদেশের দুর্দান্ত জয়ে এশিয়া কাপ শুরু', image: 'https://picsum.photos/seed/bangles/50/50', href: '/খেলা-বাংলাদেশের-দুর্দান্ত-জয়ে-এশিয়া-কাপ-শুরু' },
+    { title: 'মিথিলার গর্ব: পেলেন \'ডক্টর\' উপাধি', image: 'https://picsum.photos/seed/mithila/50/50', href: '/প্রযুক্তি-দেশজুড়ে-5g-সেবা-চালু-হতে-যাচ্ছে' },
+    { title: 'আগুন নেভানোর জন্য পানি আনতে গিয়ে পুকুরেই ডুবল...', image: 'https://picsum.photos/seed/firefighter/50/50', href: '/অর্থনীতি-ডলারের-বাজারে-অস্থিরতা-অর্থনীতিতে-প্রভাব' },
 ];
 
 const mainNavLinks = [

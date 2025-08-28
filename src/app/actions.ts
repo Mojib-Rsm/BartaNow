@@ -1,4 +1,3 @@
-
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -198,7 +197,7 @@ export async function updateArticleAction(data: Omit<ArticleFormValues, 'authorI
 
         revalidatePath('/admin/articles');
         revalidatePath(`/admin/articles/edit/${data.id}`);
-        revalidatePath(`/articles/${updatedArticle.slug}`);
+        revalidatePath(`/${updatedArticle.slug}`);
         revalidatePath('/');
 
 
