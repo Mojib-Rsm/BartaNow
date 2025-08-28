@@ -124,8 +124,11 @@ export async function updateUserAction(data: UpdateUserFormValues) {
             name: data.name,
             bio: data.bio,
             bloodGroup: data.bloodGroup,
-            role: data.role,
         };
+
+        if (data.role) {
+            updateData.role = data.role;
+        }
 
         if (data.avatarUrl && data.avatarUrl.startsWith('data:image')) {
             updateData.avatarUrl = await uploadImage(data.avatarUrl, `${data.id}-avatar.png`);
