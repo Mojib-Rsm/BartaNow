@@ -1,47 +1,73 @@
-/* eslint-disable no-restricted-globals */
+// This is the service worker file for handling push notifications.
 
-// This service worker file is responsible for handling push notifications.
+// Listen for the 'install' event, which fires when the service worker is installed.
+self.addEventListener('install', (event) => {
+  console.log('Service Worker: Installed');
+  // Skip waiting to ensure the new service worker activates immediately.
+  self.skipWaiting();
+});
 
+// Listen for the 'activate' event, which fires when the service worker is activated.
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker: Activated');
+  // Claim all clients to ensure the service worker controls any open pages.
+  event.waitUntil(self.clients.claim());
+});
+
+// Listen for the 'push' event, which is the core of handling incoming push messages.
 self.addEventListener('push', (event) => {
-  if (!event.data) {
-    console.error('Push event but no data');
-    return;
-  }
+  console.log('Service Worker: Push Received.');
+  
+  // The data from the push message is in event.data.
+  // We default to a generic message if no data is present.
+  const notificationData = event.data?.json() ?? {
+    title: 'BartaNow',
+    body: 'You have a new notification!',
+    url: '/',
+  };
 
-  const data = event.data.json();
-  const title = data.title || 'BartaNow';
+  const { title, body, url } = notificationData;
+
   const options = {
-    body: data.body,
-    icon: '/icon-192x192.png', // Make sure you have an icon in your public folder
-    badge: '/badge-72x72.png', // And a badge
+    body: body,
+    icon: '/logo.png', // Icon for the notification
+    badge: '/badge.png', // Badge for the notification bar on mobile
     data: {
-      url: data.url || '/',
+      url: url || '/', // URL to open when the notification is clicked
     },
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  // Show the notification. waitUntil ensures the service worker doesn't terminate
+  // before the notification is displayed.
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
 });
 
+// Listen for the 'notificationclick' event, which fires when a user clicks on a notification.
 self.addEventListener('notificationclick', (event) => {
+  console.log('Service Worker: Notification clicked.');
+
+  // Close the notification
   event.notification.close();
 
-  const urlToOpen = event.notification.data.url || '/';
+  const urlToOpen = event.notification.data.url;
 
+  // This looks for an existing window with the same URL and focuses it.
+  // If no such window is found, it opens a new one.
   event.waitUntil(
-    clients.matchAll({
+    self.clients.matchAll({
       type: 'window',
       includeUncontrolled: true,
     }).then((clientList) => {
-      if (clientList.length > 0) {
-        let client = clientList[0];
-        for (let i = 0; i < clientList.length; i++) {
-          if (clientList[i].focused) {
-            client = clientList[i];
-          }
+      for (const client of clientList) {
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
         }
-        return client.focus().then(cli => cli.navigate(urlToOpen));
       }
-      return clients.openWindow(urlToOpen);
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(urlToOpen);
+      }
     })
   );
 });
