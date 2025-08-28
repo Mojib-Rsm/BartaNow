@@ -2,7 +2,7 @@
 
 'use server';
 
-import type { Article, Author, Poll, MemeNews, User } from './types';
+import type { Article, Author, Poll, MemeNews, User, Notification } from './types';
 import admin from 'firebase-admin';
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
@@ -200,6 +200,10 @@ async function deleteMockUser(userId: string): Promise<void> {
     if (index > -1) mockDb.users.splice(index, 1);
 }
 
+async function getMockNotificationsForUser(userId: string): Promise<Notification[]> {
+    return mockDb.notifications.filter(n => n.userId === userId).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+}
+
 
 // --- FIRESTORE IMPLEMENTATIONS ---
 
@@ -368,6 +372,14 @@ async function deleteFirestoreUser(userId: string): Promise<void> {
     await db.collection('users').doc(userId).delete();
 }
 
+async function getFirestoreNotificationsForUser(userId: string): Promise<Notification[]> {
+    const snapshot = await db.collection('notifications')
+        .where('userId', '==', userId)
+        .orderBy('timestamp', 'desc')
+        .get();
+    return snapshot.docs.map(doc => doc.data() as Notification);
+}
+
 
 // --- PUBLIC API ---
 
@@ -476,4 +488,9 @@ export async function getPollById(id: string): Promise<Poll | undefined> {
 
 export async function getMemeNews(): Promise<MemeNews[]> {
   return mockDb.memeNews;
+}
+
+export async function getNotificationsForUser(userId: string): Promise<Notification[]> {
+    if (!useFirestore || !db) return getMockNotificationsForUser(userId);
+    return getFirestoreNotificationsForUser(userId);
 }

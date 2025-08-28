@@ -10,6 +10,7 @@ import {
   Home,
   Bookmark,
   History,
+  Bell,
 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -115,6 +116,13 @@ export default function DashboardLayout({
                 পঠিত ইতিহাস
               </Link>
                <Link
+                href="/dashboard/notifications"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${isActive('/dashboard/notifications') ? 'bg-muted text-primary' : ''}`}
+              >
+                <Bell className="h-4 w-4" />
+                নোটিফিকেশন সেন্টার
+              </Link>
+               <Link
                 href="/dashboard/profile/edit"
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${isActive('/dashboard/profile/edit') ? 'bg-muted text-primary' : ''}`}
               >
@@ -143,6 +151,7 @@ export default function DashboardLayout({
                 {pathname === '/dashboard/profile/edit' && 'প্রোফাইল এডিট করুন'}
                  {pathname === '/dashboard/saved-articles' && 'সংরক্ষিত আর্টিকেল'}
                 {pathname === '/dashboard/reading-history' && 'পঠিত ইতিহাস'}
+                 {pathname === '/dashboard/notifications' && 'নোটিফিকেশন সেন্টার'}
             </h1>
           </div>
           <div className="flex items-center gap-4">

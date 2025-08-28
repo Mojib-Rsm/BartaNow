@@ -100,6 +100,20 @@ export interface Media {
     entityType?: 'MEDIA';
 }
 
+export interface Notification {
+    id: string;
+    userId: string;
+    type: 'breaking' | 'topic' | 'system';
+    title: string;
+    message: string;
+    articleId?: string;
+    articleSlug?: string;
+    isRead: boolean;
+    timestamp: string; // ISO date string
+    entityType?: 'NOTIFICATION';
+}
+
+
 export interface Ad {
   id: string;
   name: string;

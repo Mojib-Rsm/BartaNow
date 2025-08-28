@@ -1,6 +1,6 @@
 
 
-import type { Article, Author, Poll, MemeNews, User, Comment, Media } from './types';
+import type { Article, Author, Poll, MemeNews, User, Comment, Media, Notification } from './types';
 
 // Helper to generate a non-AI slug from a title for mock data
 const generateNonAiSlug = (title: string) => {
@@ -552,7 +552,7 @@ const comments: Comment[] = [
         timestamp: '2024-07-22T11:00:00Z',
         isApproved: true,
     },
-    { 
+    { _modified an existing one. It should now have the latest and greatest content.
         id: 'comment-2', 
         articleId: '2', 
         userId: 'user-1', 
@@ -583,6 +583,49 @@ const media: Media[] = articles.map((article, index) => ({
     uploadedAt: article.publishedAt,
     uploadedBy: article.authorId,
 }));
+
+const notifications: Notification[] = [
+    {
+        id: 'notif-1',
+        userId: 'user-2',
+        type: 'breaking',
+        title: 'ব্রেকিং নিউজ: জাতীয় নির্বাচন অনুষ্ঠিত হবে আগামী মাসে',
+        message: 'নির্বাচন কমিশন এইমাত্র আগামী মাসের ১০ তারিখে জাতীয় নির্বাচনের তারিখ ঘোষণা করেছে।',
+        articleId: '11',
+        articleSlug: articles.find(a => a.id === '11')?.slug,
+        isRead: false,
+        timestamp: '2024-07-29T10:00:00Z',
+    },
+    {
+        id: 'notif-2',
+        userId: 'user-2',
+        type: 'topic',
+        title: 'আপনার পছন্দের বিষয়ে নতুন খবর: খেলা',
+        message: 'বাংলাদেশ প্রিমিয়ার লিগের উত্তেজনাপূর্ণ ম্যাচে মোহামেডানকে হারিয়েছে আবাহনী।',
+        articleId: '13',
+        articleSlug: articles.find(a => a.id === '13')?.slug,
+        isRead: false,
+        timestamp: '2024-07-29T09:00:00Z',
+    },
+    {
+        id: 'notif-3',
+        userId: 'user-2',
+        type: 'system',
+        title: 'সিস্টেম আপডেট: নতুন ড্যাশবোর্ড ফিচার',
+        message: 'আপনার ড্যাশবোর্ডে এখন থেকে সংরক্ষিত আর্টিকেল এবং পঠিত ইতিহাস দেখতে পাবেন।',
+        isRead: true,
+        timestamp: '2024-07-28T18:00:00Z',
+    },
+     {
+        id: 'notif-4',
+        userId: 'user-1', // For admin
+        type: 'system',
+        title: 'নতুন ব্যবহারকারী রেজিস্ট্রেশন করেছেন',
+        message: 'Regular User (user@bartanow.com) আপনার সাইটে রেজিস্ট্রেশন করেছেন।',
+        isRead: true,
+        timestamp: '2024-07-28T17:00:00Z',
+    }
+];
 
 
 export const mockDb = {
@@ -621,4 +664,5 @@ export const mockDb = {
   memeNews,
   comments,
   media,
+  notifications,
 };
