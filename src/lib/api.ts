@@ -2,7 +2,7 @@
 
 'use server';
 
-import type { Article, Author, Poll, MemeNews, User, Notification } from './types';
+import type { Article, Author, Poll, MemeNews, User, Notification, Media } from './types';
 import admin from 'firebase-admin';
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
@@ -204,6 +204,20 @@ async function getMockNotificationsForUser(userId: string): Promise<Notification
     return mockDb.notifications.filter(n => n.userId === userId).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 }
 
+async function getMockAllMedia(): Promise<Media[]> {
+    return [...mockDb.media].sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+}
+
+async function createMockMedia(data: Omit<Media, 'id' | 'uploadedAt'>): Promise<Media> {
+    const newMedia: Media = {
+        id: `media-${Date.now()}`,
+        uploadedAt: new Date().toISOString(),
+        ...data,
+    };
+    mockDb.media.unshift(newMedia);
+    return newMedia;
+}
+
 
 // --- FIRESTORE IMPLEMENTATIONS ---
 
@@ -380,6 +394,22 @@ async function getFirestoreNotificationsForUser(userId: string): Promise<Notific
     return snapshot.docs.map(doc => doc.data() as Notification);
 }
 
+async function getFirestoreAllMedia(): Promise<Media[]> {
+    const snapshot = await db.collection('media').orderBy('uploadedAt', 'desc').get();
+    return snapshot.docs.map(doc => doc.data() as Media);
+}
+
+async function createFirestoreMedia(data: Omit<Media, 'id' | 'uploadedAt'>): Promise<Media> {
+    const newMedia: Media = {
+        id: `media-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        uploadedAt: new Date().toISOString(),
+        entityType: 'MEDIA',
+        ...data,
+    };
+    await db.collection('media').doc(newMedia.id).set(newMedia);
+    return newMedia;
+}
+
 
 // --- PUBLIC API ---
 
@@ -493,4 +523,14 @@ export async function getMemeNews(): Promise<MemeNews[]> {
 export async function getNotificationsForUser(userId: string): Promise<Notification[]> {
     if (!useFirestore || !db) return getMockNotificationsForUser(userId);
     return getFirestoreNotificationsForUser(userId);
+}
+
+export async function getAllMedia(): Promise<Media[]> {
+    if (!useFirestore || !db) return getMockAllMedia();
+    return getFirestoreAllMedia();
+}
+
+export async function createMedia(data: Omit<Media, 'id' | 'uploadedAt' | 'entityType'>): Promise<Media> {
+    if (!useFirestore || !db) return createMockMedia(data);
+    return createFirestoreMedia(data);
 }

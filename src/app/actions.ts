@@ -3,7 +3,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia } from '@/lib/api';
 import type { Article, User } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -368,4 +368,45 @@ export async function getReadingHistoryAction(userId: string): Promise<Article[]
     const articlePromises = user.readingHistory.map(id => getArticleById(id));
     const articles = await Promise.all(articlePromises);
     return articles.filter((article): article is Article => article !== undefined);
+}
+
+export async function uploadMediaAction(formData: FormData) {
+    const file = formData.get('file') as File;
+    const userId = formData.get('userId') as string;
+
+    if (!file || !userId) {
+        return { success: false, message: 'ফাইল এবং ব্যবহারকারী আইডি প্রয়োজন।' };
+    }
+
+    try {
+        // Convert file to base64
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const base64String = `data:${file.type};base64,${buffer.toString('base64')}`;
+
+        // Upload to ImageKit
+        const imageUrl = await uploadImage(base64String, file.name);
+
+        // Save metadata to database
+        const newMedia = await createMedia({
+            fileName: file.name,
+            url: imageUrl,
+            mimeType: file.type,
+            size: file.size,
+            uploadedBy: userId,
+        });
+
+        if (!newMedia) {
+            return { success: false, message: 'মিডিয়া আপলোড করা যায়নি।' };
+        }
+
+        revalidatePath('/admin/media');
+        
+        return { success: true, message: 'মিডিয়া সফলভাবে আপলোড হয়েছে।', media: newMedia };
+
+    } catch (error) {
+        console.error("Upload Media Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'মিডিয়া আপলোড করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
 }
