@@ -2,17 +2,6 @@
 
 import type { Article, Author, Poll, MemeNews, User } from './types';
 
-// Helper to generate a slug from a title
-const generateSlug = (title: string) => {
-    return title
-        .toLowerCase()
-        .replace(/\s+/g, '-') // Replace spaces with -
-        .replace(/[^\p{L}\p{N}-]/gu, '') // Remove all non-alphanumeric characters except dashes
-        .replace(/--+/g, '-') // Replace multiple - with single -
-        .replace(/^-+/, '') // Trim - from start of text
-        .replace(/-+$/, ''); // Trim - from end of text
-};
-
 const users: User[] = [
     { 
         id: 'user-1', 
@@ -498,7 +487,7 @@ const articlesData: Omit<Article, 'slug'>[] = [
 
 const articles: Article[] = articlesData.map(article => ({
     ...article,
-    slug: generateSlug(article.title)
+    slug: article.id, // Will be replaced by AI slug generation in api.ts
 }));
 
 

@@ -7,6 +7,7 @@ import admin from 'firebase-admin';
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
 import { sendMail } from './mailer';
+import { translateForSlug } from '@/ai/flows/translate-for-slug';
 
 const useFirestore = process.env.DATABASE_TYPE === 'firestore';
 
@@ -35,7 +36,7 @@ if (useFirestore) {
 
 
 // Helper to generate a slug from a title
-const generateSlug = (title: string) => {
+const generateNonAiSlug = (title: string) => {
     return title
         .toLowerCase()
         .replace(/\s+/g, '-') // Replace spaces with -
@@ -158,7 +159,7 @@ async function createMockArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiS
      const newArticle: Article = {
         id: `article-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         publishedAt: new Date().toISOString(),
-        slug: generateSlug(data.title),
+        slug: await translateForSlug(data.title),
         aiSummary: data.content.join('\n\n').substring(0, 150) + '...', // Basic summary
         ...data,
     };
@@ -168,7 +169,7 @@ async function createMockArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiS
 
 async function updateMockArticle(articleId: string, data: Partial<Article>): Promise<Article | undefined> {
      if (data.title && !data.slug) {
-        data.slug = generateSlug(data.title);
+        data.slug = await translateForSlug(data.title);
     }
     const articleIndex = mockDb.articles.findIndex(a => a.id === articleId);
     if (articleIndex === -1) return undefined;
@@ -313,11 +314,12 @@ async function updateFirestoreUser(userId: string, data: Partial<User>): Promise
     return updatedDoc.data() as User | undefined;
 }
 
-async function createFirestoreArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiSummary'>): Promise<Article> {
+async function createFirestoreArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiSummary' | 'slug'>): Promise<Article> {
+    const slug = await translateForSlug(data.title);
     const newArticle: Article = {
         id: `article-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         publishedAt: new Date().toISOString(),
-        slug: generateSlug(data.title),
+        slug: slug,
         aiSummary: data.content.join('\n\n').substring(0, 150) + '...', // Basic summary
         ...data,
     };
@@ -327,7 +329,7 @@ async function createFirestoreArticle(data: Omit<Article, 'id' | 'publishedAt' |
 
 async function updateFirestoreArticle(articleId: string, data: Partial<Article>): Promise<Article | undefined> {
     if (data.title && !data.slug) {
-        data.slug = generateSlug(data.title);
+        data.slug = await translateForSlug(data.title);
     }
     const articleRef = db.collection('articles').doc(articleId);
     await articleRef.update(data);
@@ -410,7 +412,7 @@ export async function updateUser(userId: string, data: Partial<User>): Promise<U
     return updateFirestoreUser(userId, data);
 }
 
-export async function createArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiSummary'>): Promise<Article> {
+export async function createArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiSummary' | 'slug'>): Promise<Article> {
     const newArticle = (!useFirestore || !db) ? await createMockArticle(data) : await createFirestoreArticle(data);
 
     // AI Summary generation can be slow, so we do it after creating the article
