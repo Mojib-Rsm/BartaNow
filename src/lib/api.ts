@@ -155,7 +155,6 @@ export async function getArticleById(id: string): Promise<Article | undefined> {
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
     if (useMockData) {
         const article = mockDb.articles.find((article) => article.slug === slug);
-        // Fallback for newly created articles not in the initial mock import
         if(article) return article;
     }
     const snapshot = await db.collection('articles').where('slug', '==', slug).limit(1).get();
