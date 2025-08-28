@@ -83,7 +83,7 @@ export default function Header() {
     router.push('/');
   };
 
-  const logoUrl = "https://bartanow.com/wp-content/uploads/2025/04/BartaNow.png";
+  const logoUrl = "/logo.png";
   const userInitials = user?.name.split(' ').map(n => n[0]).join('') || 'U';
 
   return (
@@ -98,7 +98,7 @@ export default function Header() {
             isScrolled ? 'h-0 border-none opacity-0' : 'opacity-100'
           )}>
             <Link href="/" className="flex items-center gap-2 text-3xl font-bold font-headline text-primary hover:opacity-80 transition-opacity">
-                 <Image src={logoUrl} alt="BartaNow Logo" width={200} height={50} />
+                 <Image src={logoUrl} alt="BartaNow Logo" width={160} height={40} />
             </Link>
             <div className="hidden md:flex items-center gap-4 text-sm">
                 {topNavLinks.map((link, index) => (
@@ -159,7 +159,7 @@ export default function Header() {
                 "flex items-center gap-2 text-xl font-bold font-headline text-primary transition-opacity",
                 isScrolled ? 'opacity-100' : 'md:opacity-0'
                 )}>
-                  <Image src={logoUrl} alt="BartaNow Logo" width={150} height={40} />
+                  <Image src={logoUrl} alt="BartaNow Logo" width={160} height={40} />
               </Link>
             </div>
             <nav className="hidden md:flex items-center gap-6 flex-grow">
