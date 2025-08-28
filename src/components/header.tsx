@@ -83,7 +83,7 @@ export default function Header() {
     router.push('/');
   };
 
-  const logoUrl = "/logo.png";
+  const logoUrl = "https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/refs/heads/main/public/log-heado.png";
   const userInitials = user?.name.split(' ').map(n => n[0]).join('') || 'U';
 
   return (
