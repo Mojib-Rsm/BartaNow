@@ -1,3 +1,4 @@
+
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
@@ -29,12 +30,23 @@ import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { deleteArticleAction } from "@/app/actions"
 import { useRouter } from "next/navigation"
+import { useAuthorization } from "@/hooks/use-authorization"
 
 const DeleteConfirmationDialog = ({ article, onDeleted }: { article: Article, onDeleted: () => void }) => {
     const [isOpen, setIsOpen] = useState(false)
     const { toast } = useToast()
+    const { hasPermission } = useAuthorization();
 
     const handleDelete = async () => {
+        if (!hasPermission('delete_article')) {
+            toast({
+                variant: "destructive",
+                title: "অনুমতি নেই",
+                description: "আপনার এই আর্টিকেলটি ডিলিট করার অনুমতি নেই।",
+            });
+            return;
+        }
+
         const result = await deleteArticleAction(article.id)
         if (result.success) {
             toast({
@@ -51,6 +63,8 @@ const DeleteConfirmationDialog = ({ article, onDeleted }: { article: Article, on
         }
         setIsOpen(false)
     }
+
+    if (!hasPermission('delete_article')) return null;
 
     return (
         <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
@@ -159,6 +173,7 @@ export const columns: ColumnDef<Article>[] = [
     cell: ({ row, table }) => {
       const article = row.original
       const router = useRouter()
+      const { hasPermission } = useAuthorization();
 
       const handleDeleted = () => {
         router.refresh()
@@ -183,9 +198,11 @@ export const columns: ColumnDef<Article>[] = [
             <DropdownMenuItem asChild>
               <Link href={`/${article.slug}`} target="_blank">আর্টিকেল দেখুন</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={`/admin/articles/edit/${article.id}`}>এডিট করুন</Link>
-            </DropdownMenuItem>
+            {hasPermission('edit_article') && (
+                <DropdownMenuItem asChild>
+                <Link href={`/admin/articles/edit/${article.id}`}>এডিট করুন</Link>
+                </DropdownMenuItem>
+            )}
             <DeleteConfirmationDialog article={article} onDeleted={handleDeleted} />
           </DropdownMenuContent>
         </DropdownMenu>

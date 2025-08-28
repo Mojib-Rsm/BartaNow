@@ -1,4 +1,18 @@
 
+export type Permission =
+  | 'create_article' | 'edit_article' | 'delete_article' | 'publish_article'
+  | 'create_page' | 'edit_page' | 'delete_page'
+  | 'create_poll' | 'edit_poll' | 'delete_poll'
+  | 'manage_comments' | 'approve_comment' | 'delete_comment'
+  | 'view_users' | 'create_user' | 'edit_user_profile' | 'delete_user' | 'change_user_role' | 'block_user'
+  | 'manage_media' | 'upload_media' | 'delete_media'
+  | 'manage_settings' | 'manage_ads' | 'send_notification' | 'manage_newsletter'
+  | 'login_as_user';
+
+export interface Role {
+  name: string;
+  permissions: Permission[];
+}
 
 export interface Author {
   id: string;

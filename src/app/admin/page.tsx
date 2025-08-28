@@ -137,29 +137,29 @@ export default function AdminPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
             <Card className="lg:col-span-4">
                 <CardHeader>
-                    <CardTitle>Total Views</CardTitle>
+                    <CardTitle>সাত দিনের ভিজিটর পরিসংখ্যান</CardTitle>
                      <CardDescription>
-                        গত ৬ মাসের ভিউয়ের সংখ্যা
+                        গত ৭ দিনে আপনার ওয়েবসাইটে ইউনিক ভিজিটরের সংখ্যা
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="pl-2">
                     <ResponsiveContainer width="100%" height={350}>
-                        <RechartsLineChart data={totalViewsData}>
+                        <RechartsLineChart data={visitorsData}>
                             <CartesianGrid vertical={false} />
-                            <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+                            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => new Date(value).toLocaleDateString('bn-BD', { day: 'numeric', month: 'short' })} />
                             <YAxis />
                             <Tooltip
                                 cursor={false}
                                 content={<CustomTooltip />}
                              />
-                             <Line dataKey="views" type="monotone" stroke="hsl(var(--primary))" strokeWidth={2} dot={true} />
+                             <Line dataKey="visitors" type="monotone" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={true} />
                         </RechartsLineChart>
                     </ResponsiveContainer>
                 </CardContent>
             </Card>
              <Card className="lg:col-span-3">
                 <CardHeader>
-                    <CardTitle>Top Categories</CardTitle>
+                    <CardTitle>টপ ক্যাটাগরি</CardTitle>
                      <CardDescription>
                         আর্টিকেলের সংখ্যা অনুযায়ী সর্বোচ্চ ক্যাটাগরি
                     </CardDescription>

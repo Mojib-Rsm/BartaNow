@@ -32,12 +32,23 @@ import type { User } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { deleteUserAction } from "@/app/actions"
+import { useAuthorization } from "@/hooks/use-authorization"
 
 const DeleteConfirmationDialog = ({ user, onDeleted }: { user: User, onDeleted: () => void }) => {
     const [isOpen, setIsOpen] = useState(false)
     const { toast } = useToast()
+    const { hasPermission } = useAuthorization();
 
     const handleDelete = async () => {
+        if (!hasPermission('delete_user')) {
+            toast({
+                variant: "destructive",
+                title: "অনুমতি নেই",
+                description: "আপনার এই ব্যবহারকারীকে ডিলিট করার অনুমতি নেই।",
+            });
+            return;
+        }
+
         const result = await deleteUserAction(user.id)
         if (result.success) {
             toast({
@@ -54,6 +65,8 @@ const DeleteConfirmationDialog = ({ user, onDeleted }: { user: User, onDeleted: 
         }
         setIsOpen(false)
     }
+
+    if (!hasPermission('delete_user')) return null;
 
     return (
         <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
@@ -157,6 +170,7 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original
       const router = useRouter()
+      const { hasPermission } = useAuthorization();
 
       const handleLoginAsUser = () => {
         // This is a simplified way to "login as user". 
@@ -180,14 +194,18 @@ export const columns: ColumnDef<User>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>অ্যাকশন</DropdownMenuLabel>
-            <DropdownMenuItem asChild>
-                <Link href={`/admin/users/edit/${user.id}`}>প্রোফাইল এডিট করুন</Link>
-            </DropdownMenuItem>
-             <DropdownMenuItem onClick={handleLoginAsUser}>
-              অ্যাকাউন্টে লগইন করুন
-            </DropdownMenuItem>
+            {hasPermission('edit_user_profile') && (
+                <DropdownMenuItem asChild>
+                    <Link href={`/admin/users/edit/${user.id}`}>প্রোফাইল এডিট করুন</Link>
+                </DropdownMenuItem>
+            )}
+            {hasPermission('login_as_user') && (
+                <DropdownMenuItem onClick={handleLoginAsUser}>
+                অ্যাকাউন্টে লগইন করুন
+                </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem>ব্লক করুন</DropdownMenuItem>
+            {hasPermission('block_user') && <DropdownMenuItem>ব্লক করুন</DropdownMenuItem>}
             <DeleteConfirmationDialog user={user} onDeleted={handleDeleted} />
           </DropdownMenuContent>
         </DropdownMenu>
