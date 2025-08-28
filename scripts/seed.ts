@@ -2,6 +2,7 @@
 import admin from 'firebase-admin';
 import { mockDb } from '../src/lib/data';
 import { config } from 'dotenv';
+import { translateForSlug } from '@/ai/flows/translate-for-slug';
 
 // Load environment variables from .env file at the root of the project
 config({ path: '.env' });
@@ -41,13 +42,27 @@ export async function seedDatabase() {
   await Promise.all(authorPromises);
   console.log('Authors seeded successfully.');
   
-  // Seed Articles
-  console.log(`Seeding ${mockDb.articles.length} articles...`);
-  const articlePromises = mockDb.articles.map(article =>
-    articlesCollection.doc(article.id).set(article)
-  );
+  // Seed Articles with AI-generated slugs
+  console.log(`Generating slugs and seeding ${mockDb.articles.length} articles...`);
+  console.log("This may take a few moments as it requires AI calls for each title.");
+
+  const articlePromises = mockDb.articles.map(async (article, index) => {
+    try {
+      const slug = await translateForSlug(article.title);
+      const articleWithSlug = { ...article, slug };
+      console.log(`[${index + 1}/${mockDb.articles.length}] Generated slug: "${slug}" for title: "${article.title}"`);
+      return articlesCollection.doc(article.id).set(articleWithSlug);
+    } catch (e) {
+      console.error(`Failed to generate slug for article: "${article.title}". Error:`, e);
+      // Fallback to a non-AI slug if the AI call fails
+      const fallbackSlug = article.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}-]/gu, '');
+      const articleWithFallbackSlug = { ...article, slug: fallbackSlug };
+      return articlesCollection.doc(article.id).set(articleWithFallbackSlug);
+    }
+  });
+
   await Promise.all(articlePromises);
-  console.log('Articles seeded successfully.');
+  console.log('Articles seeded successfully with generated slugs.');
 
   // Seed Users
   console.log(`Seeding ${mockDb.users.length} users...`);
