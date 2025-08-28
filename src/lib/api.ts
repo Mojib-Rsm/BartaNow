@@ -199,7 +199,7 @@ async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, e
 
         if (category) queryRef = queryRef.where('category', '==', category);
         if (authorId) queryRef = queryRef.where('authorId', '==', authorId);
-        if (hasVideo) queryRef = queryRef.where('videoUrl', '!=', null);
+        if (hasVideo) queryRef = queryRef.where('videoUrl', '>', '');
         if (editorsPick) queryRef = queryRef.where('editorsPick', '==', true);
         if (date) queryRef = queryRef.where('publishedAt', '>=', date).where('publishedAt', '<', date + '\uf8ff');
         if (location) queryRef = queryRef.where('location', '==', location);
