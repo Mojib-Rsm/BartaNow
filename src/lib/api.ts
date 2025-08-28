@@ -205,10 +205,13 @@ async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, e
         }
         if (hasVideo) {
             queryRef = queryRef.where('videoUrl', '>', '');
-            queryRef = queryRef.orderBy('videoUrl'); 
+            queryRef = queryRef.orderBy('videoUrl');
+            queryRef = queryRef.orderBy('publishedAt', 'desc');
+            countQueryRef = countQueryRef.where('videoUrl', '>', '');
         }
         if (editorsPick) {
             queryRef = queryRef.where('editorsPick', '==', true);
+            queryRef = queryRef.orderBy('publishedAt', 'desc');
             countQueryRef = countQueryRef.where('editorsPick', '==', true);
         }
        
@@ -226,8 +229,10 @@ async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, e
              return getMockArticles({ query, page, limit });
         }
         
-        queryRef = queryRef.orderBy('publishedAt', 'desc');
-
+        if (!hasVideo && !editorsPick) {
+            queryRef = queryRef.orderBy('publishedAt', 'desc');
+        }
+        
         const countSnapshot = await countQueryRef.count().get();
         const totalArticles = countSnapshot.data().count;
         const totalPages = Math.ceil(totalArticles / limit);
