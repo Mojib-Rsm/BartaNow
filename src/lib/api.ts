@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import type { Article, Author, Poll, MemeNews, User } from './types';
@@ -14,17 +15,17 @@ if (useFirestore) {
     try {
         const serviceAccountJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
         if (!serviceAccountJson) {
-            console.warn("GOOGLE_APPLICATION_CREDENTIALS_JSON is not set. Firestore will be disabled.");
-        } else {
-            const serviceAccount = JSON.parse(serviceAccountJson);
-            if (admin.apps.length === 0) {
-                admin.initializeApp({
-                    credential: admin.credential.cert(serviceAccount),
-                });
-            }
-            db = admin.firestore();
-            console.log("Successfully connected to Firestore.");
+             throw new Error("GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable not set. Please provide your Firebase service account key.");
         }
+        const serviceAccount = JSON.parse(serviceAccountJson);
+        
+        if (admin.apps.length === 0) {
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+            });
+        }
+        db = admin.firestore();
+        console.log("Successfully connected to Firestore.");
     } catch (error) {
         console.error("Firebase Admin SDK initialization error. Firestore will be disabled.", error);
     }
@@ -204,15 +205,13 @@ async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, e
         }
         if (hasVideo) {
             queryRef = queryRef.where('videoUrl', '>', '');
-            queryRef = queryRef.orderBy('videoUrl'); // Add this line
-            countQueryRef = countQueryRef.where('videoUrl', '>', '');
+            queryRef = queryRef.orderBy('videoUrl'); 
         }
         if (editorsPick) {
             queryRef = queryRef.where('editorsPick', '==', true);
             countQueryRef = countQueryRef.where('editorsPick', '==', true);
-        } else {
-             queryRef = queryRef.orderBy('publishedAt', 'desc');
         }
+       
         if (date) {
             queryRef = queryRef.where('publishedAt', '>=', date).where('publishedAt', '<', date + '\uf8ff');
             countQueryRef = countQueryRef.where('publishedAt', '>=', date).where('publishedAt', '<', date + '\uf8ff');
@@ -227,6 +226,8 @@ async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, e
              return getMockArticles({ query, page, limit });
         }
         
+        queryRef = queryRef.orderBy('publishedAt', 'desc');
+
         const countSnapshot = await countQueryRef.count().get();
         const totalArticles = countSnapshot.data().count;
         const totalPages = Math.ceil(totalArticles / limit);
