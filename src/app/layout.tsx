@@ -42,7 +42,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&family=Playfair+Display:wght@700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased bg-background">
+      <body className="font-body antialiased bg-background flex flex-col min-h-screen">
         <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -52,7 +52,12 @@ export default function RootLayout({
           {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
             <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
           )}
-          {children}
+          <Header />
+          <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+            {children}
+          </main>
+          <Footer />
+          <PushNotificationManager />
           <Toaster />
         </ThemeProvider>
       </body>
