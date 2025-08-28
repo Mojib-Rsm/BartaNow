@@ -2,7 +2,7 @@
 
 'use server';
 
-import type { Article, Author, Poll, MemeNews, User, Notification, Media } from './types';
+import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment } from './types';
 import admin from 'firebase-admin';
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
@@ -201,7 +201,8 @@ async function deleteMockUser(userId: string): Promise<void> {
 }
 
 async function getMockNotificationsForUser(userId: string): Promise<Notification[]> {
-    return mockDb.notifications.filter(n => n.userId === userId).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const notifications = mockDb.notifications.filter(n => n.userId === userId);
+    return notifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 }
 
 async function getMockAllMedia(): Promise<Media[]> {
@@ -216,6 +217,23 @@ async function createMockMedia(data: Omit<Media, 'id' | 'uploadedAt'>): Promise<
     };
     mockDb.media.unshift(newMedia);
     return newMedia;
+}
+
+async function getMockAllComments(): Promise<Comment[]> {
+    return [...mockDb.comments].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+}
+
+async function updateMockComment(commentId: string, data: Partial<Comment>): Promise<Comment | undefined> {
+    const commentIndex = mockDb.comments.findIndex(c => c.id === commentId);
+    if (commentIndex === -1) return undefined;
+    const updatedComment = { ...mockDb.comments[commentIndex], ...data };
+    mockDb.comments[commentIndex] = updatedComment;
+    return updatedComment;
+}
+
+async function deleteMockComment(commentId: string): Promise<void> {
+    const index = mockDb.comments.findIndex(c => c.id === commentId);
+    if (index > -1) mockDb.comments.splice(index, 1);
 }
 
 
@@ -411,6 +429,22 @@ async function createFirestoreMedia(data: Omit<Media, 'id' | 'uploadedAt'>): Pro
     return newMedia;
 }
 
+async function getFirestoreAllComments(): Promise<Comment[]> {
+    const snapshot = await db.collection('comments').orderBy('timestamp', 'desc').get();
+    return snapshot.docs.map(doc => doc.data() as Comment);
+}
+
+async function updateFirestoreComment(commentId: string, data: Partial<Comment>): Promise<Comment | undefined> {
+    const commentRef = db.collection('comments').doc(commentId);
+    await commentRef.update(data);
+    const updatedDoc = await commentRef.get();
+    return updatedDoc.data() as Comment | undefined;
+}
+
+async function deleteFirestoreComment(commentId: string): Promise<void> {
+    await db.collection('comments').doc(commentId).delete();
+}
+
 
 // --- PUBLIC API ---
 
@@ -534,4 +568,19 @@ export async function getAllMedia(): Promise<Media[]> {
 export async function createMedia(data: Omit<Media, 'id' | 'uploadedAt' | 'entityType'>): Promise<Media> {
     if (!useFirestore || !db) return createMockMedia(data);
     return createFirestoreMedia(data);
+}
+
+export async function getAllComments(): Promise<Comment[]> {
+    if (!useFirestore || !db) return getMockAllComments();
+    return getFirestoreAllComments();
+}
+
+export async function updateComment(commentId: string, data: Partial<Comment>): Promise<Comment | undefined> {
+    if (!useFirestore || !db) return updateMockComment(commentId, data);
+    return updateFirestoreComment(commentId, data);
+}
+
+export async function deleteComment(commentId: string): Promise<void> {
+    if (!useFirestore || !db) return deleteMockComment(commentId);
+    return deleteFirestoreComment(commentId);
 }

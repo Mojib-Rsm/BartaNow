@@ -3,7 +3,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment } from '@/lib/api';
 import type { Article, User } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -407,6 +407,30 @@ export async function uploadMediaAction(formData: FormData) {
     } catch (error) {
         console.error("Upload Media Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'মিডিয়া আপলোড করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
+export async function approveCommentAction(commentId: string) {
+    try {
+        await updateComment(commentId, { isApproved: true });
+        revalidatePath('/admin/comments');
+        return { success: true, message: 'মন্তব্য সফলভাবে অনুমোদন করা হয়েছে।' };
+    } catch (error) {
+        console.error("Approve Comment Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'মন্তব্য অনুমোদন করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
+export async function deleteCommentAction(commentId: string) {
+    try {
+        await deleteComment(commentId);
+        revalidatePath('/admin/comments');
+        return { success: true, message: 'মন্তব্য সফলভাবে ডিলিট করা হয়েছে।' };
+    } catch (error) {
+        console.error("Delete Comment Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'মন্তব্য ডিলিট করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
     }
 }
