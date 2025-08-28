@@ -653,13 +653,7 @@ const notifications: Notification[] = [
     }
 ];
 
-
-export const mockDb = {
-  users,
-  authors,
-  articles,
-  pages,
-  polls: [
+const polls: Poll[] = [
     {
       id: 'poll-1',
       question: 'আগামী নির্বাচনে কোন দল জিতবে বলে আপনার মনে হয়?',
@@ -668,6 +662,8 @@ export const mockDb = {
         { id: 'option2', label: 'দল খ', votes: 35 },
         { id: 'option3', label: 'অন্যান্য', votes: 23 },
       ],
+      createdAt: '2024-07-28T10:00:00Z',
+      isActive: true,
     },
     {
         id: 'poll-2',
@@ -677,6 +673,8 @@ export const mockDb = {
             { id: 'option5', label: 'না, আগ্রহী নই', votes: 12 },
             { id: 'option6', label: 'মন্তব্য নেই', votes: 5 },
         ],
+        createdAt: '2024-07-25T11:00:00Z',
+        isActive: true,
     },
      {
       id: 'poll-3',
@@ -686,10 +684,21 @@ export const mockDb = {
         { id: 'option8', label: 'মোটামুটি কার্যকর', votes: 30 },
         { id: 'option9', label: 'কার্যকর নয়', votes: 15 },
       ],
+      createdAt: '2024-07-20T12:00:00Z',
+      isActive: false,
     },
-  ],
+];
+
+export const mockDb = {
+  users,
+  authors,
+  articles,
+  pages,
+  polls,
   memeNews,
   comments,
   media,
   notifications,
 };
+
+    

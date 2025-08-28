@@ -10,6 +10,7 @@ import {
   MessagesSquare,
   BellRing,
   FileText,
+  BarChartHorizontal,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -51,6 +52,12 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'মন্তব্যসমূহ',
     icon: MessagesSquare,
     roles: ['admin', 'editor'],
+  },
+  {
+    path: '/admin/polls',
+    label: 'জরিপ',
+    icon: BarChartHorizontal,
+    roles: ['admin', 'editor', 'reporter'],
   },
   {
     path: '/admin/media',

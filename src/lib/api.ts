@@ -275,6 +275,37 @@ async function deleteMockPage(pageId: string): Promise<void> {
     if (index > -1) mockDb.pages.splice(index, 1);
 }
 
+async function getMockAllPolls(): Promise<Poll[]> {
+    return [...mockDb.polls];
+}
+
+async function getMockPollById(id: string): Promise<Poll | undefined> {
+    return mockDb.polls.find(poll => poll.id === id);
+}
+
+async function createMockPoll(data: Omit<Poll, 'id' | 'createdAt'>): Promise<Poll> {
+    const newPoll: Poll = {
+        id: `poll-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        ...data,
+    };
+    mockDb.polls.unshift(newPoll);
+    return newPoll;
+}
+
+async function updateMockPoll(pollId: string, data: Partial<Poll>): Promise<Poll | undefined> {
+    const pollIndex = mockDb.polls.findIndex(p => p.id === pollId);
+    if (pollIndex === -1) return undefined;
+    const updatedPoll = { ...mockDb.polls[pollIndex], ...data };
+    mockDb.polls[pollIndex] = updatedPoll;
+    return updatedPoll;
+}
+
+async function deleteMockPoll(pollId: string): Promise<void> {
+    const index = mockDb.polls.findIndex(p => p.id === pollId);
+    if (index > -1) mockDb.polls.splice(index, 1);
+}
+
 
 // --- FIRESTORE IMPLEMENTATIONS ---
 
@@ -526,6 +557,39 @@ async function deleteFirestorePage(pageId: string): Promise<void> {
     await db.collection('pages').doc(pageId).delete();
 }
 
+async function getFirestoreAllPolls(): Promise<Poll[]> {
+    const snapshot = await db.collection('polls').orderBy('createdAt', 'desc').get();
+    return snapshot.docs.map(doc => doc.data() as Poll);
+}
+
+async function getFirestorePollById(id: string): Promise<Poll | undefined> {
+    const doc = await db.collection('polls').doc(id).get();
+    return doc.exists ? doc.data() as Poll : undefined;
+}
+
+async function createFirestorePoll(data: Omit<Poll, 'id' | 'createdAt'>): Promise<Poll> {
+    const newPoll: Poll = {
+        id: `poll-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        createdAt: new Date().toISOString(),
+        entityType: 'POLL',
+        ...data,
+    };
+    await db.collection('polls').doc(newPoll.id).set(newPoll);
+    return newPoll;
+}
+
+async function updateFirestorePoll(pollId: string, data: Partial<Poll>): Promise<Poll | undefined> {
+    const pollRef = db.collection('polls').doc(pollId);
+    await pollRef.update(data);
+    const updatedDoc = await pollRef.get();
+    return updatedDoc.data() as Poll | undefined;
+}
+
+async function deleteFirestorePoll(pollId: string): Promise<void> {
+    await db.collection('polls').doc(pollId).delete();
+}
+
+
 // --- PUBLIC API ---
 
 export async function getArticles(options: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
@@ -566,7 +630,7 @@ export async function getAuthorById(id: string): Promise<Author | undefined> {
 }
 
 export async function getAllAuthors(): Promise<Author[]> {
-    if (!useFirestore || !db) return getFirestoreAllAuthors();
+    if (!useFirestore || !db) return getMockAllAuthors();
     return getFirestoreAllAuthors();
 }
 
@@ -650,16 +714,34 @@ export async function deletePage(pageId: string): Promise<void> {
     return deleteFirestorePage(pageId);
 }
 
-
-// --- NON-CRUD APIs ---
-
-export async function getPolls(): Promise<Poll[]> {
-  return mockDb.polls;
+export async function getAllPolls(): Promise<Poll[]> {
+    if (!useFirestore || !db) return getMockAllPolls();
+    return getFirestoreAllPolls();
 }
 
 export async function getPollById(id: string): Promise<Poll | undefined> {
-  return mockDb.polls.find(poll => poll.id === id);
+    if (!useFirestore || !db) return getMockPollById(id);
+    return getFirestorePollById(id);
 }
+
+export async function createPoll(data: Omit<Poll, 'id' | 'createdAt' | 'entityType'>): Promise<Poll> {
+    if (!useFirestore || !db) return createMockPoll(data);
+    return createFirestorePoll(data);
+}
+
+export async function updatePoll(pollId: string, data: Partial<Poll>): Promise<Poll | undefined> {
+    if (!useFirestore || !db) return updateMockPoll(pollId, data);
+    return updateFirestorePoll(pollId, data);
+}
+
+export async function deletePoll(pollId: string): Promise<void> {
+    if (!useFirestore || !db) return deleteMockPoll(pollId);
+    return deleteFirestorePoll(pollId);
+}
+
+
+
+// --- NON-CRUD APIs ---
 
 export async function getMemeNews(): Promise<MemeNews[]> {
   return mockDb.memeNews;
@@ -694,3 +776,5 @@ export async function deleteComment(commentId: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockComment(commentId);
     return deleteFirestoreComment(commentId);
 }
+
+    

@@ -3,8 +3,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage } from '@/lib/api';
-import type { Article, User, Page } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll } from '@/lib/api';
+import type { Article, User, Page, Poll, PollOption } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -500,5 +500,74 @@ export async function deletePageAction(pageId: string) {
     } catch (error) {
         console.error("Delete Page Error:", error);
         return { success: false, message: 'পেজ ডিলিট করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+
+const pollOptionSchema = z.object({
+    id: z.string().optional(),
+    label: z.string().min(1, "অপশন লেবেল খালি রাখা যাবে না।"),
+});
+
+const pollSchema = z.object({
+  id: z.string().optional(),
+  question: z.string().min(10, "প্রশ্ন কমপক্ষে ১০ অক্ষরের হতে হবে।"),
+  options: z.array(pollOptionSchema).min(2, "কমপক্ষে দুটি অপশন যোগ করুন।"),
+  isActive: z.boolean().default(true),
+});
+
+type PollFormValues = z.infer<typeof pollSchema>;
+
+export async function createPollAction(data: PollFormValues) {
+    const validation = pollSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+    
+    try {
+        const newPoll = await createPoll(data);
+        if (!newPoll) {
+            return { success: false, message: 'জরিপ তৈরি করা যায়নি।' };
+        }
+        revalidatePath('/admin/polls');
+        revalidatePath('/poll-section'); // Assuming this component needs revalidation
+        return { success: true, message: 'জরিপ সফলভাবে তৈরি হয়েছে।', poll: newPoll };
+    } catch (error) {
+        console.error("Create Poll Error:", error);
+        return { success: false, message: 'জরিপ তৈরি করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function updatePollAction(data: PollFormValues) {
+    if (!data.id) return { success: false, message: 'জরিপ আইডি পাওয়া যায়নি।' };
+
+    const validation = pollSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+    
+    try {
+        const updatedPoll = await updatePoll(data.id, data);
+        if (!updatedPoll) {
+            return { success: false, message: 'জরিপ আপডেট করা যায়নি।' };
+        }
+        revalidatePath('/admin/polls');
+        revalidatePath(`/admin/polls/edit/${data.id}`);
+        return { success: true, message: 'জরিপ সফলভাবে আপডেট হয়েছে।', poll: updatedPoll };
+    } catch (error) {
+        console.error("Update Poll Error:", error);
+        return { success: false, message: 'জরিপ আপডেট করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function deletePollAction(pollId: string) {
+    try {
+        await deletePoll(pollId);
+        revalidatePath('/admin/polls');
+        return { success: true, message: 'জরিপ সফলভাবে ডিলিট হয়েছে।' };
+    } catch (error) {
+        console.error("Delete Poll Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'জরিপ ডিলিট করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
     }
 }

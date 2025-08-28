@@ -1,5 +1,4 @@
 
-
 export interface Author {
   id: string;
   name: string;
@@ -16,9 +15,12 @@ export interface PollOption {
 }
 
 export interface Poll {
-  id:string;
+  id: string;
   question: string;
   options: PollOption[];
+  isActive: boolean;
+  createdAt: string; // ISO date string
+  entityType?: 'POLL';
 }
 
 export interface FactCheck {
