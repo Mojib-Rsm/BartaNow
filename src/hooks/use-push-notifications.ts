@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,8 +23,12 @@ export const usePushNotifications = () => {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
+      // Set the initial permission status
       setPermissionStatus(Notification.permission);
+
+      // Wait for the service worker to be ready
       navigator.serviceWorker.ready.then(registration => {
+        // Get existing subscription
         registration.pushManager.getSubscription().then(sub => {
           if (sub) {
             setIsSubscribed(true);
@@ -53,7 +58,9 @@ export const usePushNotifications = () => {
     }
 
     try {
+      // Ensure the service worker is registered before subscribing
       const registration = await navigator.serviceWorker.register('/sw.js');
+      
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY),
@@ -96,7 +103,6 @@ export const usePushNotifications = () => {
     isSubscribed,
     subscribe,
     unsubscribe,
-    userConsent: permissionStatus,
     permissionStatus,
     loading,
   };
