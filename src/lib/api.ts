@@ -16,7 +16,7 @@ if (useFirestore) {
     try {
         const serviceAccountJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
         if (!serviceAccountJson) {
-             throw new Error("GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable not set. Please provide your Firebase service account key.");
+             throw new Error("GOOGLE_APPLICATION_CREDENTIALS_JSON is not set for Firestore");
         }
         const serviceAccount = JSON.parse(serviceAccountJson);
         
@@ -206,13 +206,11 @@ async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, e
         }
         if (hasVideo) {
             queryRef = queryRef.where('videoUrl', '>', '');
-            queryRef = queryRef.orderBy('videoUrl');
-            queryRef = queryRef.orderBy('publishedAt', 'desc');
+            queryRef = queryRef.orderBy('videoUrl').orderBy('publishedAt', 'desc');
             countQueryRef = countQueryRef.where('videoUrl', '>', '');
         }
         if (editorsPick) {
-            queryRef = queryRef.where('editorsPick', '==', true);
-            queryRef = queryRef.orderBy('publishedAt', 'desc');
+            queryRef = queryRef.where('editorsPick', '==', true).orderBy('publishedAt', 'desc');
             countQueryRef = countQueryRef.where('editorsPick', '==', true);
         }
        

@@ -22,7 +22,7 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const article = await getArticleBySlug(params.slug)
+  const article = await getArticleBySlug(decodeURIComponent(params.slug))
  
   if (!article) {
     return {
@@ -37,7 +37,7 @@ export async function generateMetadata(
 }
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  const article = await getArticleBySlug(params.slug);
+  const article = await getArticleBySlug(decodeURIComponent(params.slug));
 
   if (!article) {
     notFound();
