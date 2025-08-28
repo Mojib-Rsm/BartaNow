@@ -127,16 +127,16 @@ export default function AdminLayout({
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col bg-sidebar text-white p-0">
-              <nav className="grid gap-2 text-lg font-medium">
-                <div className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
-                     <Link href="/admin" className="flex items-center gap-2 font-semibold">
+                <div className="flex h-14 shrink-0 items-center border-b border-sidebar-border px-4">
+                     <Link href="/admin">
                        <Image src={logoUrl} alt="BartaNow Logo" width={140} height={35} />
                     </Link>
                 </div>
-                <div className="p-4 space-y-2">
-                    {sidebarLinks}
-                </div>
-              </nav>
+                <nav className="flex-1 overflow-auto p-4">
+                    <div className="grid gap-2 text-lg font-medium">
+                        {sidebarLinks}
+                    </div>
+                </nav>
             </SheetContent>
           </Sheet>
           
