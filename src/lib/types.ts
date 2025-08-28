@@ -1,4 +1,5 @@
 
+
 export interface Author {
   id: string;
   name: string;
@@ -125,6 +126,13 @@ export interface Notification {
     entityType?: 'NOTIFICATION';
 }
 
+export interface Subscriber {
+  id: string;
+  email: string;
+  subscribedAt: string; // ISO date string
+  entityType?: 'SUBSCRIBER';
+}
+
 
 export interface Ad {
   id: string;
@@ -138,5 +146,3 @@ export interface Ad {
   endDate?: string;
   entityType?: 'AD';
 }
-
-    

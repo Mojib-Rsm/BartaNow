@@ -11,6 +11,7 @@ import {
   BellRing,
   FileText,
   BarChartHorizontal,
+  Send,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -58,6 +59,18 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'জরিপ',
     icon: BarChartHorizontal,
     roles: ['admin', 'editor', 'reporter'],
+  },
+    {
+    path: '/admin/subscribers',
+    label: 'সাবস্ক্রাইবার',
+    icon: Users,
+    roles: ['admin', 'editor'],
+  },
+  {
+    path: '/admin/newsletter',
+    label: 'নিউজলেটার',
+    icon: Send,
+    roles: ['admin', 'editor'],
   },
   {
     path: '/admin/media',
