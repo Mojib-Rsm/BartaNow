@@ -10,7 +10,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import SearchInput from './search-input';
 import { ThemeToggle } from './theme-toggle';
-import type { User as UserType } from '@/lib/types';
+import type { User as UserType, MenuItem } from '@/lib/types';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useRouter } from 'next/navigation';
-
+import { getMenuItems } from '@/lib/api';
+import { Skeleton } from './ui/skeleton';
 
 const topNavLinks = [
     { title: 'খেলা: বাংলাদেশের দুর্দান্ত জয়ে এশিয়া কাপ শুরু', image: 'https://picsum.photos/seed/bangles/50/50', href: '/খেলা-বাংলাদেশের-দুর্দান্ত-জয়ে-এশিয়া-কাপ-শুরু' },
@@ -29,23 +30,20 @@ const topNavLinks = [
     { title: 'আগুন নেভানোর জন্য পানি আনতে গিয়ে পুকুরেই ডুবল...', image: 'https://picsum.photos/seed/firefighter/50/50', href: '/অর্থনীতি-ডলারের-বাজারে-অস্থিরতা-অর্থনীতিতে-প্রভাব' },
 ];
 
-const mainNavLinks = [
-    { name: 'সর্বশেষ', href: '/category/সর্বশেষ' },
-    { name: 'জাতীয়', href: '/category/জাতীয়' },
-    { name: 'রাজনীতি', href: '/category/রাজনীতি' },
-    { name: 'খেলা', href: '/category/খেলা' },
-    { name: 'বিনোদন', href: '/category/বিনোদন' },
-    { name: 'প্রযুক্তি', href: '/category/প্রযুক্তি' },
-    { name: 'আন্তর্জাতিক', href: '/category/আন্তর্জাতিক' },
-    { name: 'ইসলামী জীবন', href: '/category/ইসলামী-জীবন' },
-    { name: 'বিশেষ কভারেজ', href: '/special-coverage' },
-    { name: 'ভিডিও', href: '/category/videos' },
-    { name: 'মিম নিউজ', href: '/category/মিম-নিউজ' },
-];
+const NavMenuSkeleton = () => (
+    <div className="hidden md:flex items-center gap-6 flex-grow">
+        {[...Array(8)].map((_, i) => (
+            <Skeleton key={i} className="h-4 w-16" />
+        ))}
+    </div>
+);
+
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<UserType | null>(null);
+  const [mainNavLinks, setMainNavLinks] = useState<MenuItem[]>([]);
+  const [loadingMenu, setLoadingMenu] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -54,13 +52,11 @@ export default function Header() {
     };
     window.addEventListener('scroll', handleScroll);
     
-    // Check for user in localStorage
     const storedUser = localStorage.getItem('bartaNowUser');
     if (storedUser) {
         setUser(JSON.parse(storedUser));
     }
 
-    // Listen for storage changes to sync across tabs
     const handleStorageChange = (event: StorageEvent) => {
         if (event.key === 'bartaNowUser') {
             const newUser = event.newValue ? JSON.parse(event.newValue) : null;
@@ -68,7 +64,19 @@ export default function Header() {
         }
     };
     window.addEventListener('storage', handleStorageChange);
-
+    
+    async function fetchMenu() {
+        try {
+            const menuItems = await getMenuItems();
+            setMainNavLinks(menuItems);
+        } catch (error) {
+            console.error("Failed to fetch menu items", error);
+            // Fallback to mock data or show error
+        } finally {
+            setLoadingMenu(false);
+        }
+    }
+    fetchMenu();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -92,7 +100,6 @@ export default function Header() {
       isScrolled ? 'shadow-md' : 'shadow-sm'
     )}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Top bar with logo and ticker */}
         <div className={cn(
             "flex items-center justify-between h-20 border-b transition-all duration-300 overflow-hidden",
             isScrolled ? 'h-0 border-none opacity-0' : 'opacity-100'
@@ -112,7 +119,6 @@ export default function Header() {
             </div>
         </div>
 
-        {/* Main navigation */}
         <div className="flex items-center justify-between h-12">
           <div className='flex items-center gap-2'>
               <Sheet>
@@ -137,7 +143,7 @@ export default function Header() {
                           <nav className="flex-grow p-4">
                               <ul className="space-y-2">
                                   {mainNavLinks.map((link) => (
-                                      <li key={link.name}>
+                                      <li key={link.id}>
                                           <Link href={link.href} className="block text-lg font-medium text-foreground hover:text-primary transition-colors py-2 px-2 rounded-md hover:bg-accent">
                                               {link.name}
                                           </Link>
@@ -162,13 +168,17 @@ export default function Header() {
                   <Image src={logoUrl} alt="BartaNow Logo" width={160} height={40} />
               </Link>
             </div>
-            <nav className="hidden md:flex items-center gap-6 flex-grow">
-                {mainNavLinks.map((link) => (
-                    <Link key={link.name} href={link.href} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                        {link.name}
-                    </Link>
-                ))}
-            </nav>
+            {loadingMenu ? (
+                <NavMenuSkeleton />
+            ) : (
+                <nav className="hidden md:flex items-center gap-6 flex-grow">
+                    {mainNavLinks.map((link) => (
+                        <Link key={link.id} href={link.href} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                            {link.name}
+                        </Link>
+                    ))}
+                </nav>
+            )}
             <div className="flex items-center gap-2">
                 <SearchInput />
                 <ThemeToggle />

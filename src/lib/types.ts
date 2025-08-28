@@ -149,6 +149,15 @@ export interface Subscriber {
   entityType?: 'SUBSCRIBER';
 }
 
+export interface MenuItem {
+  id: string;
+  name: string;
+  href: string;
+  order: number;
+  parentId?: string | null;
+  children: MenuItem[];
+  entityType?: 'MENU_ITEM';
+}
 
 export interface Ad {
   id: string;

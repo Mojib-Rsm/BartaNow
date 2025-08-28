@@ -10,9 +10,9 @@ import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { uploadImage } from '@/lib/imagekit';
-import { sendMail } from './lib/mailer.js';
-import { getWelcomeEmailHtml } from './lib/email-templates/welcome-email.js';
-import { getNewsletterHtml } from './lib/email-templates/newsletter-email.js';
+import { sendMail } from '@/lib/mailer';
+import { getWelcomeEmailHtml } from '@/lib/email-templates/welcome-email.js';
+import { getNewsletterHtml } from '@/lib/email-templates/newsletter-email.js';
 
 export async function seedAction() {
   const result = await seedDatabase();

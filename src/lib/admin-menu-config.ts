@@ -14,6 +14,7 @@ import {
   BarChartHorizontal,
   Send,
   Rss,
+  Palette,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -79,6 +80,12 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'মিডিয়া',
     icon: ImageIcon,
     roles: ['admin', 'editor', 'reporter'],
+  },
+  {
+    path: '/admin/appearance',
+    label: 'Appearance',
+    icon: Palette,
+    roles: ['admin'],
   },
   {
     path: '/admin/rss',

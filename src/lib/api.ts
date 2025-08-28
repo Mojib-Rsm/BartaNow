@@ -2,7 +2,7 @@
 
 'use server';
 
-import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page } from './types';
+import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber } from './types';
 import admin from 'firebase-admin';
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
@@ -306,6 +306,35 @@ async function deleteMockPoll(pollId: string): Promise<void> {
     if (index > -1) mockDb.polls.splice(index, 1);
 }
 
+async function getMockMenuItems(): Promise<MenuItem[]> {
+    return [...mockDb.menuItems];
+}
+
+async function getMockAllSubscribers(): Promise<Subscriber[]> {
+    return [...mockDb.subscribers];
+}
+
+async function createMockSubscriber(email: string): Promise<Subscriber | null> {
+    if (mockDb.subscribers.some(s => s.email === email)) {
+        return null; // Already subscribed
+    }
+    const newSubscriber: Subscriber = {
+        id: `sub-${Date.now()}`,
+        email,
+        isSubscribed: true,
+        subscribedAt: new Date().toISOString(),
+    };
+    mockDb.subscribers.push(newSubscriber);
+    return newSubscriber;
+}
+
+async function deleteMockSubscriber(subscriberId: string): Promise<void> {
+    const index = mockDb.subscribers.findIndex(s => s.id === subscriberId);
+    if (index > -1) {
+        mockDb.subscribers.splice(index, 1);
+    }
+}
+
 
 // --- FIRESTORE IMPLEMENTATIONS ---
 
@@ -589,6 +618,45 @@ async function deleteFirestorePoll(pollId: string): Promise<void> {
     await db.collection('polls').doc(pollId).delete();
 }
 
+async function getFirestoreMenuItems(): Promise<MenuItem[]> {
+    const doc = await db.collection('settings').doc('mainMenu').get();
+    if (doc.exists) {
+        return (doc.data()?.items as MenuItem[]) || [];
+    }
+    // Fallback to mock data if not found in Firestore
+    return getMockMenuItems();
+}
+
+async function getFirestoreAllSubscribers(): Promise<Subscriber[]> {
+    const snapshot = await db.collection('subscribers').where('isSubscribed', '==', true).get();
+    return snapshot.docs.map(doc => doc.data() as Subscriber);
+}
+
+async function createFirestoreSubscriber(email: string): Promise<Subscriber | null> {
+    const snapshot = await db.collection('subscribers').where('email', '==', email).limit(1).get();
+    if (!snapshot.empty) {
+        // User exists, just update their subscription status
+        const doc = snapshot.docs[0];
+        await doc.ref.update({ isSubscribed: true });
+        return doc.data() as Subscriber;
+    }
+
+    const newSubscriber: Subscriber = {
+        id: `sub-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        email,
+        isSubscribed: true,
+        subscribedAt: new Date().toISOString(),
+        entityType: 'SUBSCRIBER',
+    };
+    await db.collection('subscribers').doc(newSubscriber.id).set(newSubscriber);
+    return newSubscriber;
+}
+
+async function deleteFirestoreSubscriber(subscriberId: string): Promise<void> {
+    await db.collection('subscribers').doc(subscriberId).delete();
+}
+
+
 
 // --- PUBLIC API ---
 
@@ -739,6 +807,25 @@ export async function deletePoll(pollId: string): Promise<void> {
     return deleteFirestorePoll(pollId);
 }
 
+export async function getMenuItems(): Promise<MenuItem[]> {
+    if (!useFirestore || !db) return getMockMenuItems();
+    return getFirestoreMenuItems();
+}
+
+export async function getAllSubscribers(): Promise<Subscriber[]> {
+    if (!useFirestore || !db) return getMockAllSubscribers();
+    return getFirestoreAllSubscribers();
+}
+
+export async function createSubscriber(email: string): Promise<Subscriber | null> {
+    if (!useFirestore || !db) return createMockSubscriber(email);
+    return createFirestoreSubscriber(email);
+}
+
+export async function deleteSubscriber(subscriberId: string): Promise<void> {
+    if (!useFirestore || !db) return deleteMockSubscriber(subscriberId);
+    return deleteFirestoreSubscriber(subscriberId);
+}
 
 
 // --- NON-CRUD APIs ---
@@ -776,5 +863,3 @@ export async function deleteComment(commentId: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockComment(commentId);
     return deleteFirestoreComment(commentId);
 }
-
-    
