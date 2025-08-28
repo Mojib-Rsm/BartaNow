@@ -38,7 +38,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const logoUrl = "https://www.bartanow.com/logo.png";
+  const logoUrl = "/logo.png";
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {

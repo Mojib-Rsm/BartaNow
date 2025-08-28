@@ -83,7 +83,7 @@ export default function Header() {
     router.push('/');
   };
 
-  const logoUrl = "https://www.bartanow.com/logo.png";
+  const logoUrl = "/logo.png";
   const userInitials = user?.name.split(' ').map(n => n[0]).join('') || 'U';
 
   return (
