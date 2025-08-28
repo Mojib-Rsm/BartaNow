@@ -75,6 +75,29 @@ export interface MemeNews {
   bottomText: string;
 }
 
+export interface Comment {
+    id: string;
+    articleId: string;
+    userId: string;
+    userName: string;
+    userAvatar: string;
+    text: string;
+    timestamp: string; // ISO date string
+    isApproved: boolean;
+    entityType?: 'COMMENT';
+}
+
+export interface Media {
+    id: string;
+    fileName: string;
+    url: string;
+    mimeType: string;
+    size: number; // in bytes
+    uploadedAt: string; // ISO date string
+    uploadedBy: string; // userId
+    entityType?: 'MEDIA';
+}
+
 export interface Ad {
   id: string;
   name: string;

@@ -1,6 +1,6 @@
 
 
-import type { Article, Author, Poll, MemeNews, User } from './types';
+import type { Article, Author, Poll, MemeNews, User, Comment, Media } from './types';
 
 // Helper to generate a non-AI slug from a title for mock data
 const generateNonAiSlug = (title: string) => {
@@ -533,6 +533,49 @@ const memeNews: MemeNews[] = [
     },
 ];
 
+const comments: Comment[] = [
+    { 
+        id: 'comment-1', 
+        articleId: '1', 
+        userId: 'user-2', 
+        userName: 'Regular User', 
+        userAvatar: 'https://i.pravatar.cc/150?u=regular-user', 
+        text: 'দারুণ খেলেছে বাংলাদেশ! এই জয়টা খুব দরকার ছিল।', 
+        timestamp: '2024-07-22T11:00:00Z',
+        isApproved: true,
+    },
+    { 
+        id: 'comment-2', 
+        articleId: '2', 
+        userId: 'user-1', 
+        userName: 'Admin User', 
+        userAvatar: 'https://i.pravatar.cc/150?u=admin-user', 
+        text: '5G প্রযুক্তি আমাদের দেশের জন্য একটি নতুন দিগন্ত উন্মোচন করবে। অসাধারণ উদ্যোগ!', 
+        timestamp: '2024-07-21T15:00:00Z',
+        isApproved: true,
+    },
+    { 
+        id: 'comment-3', 
+        articleId: '1', 
+        userId: 'user-3', 
+        userName: 'Editor User', 
+        userAvatar: 'https://i.pravatar.cc/150?u=editor-user', 
+        text: 'এই ম্যাচের বিশ্লেষণধর্মী একটি ফলো-আপ আর্টিকেল করা যেতে পারে।', 
+        timestamp: '2024-07-22T12:30:00Z',
+        isApproved: false, // Example of an unapproved comment
+    },
+];
+
+const media: Media[] = articles.map((article, index) => ({
+    id: `media-${index + 1}`,
+    fileName: `${article.slug}.jpg`,
+    url: article.imageUrl,
+    mimeType: 'image/jpeg',
+    size: Math.floor(Math.random() * (500 * 1024 - 100 * 1024 + 1)) + (100 * 1024), // Random size between 100KB and 500KB
+    uploadedAt: article.publishedAt,
+    uploadedBy: article.authorId,
+}));
+
 
 export const mockDb = {
   users,
@@ -568,4 +611,6 @@ export const mockDb = {
     },
   ],
   memeNews,
+  comments,
+  media,
 };

@@ -30,17 +30,28 @@ const db = admin.firestore();
 const articlesCollection = db.collection('articles');
 const usersCollection = db.collection('users');
 const authorsCollection = db.collection('authors');
+const commentsCollection = db.collection('comments');
+const mediaCollection = db.collection('media');
+
+async function seedCollection(name: string, collection: admin.firestore.CollectionReference, data: any[]) {
+    console.log(`Seeding ${data.length} ${name}...`);
+    const batch = db.batch();
+    data.forEach(item => {
+        const docRef = collection.doc(item.id);
+        batch.set(docRef, item);
+    });
+    await batch.commit();
+    console.log(`${name} seeded successfully.`);
+}
 
 export async function seedDatabase() {
   console.log('Starting to seed Firestore database...');
 
-  // Seed Authors
-  console.log(`Seeding ${mockDb.authors.length} authors...`);
-  const authorPromises = mockDb.authors.map(author => 
-    authorsCollection.doc(author.id).set(author)
-  );
-  await Promise.all(authorPromises);
-  console.log('Authors seeded successfully.');
+  // Seed Authors, Users, Comments, Media first
+  await seedCollection('authors', authorsCollection, mockDb.authors);
+  await seedCollection('users', usersCollection, mockDb.users);
+  await seedCollection('comments', commentsCollection, mockDb.comments);
+  await seedCollection('media', mediaCollection, mockDb.media);
   
   // Seed Articles with AI-generated slugs
   console.log(`Generating slugs and seeding ${mockDb.articles.length} articles...`);
@@ -63,16 +74,8 @@ export async function seedDatabase() {
 
   await Promise.all(articlePromises);
   console.log('Articles seeded successfully with generated slugs.');
-
-  // Seed Users
-  console.log(`Seeding ${mockDb.users.length} users...`);
-  const userPromises = mockDb.users.map(user =>
-    usersCollection.doc(user.id).set(user)
-  );
-  await Promise.all(userPromises);
-  console.log('Users seeded successfully.');
   
-  const successMessage = `Successfully seeded ${mockDb.articles.length} articles, ${mockDb.authors.length} authors, and ${mockDb.users.length} users into Firestore.`;
+  const successMessage = `Successfully seeded ${mockDb.articles.length} articles, ${mockDb.authors.length} authors, ${mockDb.users.length} users, ${mockDb.comments.length} comments, and ${mockDb.media.length} media items into Firestore.`;
   console.log(successMessage);
   return { success: true, message: successMessage };
 }
