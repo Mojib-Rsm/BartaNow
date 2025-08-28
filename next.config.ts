@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'bartanow.com',
+        hostname: '*.bartanow.com',
         port: '',
         pathname: '/**',
       },
