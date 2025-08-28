@@ -2,18 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  Home,
-  Newspaper,
-  Users,
-  Settings,
-  BarChart2,
-  PanelLeft,
-  Megaphone,
-  Image as ImageIcon,
-  MessagesSquare,
-  BellRing,
-} from 'lucide-react';
+import { PanelLeft } from 'lucide-react';
 import {
   SidebarProvider,
   Sidebar,
@@ -31,6 +20,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import type { User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { adminMenuConfig } from '@/lib/admin-menu-config';
 
 export default function AdminLayout({
   children,
@@ -42,13 +32,11 @@ export default function AdminLayout({
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Check for user in localStorage on initial load
     const storedUser = localStorage.getItem('bartaNowUser');
     if (storedUser) {
         setUser(JSON.parse(storedUser));
     }
 
-     // Listen for storage changes to sync across tabs/components
     const handleStorageChange = (event: StorageEvent) => {
         if (event.key === 'bartaNowUser') {
             const newUser = event.newValue ? JSON.parse(event.newValue) : null;
@@ -62,12 +50,10 @@ export default function AdminLayout({
     };
   }, []);
 
-  const hasAccessToUsers = user?.role === 'admin' || user?.role === 'editor';
-
   const isActive = (path: string) => {
     if (path === '/admin' && pathname === '/admin') return true;
     return path !== '/admin' && pathname.startsWith(path);
-  }
+  };
   
   const userInitials = user?.name.split(' ').map((n) => n[0]).join('');
 
@@ -83,72 +69,21 @@ export default function AdminLayout({
             </SidebarHeader>
             <SidebarContent>
                 <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin')}>
-                    <Link href="/admin">
-                        <BarChart2 />
-                        ড্যাশবোর্ড
-                    </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/articles')}>
-                    <Link href="/admin/articles">
-                        <Newspaper />
-                        আর্টিকেলসমূহ
-                    </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                 {hasAccessToUsers && (
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild isActive={isActive('/admin/users')}>
-                        <Link href="/admin/users">
-                            <Users />
-                            ব্যবহারকারীগণ
-                        </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                 )}
-                 <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/comments')}>
-                        <Link href="/admin/comments">
-                            <MessagesSquare />
-                            মন্তব্যসমূহ
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/media')}>
-                        <Link href="/admin/media">
-                            <ImageIcon />
-                            মিডিয়া
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/ads')}>
-                        <Link href="/admin/ads">
-                            <Megaphone />
-                            বিজ্ঞাপন
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/notifications')}>
-                        <Link href="/admin/notifications">
-                            <BellRing />
-                            নোটিফিকেশন
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/settings')}>
-                        <Link href="/admin/settings">
-                            <Settings />
-                            সেটিংস
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
+                    {adminMenuConfig.map((item) => {
+                        const hasAccess = !item.roles || (user?.role && item.roles.includes(user.role));
+                        if (!hasAccess) return null;
+
+                        return (
+                            <SidebarMenuItem key={item.path}>
+                                <SidebarMenuButton asChild isActive={isActive(item.path)}>
+                                <Link href={item.path}>
+                                    <item.icon />
+                                    {item.label}
+                                </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        );
+                    })}
                 </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>
@@ -156,8 +91,8 @@ export default function AdminLayout({
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
                             <Link href="/">
-                                <Home />
-                                ওয়েবসাইটে ফিরে যান
+                                <adminMenuConfig.find(item => item.path === '/')?.icon />
+                                 ওয়েবসাইটে ফিরে যান
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
