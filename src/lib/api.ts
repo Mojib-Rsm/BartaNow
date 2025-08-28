@@ -34,8 +34,11 @@ if (!useMockData) {
 const generateSlug = (title: string) => {
     return title
         .toLowerCase()
-        .replace(/ /g, '-')
-        .replace(/[^\w-à-üÀ-Ü]/g, ''); // Keep bengali characters
+        .replace(/\s+/g, '-') // Replace spaces with -
+        .replace(/[^\p{L}\p{N}-]/gu, '') // Remove all non-alphanumeric characters except dashes
+        .replace(/--+/g, '-') // Replace multiple - with single -
+        .replace(/^-+/, '') // Trim - from start of text
+        .replace(/-+$/, ''); // Trim - from end of text
 };
 
 async function generateSummariesForMockData() {
