@@ -10,17 +10,13 @@ import { sendMail } from './mailer';
 const useFirestore = process.env.DATABASE_TYPE === 'firestore';
 
 let db: admin.firestore.Firestore;
-let useMockData = !useFirestore;
-
 if (useFirestore) {
     try {
         const serviceAccountJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
         if (!serviceAccountJson) {
-            console.warn("GOOGLE_APPLICATION_CREDENTIALS_JSON is not set. Falling back to mock data.");
-            useMockData = true;
+            console.warn("GOOGLE_APPLICATION_CREDENTIALS_JSON is not set. Firestore will be disabled.");
         } else {
             const serviceAccount = JSON.parse(serviceAccountJson);
-
             if (admin.apps.length === 0) {
                 admin.initializeApp({
                     credential: admin.credential.cert(serviceAccount),
@@ -30,8 +26,7 @@ if (useFirestore) {
             console.log("Successfully connected to Firestore.");
         }
     } catch (error) {
-        console.error("Firebase Admin SDK initialization error. Falling back to mock data.", error);
-        useMockData = true;
+        console.error("Firebase Admin SDK initialization error. Firestore will be disabled.", error);
     }
 } else {
     console.log("Using mock data (simulating local database).");
@@ -209,6 +204,7 @@ async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, e
         }
         if (hasVideo) {
             queryRef = queryRef.where('videoUrl', '>', '');
+            queryRef = queryRef.orderBy('videoUrl'); // Add this line
             countQueryRef = countQueryRef.where('videoUrl', '>', '');
         }
         if (editorsPick) {
@@ -228,7 +224,7 @@ async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, e
         
         if (query) {
              console.warn("Firestore does not support native text search. Falling back to mock data for this query.");
-             return getMockArticles({ query });
+             return getMockArticles({ query, page, limit });
         }
         
         const countSnapshot = await countQueryRef.count().get();
@@ -345,49 +341,49 @@ async function deleteFirestoreUser(userId: string): Promise<void> {
 // --- PUBLIC API ---
 
 export async function getArticles(options: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
-    if (useMockData) {
+    if (!useFirestore || !db) {
         return getMockArticles(options);
     }
     return getFirestoreArticles(options);
 }
 
 export async function getArticleById(id: string): Promise<Article | undefined> {
-    if (useMockData) return getMockArticleById(id);
+    if (!useFirestore || !db) return getMockArticleById(id);
     return getFirestoreArticleById(id);
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
-    if (useMockData) return getMockArticleBySlug(slug);
+    if (!useFirestore || !db) return getMockArticleBySlug(slug);
     return getFirestoreArticleBySlug(slug);
 }
 
 export async function getUserById(id: string): Promise<User | undefined> {
-    if (useMockData) return getMockUserById(id);
+    if (!useFirestore || !db) return getMockUserById(id);
     return getFirestoreUserById(id);
 }
 
 export async function getUserByEmail(email: string): Promise<User | undefined> {
-    if (useMockData) return getMockUserByEmail(email);
+    if (!useFirestore || !db) return getMockUserByEmail(email);
     return getFirestoreUserByEmail(email);
 }
 
 export async function getAllUsers(): Promise<User[]> {
-    if (useMockData) return getMockAllUsers();
+    if (!useFirestore || !db) return getMockAllUsers();
     return getFirestoreAllUsers();
 }
 
 export async function getAuthorById(id: string): Promise<Author | undefined> {
-    if (useMockData) return getMockAuthorById(id);
+    if (!useFirestore || !db) return getMockAuthorById(id);
     return getFirestoreAuthorById(id);
 }
 
 export async function getAllAuthors(): Promise<Author[]> {
-    if (useMockData) return getFirestoreAllAuthors();
+    if (!useFirestore || !db) return getFirestoreAllAuthors();
     return getFirestoreAllAuthors();
 }
 
 export async function createUser(user: Omit<User, 'id' | 'role'>): Promise<User> {
-    const newUser = useMockData ? await createMockUser(user) : await createFirestoreUser(user);
+    const newUser = (!useFirestore || !db) ? await createMockUser(user) : await createFirestoreUser(user);
     
     if (process.env.ADMIN_EMAIL) {
         try {
@@ -404,12 +400,12 @@ export async function createUser(user: Omit<User, 'id' | 'role'>): Promise<User>
 }
 
 export async function updateUser(userId: string, data: Partial<User>): Promise<User | undefined> {
-    if (useMockData) return updateMockUser(userId, data);
+    if (!useFirestore || !db) return updateMockUser(userId, data);
     return updateFirestoreUser(userId, data);
 }
 
 export async function createArticle(data: Omit<Article, 'id' | 'publishedAt' | 'aiSummary'>): Promise<Article> {
-    const newArticle = useMockData ? await createMockArticle(data) : await createFirestoreArticle(data);
+    const newArticle = (!useFirestore || !db) ? await createMockArticle(data) : await createFirestoreArticle(data);
 
     // AI Summary generation can be slow, so we do it after creating the article
     summarizeArticle({ articleContent: data.content.join('\n\n') })
@@ -422,17 +418,17 @@ export async function createArticle(data: Omit<Article, 'id' | 'publishedAt' | '
 }
 
 export async function updateArticle(articleId: string, data: Partial<Article>): Promise<Article | undefined> {
-    if (useMockData) return updateMockArticle(articleId, data);
+    if (!useFirestore || !db) return updateMockArticle(articleId, data);
     return updateFirestoreArticle(articleId, data);
 }
 
 export async function deleteArticle(articleId: string): Promise<void> {
-    if (useMockData) return deleteMockArticle(articleId);
+    if (!useFirestore || !db) return deleteMockArticle(articleId);
     return deleteFirestoreArticle(articleId);
 }
 
 export async function deleteUser(userId: string): Promise<void> {
-    if (useMockData) return deleteMockUser(userId);
+    if (!useFirestore || !db) return deleteMockUser(userId);
     return deleteFirestoreUser(userId);
 }
 
@@ -450,5 +446,3 @@ export async function getPollById(id: string): Promise<Poll | undefined> {
 export async function getMemeNews(): Promise<MemeNews[]> {
   return mockDb.memeNews;
 }
-
-    
