@@ -1,4 +1,5 @@
 
+
 export type Permission =
   | 'create_article' | 'edit_article' | 'delete_article' | 'publish_article'
   | 'create_page' | 'edit_page' | 'delete_page'
@@ -6,7 +7,7 @@ export type Permission =
   | 'manage_comments' | 'approve_comment' | 'delete_comment'
   | 'view_users' | 'create_user' | 'edit_user_profile' | 'delete_user' | 'change_user_role' | 'block_user'
   | 'manage_media' | 'upload_media' | 'delete_media'
-  | 'manage_settings' | 'manage_ads' | 'send_notification' | 'manage_newsletter'
+  | 'manage_settings' | 'manage_ads' | 'send_notification' | 'manage_newsletter' | 'manage_rss'
   | 'login_as_user';
 
 export interface Role {
@@ -143,6 +144,7 @@ export interface Notification {
 export interface Subscriber {
   id: string;
   email: string;
+  isSubscribed: boolean;
   subscribedAt: string; // ISO date string
   entityType?: 'SUBSCRIBER';
 }
@@ -159,4 +161,12 @@ export interface Ad {
   startDate?: string;
   endDate?: string;
   entityType?: 'AD';
+}
+
+export interface RssFeed {
+  id: string;
+  name: string;
+  url: string;
+  categoryMap: Record<string, Article['category']>;
+  defaultCategory: Article['category'];
 }

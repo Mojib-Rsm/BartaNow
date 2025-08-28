@@ -1,4 +1,5 @@
 
+
 import type { User, Role, Permission } from './types';
 
 // Define all available permissions in the system
@@ -35,6 +36,7 @@ const allPermissions: Record<Permission, string> = {
     'manage_ads': 'বিজ্ঞাপন পরিচালনা করুন',
     'send_notification': 'নোটিফিকেশন পাঠান',
     'manage_newsletter': 'নিউজলেটার পরিচালনা করুন',
+    'manage_rss': 'RSS ফিড পরিচালনা করুন',
     
     'login_as_user': 'অন্য ব্যবহারকারী হিসেবে লগইন করুন',
 };
@@ -67,6 +69,7 @@ export const roles: Record<User['role'], Role> = {
       'upload_media',
       'send_notification',
       'manage_newsletter',
+      'manage_rss',
     ],
   },
   reporter: {

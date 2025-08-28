@@ -1,14 +1,18 @@
 
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { uploadImage } from '@/lib/imagekit';
+import { sendMail } from './lib/mailer.js';
+import { getWelcomeEmailHtml } from './lib/email-templates/welcome-email.js';
+import { getNewsletterHtml } from './lib/email-templates/newsletter-email.js';
 
 export async function seedAction() {
   const result = await seedDatabase();
@@ -571,4 +575,115 @@ export async function deletePollAction(pollId: string) {
     }
 }
 
+// --- SUBSCRIBER ACTIONS ---
+
+const subscribeSchema = z.object({
+  email: z.string().email({ message: "সঠিক ইমেইল ঠিকানা দিন।" }),
+});
+
+export async function subscribeAction(data: { email: string }) {
+    const validation = subscribeSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'একটি সঠিক ইমেইল ঠিকানা প্রয়োজন।' };
+    }
+    try {
+        const newSubscriber = await createSubscriber(data.email);
+        if (!newSubscriber) {
+            return { success: false, message: 'এই ইমেইল দিয়ে ইতোমধ্যে সাবস্ক্রাইব করা আছে।' };
+        }
+
+        // Send welcome email
+        await sendMail({
+            to: newSubscriber.email,
+            subject: 'বার্তা নাও-তে স্বাগতম!',
+            html: getWelcomeEmailHtml(newSubscriber.email),
+        });
+
+        return { success: true, message: 'সাবস্ক্রিপশনের জন্য ধন্যবাদ! আপনার ইনবক্স চেক করুন।' };
+    } catch (error) {
+        return { success: false, message: 'সাবস্ক্রিপশন করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function deleteSubscriberAction(subscriberId: string) {
+    try {
+        await deleteSubscriber(subscriberId);
+        revalidatePath('/admin/subscribers');
+        return { success: true, message: 'সাবস্ক্রাইবার সফলভাবে ডিলিট হয়েছে।' };
+    } catch (error) {
+        return { success: false, message: 'সাবস্ক্রাইবার ডিলিট করতে সমস্যা হয়েছে।' };
+    }
+}
+
+export async function sendWelcomeEmailAction(email: string) {
+    try {
+        await sendMail({
+            to: email,
+            subject: 'বার্তা নাও-তে স্বাগতম!',
+            html: getWelcomeEmailHtml(email),
+        });
+        return { success: true, message: `স্বাগত ইমেইল ${email}-এ পাঠানো হয়েছে।` };
+    } catch (error) {
+        return { success: false, message: 'ইমেইল পাঠাতে সমস্যা হয়েছে।' };
+    }
+}
+
+export async function sendNewsletterAction(data: { articleIds: string[], customMessage: string }) {
+    if (data.articleIds.length === 0) {
+        return { success: false, message: 'অনুগ্রহ করে কমপক্ষে একটি আর্টিকেল নির্বাচন করুন।' };
+    }
     
+    try {
+        const subscribers = await getAllSubscribers();
+        const activeSubscribers = subscribers.filter(s => s.isSubscribed);
+        
+        if (activeSubscribers.length === 0) {
+            return { success: false, message: 'পাঠানোর জন্য কোনো সক্রিয় সাবস্ক্রাইবার নেই।' };
+        }
+
+        const articlePromises = data.articleIds.map(id => getArticleById(id));
+        const articles = (await Promise.all(articlePromises)).filter((a): a is Article => a !== undefined);
+
+        const newsletterHtml = getNewsletterHtml({ articles, customMessage: data.customMessage });
+
+        const emailPromises = activeSubscribers.map(subscriber => 
+            sendMail({
+                to: subscriber.email,
+                subject: `আপনার সাপ্তাহিক বার্তা নাও নিউজলেটার`,
+                html: newsletterHtml,
+            })
+        );
+        
+        await Promise.all(emailPromises);
+
+        return { success: true, message: `${activeSubscribers.length} জন সাবস্ক্রাইবারের কাছে নিউজলেটার সফলভাবে পাঠানো হয়েছে।` };
+    } catch (error) {
+        console.error("Newsletter send error:", error);
+        return { success: false, message: 'নিউজলেটার পাঠাতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function triggerRssImportAction() {
+    try {
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002';
+        const response = await fetch(`${baseUrl}/api/cron/import-rss`, {
+            method: 'GET',
+            headers: {
+                // Add any necessary headers, e.g., an auth token for cron jobs
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to trigger RSS import.');
+        }
+
+        const result = await response.json();
+        return { success: true, message: 'RSS ইম্পোর্ট সফলভাবে শুরু হয়েছে।', data: result };
+
+    } catch (error) {
+        console.error("RSS Import Trigger Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'RSS ইম্পোর্ট শুরু করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}

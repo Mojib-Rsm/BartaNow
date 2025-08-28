@@ -1,4 +1,5 @@
 
+
 import {
   Home,
   Newspaper,
@@ -12,6 +13,7 @@ import {
   FileText,
   BarChartHorizontal,
   Send,
+  Rss,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -77,6 +79,12 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'মিডিয়া',
     icon: ImageIcon,
     roles: ['admin', 'editor', 'reporter'],
+  },
+  {
+    path: '/admin/rss',
+    label: 'RSS ফিড',
+    icon: Rss,
+    roles: ['admin', 'editor'],
   },
   {
     path: '/admin/ads',
