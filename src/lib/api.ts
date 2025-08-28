@@ -2,7 +2,7 @@
 
 'use server';
 
-import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment } from './types';
+import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page } from './types';
 import admin from 'firebase-admin';
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
@@ -237,6 +237,45 @@ async function deleteMockComment(commentId: string): Promise<void> {
 }
 
 
+async function getMockAllPages(): Promise<Page[]> {
+    return [...mockDb.pages];
+}
+
+async function getMockPageById(id: string): Promise<Page | undefined> {
+    return mockDb.pages.find((p) => p.id === id);
+}
+
+async function getMockPageBySlug(slug: string): Promise<Page | undefined> {
+    return mockDb.pages.find((p) => p.slug === slug);
+}
+
+async function createMockPage(data: Omit<Page, 'id' | 'slug' | 'publishedAt' | 'lastUpdatedAt'>): Promise<Page> {
+    const now = new Date().toISOString();
+    const newPage: Page = {
+        id: `page-${Date.now()}`,
+        slug: generateNonAiSlug(data.title),
+        publishedAt: now,
+        lastUpdatedAt: now,
+        ...data,
+    };
+    mockDb.pages.push(newPage);
+    return newPage;
+}
+
+async function updateMockPage(pageId: string, data: Partial<Page>): Promise<Page | undefined> {
+    const pageIndex = mockDb.pages.findIndex(p => p.id === pageId);
+    if (pageIndex === -1) return undefined;
+    const updatedPage = { ...mockDb.pages[pageIndex], ...data, lastUpdatedAt: new Date().toISOString() };
+    mockDb.pages[pageIndex] = updatedPage;
+    return updatedPage;
+}
+
+async function deleteMockPage(pageId: string): Promise<void> {
+    const index = mockDb.pages.findIndex(p => p.id === pageId);
+    if (index > -1) mockDb.pages.splice(index, 1);
+}
+
+
 // --- FIRESTORE IMPLEMENTATIONS ---
 
 async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date, location }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
@@ -445,6 +484,47 @@ async function deleteFirestoreComment(commentId: string): Promise<void> {
     await db.collection('comments').doc(commentId).delete();
 }
 
+async function getFirestoreAllPages(): Promise<Page[]> {
+    const snapshot = await db.collection('pages').orderBy('lastUpdatedAt', 'desc').get();
+    return snapshot.docs.map(doc => doc.data() as Page);
+}
+
+async function getFirestorePageById(id: string): Promise<Page | undefined> {
+    const doc = await db.collection('pages').doc(id).get();
+    return doc.exists ? doc.data() as Page : undefined;
+}
+
+async function getFirestorePageBySlug(slug: string): Promise<Page | undefined> {
+    const snapshot = await db.collection('pages').where('slug', '==', slug).limit(1).get();
+    if (snapshot.empty) return undefined;
+    return snapshot.docs[0].data() as Page;
+}
+
+async function createFirestorePage(data: Omit<Page, 'id' | 'slug' | 'publishedAt' | 'lastUpdatedAt'>): Promise<Page> {
+    const now = new Date().toISOString();
+    const slug = generateNonAiSlug(data.title);
+    const newPage: Page = {
+        id: `page-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        slug,
+        publishedAt: now,
+        lastUpdatedAt: now,
+        entityType: 'PAGE',
+        ...data,
+    };
+    await db.collection('pages').doc(newPage.id).set(newPage);
+    return newPage;
+}
+
+async function updateFirestorePage(pageId: string, data: Partial<Page>): Promise<Page | undefined> {
+    const pageRef = db.collection('pages').doc(pageId);
+    await pageRef.update(data);
+    const updatedDoc = await pageRef.get();
+    return updatedDoc.data() as Page | undefined;
+}
+
+async function deleteFirestorePage(pageId: string): Promise<void> {
+    await db.collection('pages').doc(pageId).delete();
+}
 
 // --- PUBLIC API ---
 
@@ -538,6 +618,36 @@ export async function deleteArticle(articleId: string): Promise<void> {
 export async function deleteUser(userId: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockUser(userId);
     return deleteFirestoreUser(userId);
+}
+
+export async function getAllPages(): Promise<Page[]> {
+    if (!useFirestore || !db) return getMockAllPages();
+    return getFirestoreAllPages();
+}
+
+export async function getPageById(id: string): Promise<Page | undefined> {
+    if (!useFirestore || !db) return getMockPageById(id);
+    return getFirestorePageById(id);
+}
+
+export async function getPageBySlug(slug: string): Promise<Page | undefined> {
+    if (!useFirestore || !db) return getMockPageBySlug(slug);
+    return getFirestorePageBySlug(slug);
+}
+
+export async function createPage(data: Omit<Page, 'id' | 'slug' | 'publishedAt' | 'lastUpdatedAt' | 'entityType'>): Promise<Page> {
+    if (!useFirestore || !db) return createMockPage(data);
+    return createFirestorePage(data);
+}
+
+export async function updatePage(pageId: string, data: Partial<Page>): Promise<Page | undefined> {
+    if (!useFirestore || !db) return updateMockPage(pageId, data);
+    return updateFirestorePage(pageId, data);
+}
+
+export async function deletePage(pageId: string): Promise<void> {
+    if (!useFirestore || !db) return deleteMockPage(pageId);
+    return deleteFirestorePage(pageId);
 }
 
 

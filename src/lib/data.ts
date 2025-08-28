@@ -1,6 +1,6 @@
 
 
-import type { Article, Author, Poll, MemeNews, User, Comment, Media, Notification } from './types';
+import type { Article, Author, Poll, MemeNews, User, Comment, Media, Notification, Page } from './types';
 
 // Helper to generate a non-AI slug from a title for mock data
 const generateNonAiSlug = (title: string) => {
@@ -510,6 +510,32 @@ const articles: Article[] = articlesData.map(article => ({
     slug: generateNonAiSlug(article.title),
 }));
 
+const pages: Page[] = [
+    {
+        id: 'page-1',
+        title: 'আমাদের সম্পর্কে',
+        slug: 'about-us',
+        content: [
+            "বার্তা নাও একটি স্বাধীন অনলাইন নিউজ পোর্টাল। আমরা পাঠকের কাছে বস্তুনিষ্ঠ, নির্ভুল এবং সর্বশেষ সংবাদ পৌঁছে দিতে প্রতিশ্রুতিবদ্ধ। আমাদের লক্ষ্য হলো তথ্যের অবাধ প্রবাহ নিশ্চিত করা এবং গণতন্ত্রকে শক্তিশালী করা।",
+            "আমাদের একদল অভিজ্ঞ এবং নিবেদিতপ্রাণ সাংবাদিক রয়েছেন যারা মাঠ থেকে খবর সংগ্রহ করে এবং সেগুলোকে আপনাদের সামনে তুলে ধরে। আমরা রাজনীতি, অর্থনীতি, খেলা, বিনোদন, প্রযুক্তি এবং আরও অনেক বিষয়ে খবর পরিবেশন করি।"
+        ],
+        publishedAt: '2024-01-01T10:00:00Z',
+        lastUpdatedAt: '2024-07-20T12:00:00Z',
+    },
+    {
+        id: 'page-2',
+        title: 'যোগাযোগ করুন',
+        slug: 'contact-us',
+        content: [
+            "আমাদের সাথে যোগাযোগ করার জন্য ধন্যবাদ। আপনার যেকোনো প্রশ্ন, মতামত বা অভিযোগের জন্য আমরা সর্বদা প্রস্তুত।",
+            "ইমেইল: contact@bartanow.com",
+            "ফোন: +৮৮০ ১২৩৪ ৫৬৭৮৯০",
+            "ঠিকানা: ১২৩ নিউজ স্ট্রিট, ঢাকা, বাংলাদেশ",
+        ],
+        publishedAt: '2024-01-01T10:00:00Z',
+        lastUpdatedAt: '2024-01-01T10:00:00Z',
+    }
+];
 
 const memeNews: MemeNews[] = [
     {
@@ -632,6 +658,7 @@ export const mockDb = {
   users,
   authors,
   articles,
+  pages,
   polls: [
     {
       id: 'poll-1',

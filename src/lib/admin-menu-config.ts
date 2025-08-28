@@ -9,6 +9,7 @@ import {
   ImageIcon,
   MessagesSquare,
   BellRing,
+  FileText,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -32,6 +33,12 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'আর্টিকেলসমূহ',
     icon: Newspaper,
     roles: ['admin', 'editor', 'reporter'],
+  },
+   {
+    path: '/admin/pages',
+    label: 'পেজসমূহ',
+    icon: FileText,
+    roles: ['admin', 'editor'],
   },
   {
     path: '/admin/users',

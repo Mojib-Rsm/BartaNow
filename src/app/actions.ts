@@ -3,8 +3,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment } from '@/lib/api';
-import type { Article, User } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage } from '@/lib/api';
+import type { Article, User, Page } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -432,5 +432,73 @@ export async function deleteCommentAction(commentId: string) {
         console.error("Delete Comment Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'মন্তব্য ডিলিট করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
+    }
+}
+
+
+const pageSchema = z.object({
+  title: z.string().min(3, "শিরোনাম কমপক্ষে ৩ অক্ষরের হতে হবে।"),
+  content: z.string().min(10, "কনটেন্ট কমপক্ষে ১০ অক্ষরের হতে হবে।"),
+});
+
+export async function createPageAction(data: z.infer<typeof pageSchema>) {
+    const validation = pageSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+    
+    try {
+        const newPage = await createPage({
+            title: data.title,
+            content: data.content.split('\n').filter(p => p.trim() !== ''),
+        });
+        if (!newPage) {
+            return { success: false, message: 'পেজ তৈরি করা যায়নি।' };
+        }
+        revalidatePath('/admin/pages');
+        revalidatePath(`/p/${newPage.slug}`);
+        return { success: true, message: 'পেজ সফলভাবে তৈরি হয়েছে।', page: newPage };
+    } catch (error) {
+        console.error("Create Page Error:", error);
+        return { success: false, message: 'পেজ তৈরি করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+const updatePageSchema = pageSchema.extend({
+  id: z.string(),
+});
+
+export async function updatePageAction(data: z.infer<typeof updatePageSchema>) {
+    const validation = updatePageSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+
+    try {
+        const updatedPage = await updatePage(data.id, {
+            title: data.title,
+            content: data.content.split('\n').filter(p => p.trim() !== ''),
+            lastUpdatedAt: new Date().toISOString(),
+        });
+        if (!updatedPage) {
+            return { success: false, message: 'পেজ আপডেট করা যায়নি।' };
+        }
+        revalidatePath('/admin/pages');
+        revalidatePath(`/p/${updatedPage.slug}`);
+        return { success: true, message: 'পেজ সফলভাবে আপডেট হয়েছে।', page: updatedPage };
+    } catch (error) {
+        console.error("Update Page Error:", error);
+        return { success: false, message: 'পেজ আপডেট করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function deletePageAction(pageId: string) {
+    try {
+        await deletePage(pageId);
+        revalidatePath('/admin/pages');
+        return { success: true, message: 'পেজ সফলভাবে ডিলিট হয়েছে।' };
+    } catch (error) {
+        console.error("Delete Page Error:", error);
+        return { success: false, message: 'পেজ ডিলিট করতে একটি সমস্যা হয়েছে।' };
     }
 }

@@ -67,6 +67,16 @@ export interface Article {
   location?: string; // e.g., 'ঢাকা', 'চট্টগ্রাম'
 }
 
+export interface Page {
+  id: string;
+  slug: string;
+  title: string;
+  content: string[];
+  publishedAt: string;
+  lastUpdatedAt: string;
+  entityType?: 'PAGE';
+}
+
 export interface MemeNews {
   id: string;
   title: string;
