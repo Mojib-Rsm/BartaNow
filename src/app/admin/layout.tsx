@@ -31,6 +31,8 @@ import { adminMenuConfig } from '@/lib/admin-menu-config';
 import type { AdminMenuItem } from '@/lib/admin-menu-config';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
+import Header from '@/components/header';
+import Footer from '@/components/footer';
 
 
 const NavLink = ({ item, isActive, isChild = false }: { item: Omit<AdminMenuItem, 'children'>, isActive: boolean, isChild?: boolean }) => {
@@ -69,7 +71,7 @@ const NavCollapsible = ({ item, currentPath }: { item: AdminMenuItem, currentPat
                 {item.children?.map(child => {
                     const isChildActive = child.path ? currentPath.startsWith(child.path) : false;
                     return (
-                       <Link key={child.path} href={child.path || '#'} className={cn(
+                       <Link key={child.path || child.label} href={child.path || '#'} className={cn(
                            "block rounded-md py-2 pl-11 pr-3 transition-colors",
                            isChildActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent/50'
                        )}>
@@ -88,12 +90,14 @@ const renderNavLinks = (currentPath: string) => {
       const hasAccess = true; // Simplified for now
       if (!hasAccess) return null;
       
+      const key = item.path || item.label;
+
       if(item.children && item.children.length > 0) {
-        return <NavCollapsible key={item.label} item={item} currentPath={currentPath} />
+        return <NavCollapsible key={key} item={item} currentPath={currentPath} />
       }
 
       const isActive = item.exactMatch ? currentPath === item.path : (item.path ? currentPath.startsWith(item.path) : false);
-      return <NavLink key={item.path} item={item} isActive={isActive} />;
+      return <NavLink key={key} item={item} isActive={isActive} />;
     });
 };
 
@@ -262,4 +266,3 @@ export default function AdminLayout({
       </div>
   );
 }
-
