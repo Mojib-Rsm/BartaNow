@@ -147,21 +147,23 @@ export default function MediaManagementPage() {
             ) : filteredMedia.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                     {filteredMedia.map(item => (
-                        <Card key={item.id} className="group overflow-hidden">
-                            <CardContent className="p-0">
-                                <div className="relative aspect-square w-full bg-muted flex items-center justify-center">
-                                    {item.mimeType.startsWith('image/') ? (
-                                        <Image src={item.url} alt={item.fileName} fill className="object-cover" />
-                                    ) : (
-                                        getFileIcon(item.mimeType)
-                                    )}
-                                </div>
-                                <div className="p-2 text-xs">
-                                    <p className="font-semibold truncate group-hover:text-primary">{item.fileName}</p>
-                                    <p className="text-muted-foreground">{format(new Date(item.uploadedAt), 'PP')}</p>
-                                </div>
-                            </CardContent>
-                        </Card>
+                       <Link href={`/admin/media/${item.id}`} key={item.id}>
+                            <Card className="group overflow-hidden h-full">
+                                <CardContent className="p-0 flex flex-col h-full">
+                                    <div className="relative aspect-square w-full bg-muted flex items-center justify-center">
+                                        {item.mimeType.startsWith('image/') ? (
+                                            <Image src={item.url} alt={item.fileName} fill className="object-cover" />
+                                        ) : (
+                                            getFileIcon(item.mimeType)
+                                        )}
+                                    </div>
+                                    <div className="p-2 text-xs flex-grow flex flex-col justify-end">
+                                        <p className="font-semibold truncate group-hover:text-primary">{item.fileName}</p>
+                                        <p className="text-muted-foreground">{format(new Date(item.uploadedAt), 'PP')}</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </Link>
                     ))}
                 </div>
             ) : (

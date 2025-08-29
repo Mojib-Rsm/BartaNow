@@ -145,6 +145,12 @@ export interface Media {
     url: string;
     mimeType: string;
     size: number; // in bytes
+    altText?: string;
+    caption?: string;
+    description?: string;
+    width?: number;
+    height?: number;
+    duration?: number; // for audio/video
     uploadedAt: string; // ISO date string
     uploadedBy: string; // userId
     entityType?: 'MEDIA';

@@ -4,8 +4,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, createCategory, updateCategory, deleteCategory } from '@/lib/api';
-import type { Article, User, Page, Poll, PollOption, RssFeed, Category } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, createCategory, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl } from '@/lib/api';
+import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -469,6 +469,33 @@ export async function uploadMediaAction(formData: FormData) {
         return { success: false, message: errorMessage };
     }
 }
+
+const updateMediaSchema = z.object({
+  id: z.string(),
+  altText: z.string().optional(),
+  caption: z.string().optional(),
+  description: z.string().optional(),
+});
+export async function updateMediaAction(data: z.infer<typeof updateMediaSchema>) {
+    const validation = updateMediaSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+
+    try {
+        const updatedMedia = await updateMedia(data.id, data);
+        if (!updatedMedia) {
+            return { success: false, message: 'মিডিয়া আপডেট করা যায়নি।' };
+        }
+        revalidatePath(`/admin/media/${data.id}`);
+        return { success: true, message: 'মিডিয়া সফলভাবে আপডেট হয়েছে।', media: updatedMedia };
+    } catch (error) {
+        console.error("Update Media Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'মিডিয়া আপডেট করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
 
 export async function approveCommentAction(commentId: string) {
     try {
@@ -1009,4 +1036,8 @@ export async function uploadInArticleImageAction(base64Image: string, fileName: 
         const message = error instanceof Error ? error.message : 'Image upload failed';
         return { error: { message } };
     }
+}
+
+export async function getArticlesByMediaUrlAction(url: string) {
+    return getArticlesByMediaUrl(url);
 }

@@ -200,6 +200,10 @@ async function getMockNotificationsForUser(userId: string): Promise<Notification
     return notifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 }
 
+async function getMockMediaById(id: string): Promise<Media | undefined> {
+    return mockDb.media.find(m => m.id === id);
+}
+
 async function getMockAllMedia(): Promise<Media[]> {
     return [...mockDb.media].sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 }
@@ -212,6 +216,18 @@ async function createMockMedia(data: Omit<Media, 'id' | 'uploadedAt'>): Promise<
     };
     mockDb.media.unshift(newMedia);
     return newMedia;
+}
+
+async function updateMockMedia(id: string, data: Partial<Media>): Promise<Media | undefined> {
+    const mediaIndex = mockDb.media.findIndex(m => m.id === id);
+    if (mediaIndex === -1) return undefined;
+    const updatedMedia = { ...mockDb.media[mediaIndex], ...data };
+    mockDb.media[mediaIndex] = updatedMedia;
+    return updatedMedia;
+}
+
+async function getMockArticlesByMediaUrl(url: string): Promise<Article[]> {
+    return mockDb.articles.filter(article => article.imageUrl === url);
 }
 
 async function getMockAllComments(): Promise<Comment[]> {
@@ -571,6 +587,11 @@ async function getFirestoreNotificationsForUser(userId: string): Promise<Notific
     return notifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 }
 
+async function getFirestoreMediaById(id: string): Promise<Media | undefined> {
+    const doc = await db.collection('media').doc(id).get();
+    return doc.exists ? doc.data() as Media : undefined;
+}
+
 async function getFirestoreAllMedia(): Promise<Media[]> {
     const snapshot = await db.collection('media').orderBy('uploadedAt', 'desc').get();
     return snapshot.docs.map(doc => doc.data() as Media);
@@ -586,6 +607,20 @@ async function createFirestoreMedia(data: Omit<Media, 'id' | 'uploadedAt'>): Pro
     await db.collection('media').doc(newMedia.id).set(newMedia);
     return newMedia;
 }
+
+async function updateFirestoreMedia(id: string, data: Partial<Media>): Promise<Media | undefined> {
+    const mediaRef = db.collection('media').doc(id);
+    await mediaRef.update(data);
+    const updatedDoc = await mediaRef.get();
+    return updatedDoc.data() as Media | undefined;
+}
+
+async function getFirestoreArticlesByMediaUrl(url: string): Promise<Article[]> {
+    const snapshot = await db.collection('articles').where('imageUrl', '==', url).get();
+    if (snapshot.empty) return [];
+    return snapshot.docs.map(doc => doc.data() as Article);
+}
+
 
 async function getFirestoreAllComments(): Promise<Comment[]> {
     const snapshot = await db.collection('comments').orderBy('timestamp', 'desc').get();
@@ -1016,6 +1051,11 @@ export async function getNotificationsForUser(userId: string): Promise<Notificat
     return getFirestoreNotificationsForUser(userId);
 }
 
+export async function getMediaById(id: string): Promise<Media | undefined> {
+    if (!useFirestore || !db) return getMockMediaById(id);
+    return getFirestoreMediaById(id);
+}
+
 export async function getAllMedia(): Promise<Media[]> {
     if (!useFirestore || !db) return getMockAllMedia();
     return getFirestoreAllMedia();
@@ -1024,6 +1064,16 @@ export async function getAllMedia(): Promise<Media[]> {
 export async function createMedia(data: Omit<Media, 'id' | 'uploadedAt'>): Promise<Media> {
     if (!useFirestore || !db) return createMockMedia(data);
     return createFirestoreMedia(data);
+}
+
+export async function updateMedia(id: string, data: Partial<Media>): Promise<Media | undefined> {
+    if (!useFirestore || !db) return updateMockMedia(id, data);
+    return updateFirestoreMedia(id, data);
+}
+
+export async function getArticlesByMediaUrl(url: string): Promise<Article[]> {
+    if (!useFirestore || !db) return getMockArticlesByMediaUrl(url);
+    return getFirestoreArticlesByMediaUrl(url);
 }
 
 export async function getAllComments(): Promise<Comment[]> {
@@ -1052,3 +1102,6 @@ export async function getAllAds(): Promise<Ad[]> {
      // Firestore implementation would be similar to others
     return getMockAllAds();
 }
+
+
+    
