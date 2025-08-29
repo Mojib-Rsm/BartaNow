@@ -47,30 +47,15 @@ export const adminMenuConfig: AdminMenuItem[] = [
     exactMatch: true,
   },
   {
-    label: 'Category',
-    icon: FolderOpen,
-    roles: ['admin', 'editor', 'reporter'],
-    children: [
-        { path: '/admin/articles/categories', label: 'All Categories' },
-        { path: '/admin/articles/categories/create', label: 'Add New' },
-    ],
-  },
-  {
-    label: 'News Manages',
+    label: 'Posts',
     icon: Newspaper,
     roles: ['admin', 'editor', 'reporter'],
     children: [
-        { path: '/admin/articles', label: 'All News' },
+        { path: '/admin/articles', label: 'All Posts' },
         { path: '/admin/articles/create', label: 'Add New' },
-    ],
-  },
-  {
-    label: 'Blog Manages',
-    icon: FileSignature,
-    roles: ['admin', 'editor'],
-     children: [
-        { path: '/admin/pages', label: 'All Pages' },
-        { path: '/admin/pages/create', label: 'Add New' },
+        { path: '/admin/pages', label: 'Pages' },
+        { path: '/admin/articles/categories', label: 'Categories' },
+        { path: '/admin/articles/tags', label: 'Tags' },
     ],
   },
    {
@@ -106,12 +91,6 @@ export const adminMenuConfig: AdminMenuItem[] = [
     path: '/admin/comments',
     label: 'Comments',
     icon: MessagesSquare,
-    roles: ['admin', 'editor'],
-  },
-   {
-    path: '/admin/articles/tags',
-    label: 'Tag',
-    icon: Tags,
     roles: ['admin', 'editor'],
   },
   {
