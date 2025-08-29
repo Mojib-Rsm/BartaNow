@@ -5,6 +5,7 @@ import * as React from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
+  Row,
   SortingState,
   VisibilityState,
   flexRender,
@@ -14,7 +15,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -23,22 +25,79 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Edit, Trash2, Loader2 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { useToast } from "@/hooks/use-toast"
+import { deleteMultipleArticlesAction } from "@/app/actions"
+import type { Article } from "@/lib/types"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export function DataTable<TData, TValue>({
+const DeleteBulkConfirmationDialog = ({ 
+    selectedRows, 
+    onDeleted, 
+    onCancel 
+}: { 
+    selectedRows: Row<Article>[], 
+    onDeleted: () => void, 
+    onCancel: () => void 
+}) => {
+    const { toast } = useToast();
+    const [isDeleting, setIsDeleting] = React.useState(false);
+    const articleIds = selectedRows.map(row => row.original.id);
+
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        const result = await deleteMultipleArticlesAction(articleIds);
+        if (result.success) {
+            toast({ title: "সফল", description: result.message });
+            onDeleted();
+        } else {
+            toast({ variant: "destructive", title: "ব্যর্থ", description: result.message });
+        }
+        setIsDeleting(false);
+    };
+
+    return (
+        <AlertDialog open={true} onOpenChange={(isOpen) => !isOpen && onCancel()}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>আপনি কি নিশ্চিত?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        এই কাজটি আনডু করা যাবে না। এটি স্থায়ীভাবে {articleIds.length} টি আর্টিকেল ডিলিট করে দেবে।
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={onCancel}>বাতিল করুন</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                        {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        ডিলিট করুন
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+    );
+};
+
+
+export function DataTable<TData extends Article, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -46,7 +105,8 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
-
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = React.useState(false);
+  const { toast } = useToast()
 
   const table = useReactTable({
     data,
@@ -72,8 +132,20 @@ export function DataTable<TData, TValue>({
     }
   })
 
+  const numSelected = table.getFilteredSelectedRowModel().rows.length;
+
   return (
     <div className="w-full">
+         {isDeleteConfirmOpen && (
+            <DeleteBulkConfirmationDialog 
+                selectedRows={table.getFilteredSelectedRowModel().rows as Row<Article>[]}
+                onDeleted={() => {
+                    setIsDeleteConfirmOpen(false);
+                    table.resetRowSelection();
+                }}
+                onCancel={() => setIsDeleteConfirmOpen(false)}
+            />
+        )}
         <div className="flex items-center py-4">
             <Input
             placeholder="শিরোনাম দিয়ে ফিল্টার করুন..."
@@ -83,6 +155,17 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
             />
+             {numSelected > 0 && (
+                <div className="flex items-center gap-2 ml-4">
+                    <span className="text-sm text-muted-foreground">{numSelected} টি নির্বাচিত</span>
+                     <Button variant="outline" size="sm" onClick={() => toast({ title: "আসন্ন ফিচার", description: "বাল্ক এডিটর শীঘ্রই আসছে।" })}>
+                        <Edit className="mr-2 h-4 w-4" /> এডিট
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => setIsDeleteConfirmOpen(true)}>
+                        <Trash2 className="mr-2 h-4 w-4" /> ডিলিট
+                    </Button>
+                </div>
+            )}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="ml-auto">

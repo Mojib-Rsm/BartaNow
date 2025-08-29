@@ -190,6 +190,10 @@ async function deleteMockArticle(articleId: string): Promise<void> {
     if (index > -1) mockDb.articles.splice(index, 1);
 }
 
+async function deleteMultipleMockArticles(articleIds: string[]): Promise<void> {
+    mockDb.articles = mockDb.articles.filter(a => !articleIds.includes(a.id));
+}
+
 async function deleteMockUser(userId: string): Promise<void> {
     const index = mockDb.users.findIndex(u => u.id === userId);
     if (index > -1) mockDb.users.splice(index, 1);
@@ -586,6 +590,15 @@ async function deleteFirestoreArticle(articleId: string): Promise<void> {
     await db.collection('articles').doc(articleId).delete();
 }
 
+async function deleteMultipleFirestoreArticles(articleIds: string[]): Promise<void> {
+    const batch = db.batch();
+    articleIds.forEach(id => {
+        const docRef = db.collection('articles').doc(id);
+        batch.delete(docRef);
+    });
+    await batch.commit();
+}
+
 async function deleteFirestoreUser(userId: string): Promise<void> {
     await db.collection('users').doc(userId).delete();
 }
@@ -931,6 +944,11 @@ export async function updateArticle(articleId: string, data: Partial<Article>): 
 export async function deleteArticle(articleId: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockArticle(articleId);
     return deleteFirestoreArticle(articleId);
+}
+
+export async function deleteMultipleArticles(articleIds: string[]): Promise<void> {
+    if (!useFirestore || !db) return deleteMultipleMockArticles(articleIds);
+    return deleteMultipleFirestoreArticles(articleIds);
 }
 
 export async function deleteUser(userId: string): Promise<void> {

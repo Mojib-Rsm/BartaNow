@@ -4,7 +4,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -1070,4 +1070,17 @@ export async function uploadInArticleImageAction(base64Image: string, fileName: 
 
 export async function getArticlesByMediaUrlAction(url: string) {
     return getArticlesByMediaUrl(url);
+}
+
+export async function deleteMultipleArticlesAction(articleIds: string[]) {
+    try {
+        await deleteMultipleArticles(articleIds);
+        revalidatePath('/admin/articles');
+        revalidatePath('/');
+        return { success: true, message: `${articleIds.length} টি আর্টিকেল সফলভাবে ডিলিট হয়েছে।` };
+    } catch (error) {
+        console.error("Delete Multiple Articles Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'আর্টিকেলগুলো ডিলিট করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
 }
