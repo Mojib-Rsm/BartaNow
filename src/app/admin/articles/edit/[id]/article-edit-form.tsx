@@ -15,10 +15,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Upload } from 'lucide-react';
 import { updateArticleAction } from '@/app/actions';
 import Link from 'next/link';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import RichTextEditor from '@/components/rich-text-editor';
 
 
 const formSchema = z.object({
@@ -47,7 +46,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
     defaultValues: {
       id: article.id,
       title: article.title || '',
-      content: article.content.join('\n\n') || '',
+      content: article.content || '',
       category: article.category || 'সর্বশেষ',
       imageUrl: article.imageUrl || '',
     },
@@ -122,8 +121,11 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="content">কনটেন্ট (অনুচ্ছেদ আলাদা করতে নতুন লাইন ব্যবহার করুন)</Label>
-            <Textarea id="content" {...form.register('content')} className="min-h-[200px]" />
+            <Label htmlFor="content">কনটেন্ট</Label>
+            <RichTextEditor
+                value={form.watch('content')}
+                onChange={(content) => form.setValue('content', content)}
+            />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>
             )}

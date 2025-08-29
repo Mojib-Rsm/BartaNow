@@ -1,4 +1,5 @@
 
+
 import { getArticleBySlug, getArticles } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -100,6 +101,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         url: `/authors/${article.authorId}`,
     }],
     description: article.aiSummary,
+    articleBody: article.content,
   };
 
   return (
@@ -156,11 +158,10 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                   </div>
                 )}
 
-                <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-foreground/90">
-                    {article.content.map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
-                    ))}
-                </div>
+                <div 
+                    className="prose prose-lg dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: article.content }}
+                />
 
                 {article.factCheck && (
                     <div className="mt-8 pt-6 border-t">

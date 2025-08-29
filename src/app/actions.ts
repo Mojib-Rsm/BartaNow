@@ -102,7 +102,7 @@ export async function getArticleAudioAction(articleId: string) {
     if (!article) {
         throw new Error('Article not found');
     }
-    const fullText = [article.title, ...article.content].join('\n\n');
+    const fullText = [article.title, article.content].join('\n\n');
     const { media } = await textToSpeech(fullText);
     return media;
 }
@@ -189,7 +189,7 @@ export async function updateArticleAction(data: Omit<ArticleFormValues, 'authorI
     try {
         const articleToUpdate: Partial<Article> = {
             title: data.title,
-            content: data.content.split('\n').filter(p => p.trim() !== ''),
+            content: data.content,
             category: data.category,
         };
 
@@ -243,7 +243,7 @@ export async function createArticleAction(data: Omit<CreateArticleFormValues, 'a
         
         const newArticleData: Omit<Article, 'id' | 'slug' | 'aiSummary'> = {
             title: data.title,
-            content: data.content.split('\n').filter(p => p.trim() !== ''),
+            content: data.content,
             category: data.category,
             imageUrl: finalImageUrl,
             authorId: author.id,
@@ -456,7 +456,7 @@ export async function createPageAction(data: z.infer<typeof pageSchema>) {
     try {
         const newPage = await createPage({
             title: data.title,
-            content: data.content.split('\n').filter(p => p.trim() !== ''),
+            content: data.content,
         });
         if (!newPage) {
             return { success: false, message: 'পেজ তৈরি করা যায়নি।' };
@@ -483,7 +483,7 @@ export async function updatePageAction(data: z.infer<typeof updatePageSchema>) {
     try {
         const updatedPage = await updatePage(data.id, {
             title: data.title,
-            content: data.content.split('\n').filter(p => p.trim() !== ''),
+            content: data.content,
             lastUpdatedAt: new Date().toISOString(),
         });
         if (!updatedPage) {
@@ -771,8 +771,7 @@ export async function importWordPressAction(xmlContent: string) {
             }
             
             // Basic HTML strip to get text content
-            const contentText = contentHtml.replace(/<[^>]*>?/gm, ''); 
-            const paragraphs = contentText.split('\n').filter(p => p.trim() !== '');
+            const contentText = contentHtml;
             
             // Extract and map category
             let postCategory: Article['category'] = 'সর্বশেষ'; // Default category
@@ -791,7 +790,7 @@ export async function importWordPressAction(xmlContent: string) {
 
             const newArticleData: Omit<Article, 'id' | 'slug' | 'aiSummary'> = {
                 title: post.title,
-                content: paragraphs,
+                content: contentText,
                 category: postCategory,
                 imageUrl: imageUrl,
                 authorId: author.id,

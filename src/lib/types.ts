@@ -68,7 +68,7 @@ export interface Article {
   slug: string;
   title: string;
   category: 'রাজনীতি' | 'খেলা' | 'প্রযুক্তি' | 'বিনোদন' | 'অর্থনীতি' | 'আন্তর্জাতিক' | 'মতামত' | 'স্বাস্থ্য' | 'শিক্ষা' | 'পরিবেশ' | 'বিশেষ-কভারেজ' | 'জাতীয়' | 'ইসলামী-জীবন' | 'তথ্য-যাচাই' | 'মিম-নিউজ' | 'ভিডিও' | 'সর্বশেষ' | 'সম্পাদকের-পছন্দ';
-  content: string[]; // Array of paragraphs
+  content: string; // HTML content from the rich text editor
   imageUrl: string;
   imageHint?: string;
   authorId: string;
@@ -89,7 +89,7 @@ export interface Page {
   id: string;
   slug: string;
   title: string;
-  content: string[];
+  content: string; // HTML content
   publishedAt: string;
   lastUpdatedAt: string;
   entityType?: 'PAGE';

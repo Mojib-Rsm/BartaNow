@@ -19,7 +19,7 @@ export async function generateMetadata(
     }
   }
  
-  const description = page.content[0]?.substring(0, 160) || 'বার্তা নাও-এর একটি পেজ';
+  const description = page.content.substring(0, 160) || 'বার্তা নাও-এর একটি পেজ';
 
   return {
     title: page.title,
@@ -63,14 +63,11 @@ export default async function StaticPage({ params }: { params: { slug:string } }
                 </p>
             </header>
 
-            <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-foreground/90">
-                {page.content.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                ))}
-            </div>
+            <div 
+                className="prose prose-lg dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: page.content }}
+            />
         </article>
     </div>
   );
 }
-
-    
