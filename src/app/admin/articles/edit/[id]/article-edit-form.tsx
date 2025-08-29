@@ -17,7 +17,7 @@ import { updateArticleAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
-import TinyEditor from '@/components/tiny-editor';
+import RichTextEditor from '@/components/rich-text-editor';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -190,9 +190,15 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
 
           <div className="grid gap-2">
             <Label htmlFor="content">কনটেন্ট</Label>
-            <TinyEditor
-                value={form.watch('content')}
-                onChange={(content) => form.setValue('content', content, { shouldValidate: true, shouldDirty: true })}
+            <Controller
+              name="content"
+              control={form.control}
+              render={({ field }) => (
+                <RichTextEditor
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>

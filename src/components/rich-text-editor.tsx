@@ -2,9 +2,12 @@
 'use client';
 
 import React from 'react';
-import { Editor } from '@tinymce/tinymce-react';
+import dynamic from 'next/dynamic';
+import 'react-quill/dist/quill.snow.css'; // Import the styles
 import { useTheme } from 'next-themes';
-import { uploadInArticleImageAction } from '@/app/actions';
+
+// Dynamically import ReactQuill to avoid SSR issues
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 type RichTextEditorProps = {
   value: string;
@@ -12,54 +15,69 @@ type RichTextEditorProps = {
   placeholder?: string;
 };
 
-export default function TinyEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
   const { theme } = useTheme();
 
-  const handleEditorChange = (content: string, editor: any) => {
-    onChange(content);
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+      ['link', 'image'],
+      ['clean']
+    ],
   };
+
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image'
+  ];
+
+  // The 'dark' class will be on the html element, which Quill doesn't see directly.
+  // We can't easily switch Quill's theme, but the default theme adapts reasonably well.
+  // For a full dark theme, custom CSS would be required to override Quill's default styles.
   
-  const handleImageUpload = (blobInfo: any, progress: (percent: number) => void): Promise<string> => 
-    new Promise(async (resolve, reject) => {
-      try {
-        const result = await uploadInArticleImageAction(blobInfo.base64(), blobInfo.filename());
-        if ('location' in result) {
-            resolve(result.location);
-        } else {
-            reject(result.error.message);
-        }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Image upload failed';
-        reject(message);
-      }
-  });
-
-
   return (
-    <Editor
-      apiKey="no-api-key"
-      value={value}
-      onEditorChange={handleEditorChange}
-      init={{
-        height: 500,
-        menubar: true,
-        plugins: [
-          'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-          'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-          'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'emoticons'
-        ],
-        toolbar: 'undo redo | blocks | ' +
-          'bold italic forecolor | alignleft aligncenter ' +
-          'alignright alignjustify | bullist numlist outdent indent | ' +
-          'removeformat | image media link | emoticons | help',
-        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
-        skin: theme === 'dark' ? 'oxide-dark' : 'oxide',
-        content_css: theme === 'dark' ? 'dark' : 'default',
-        placeholder: placeholder || 'আপনার কনটেন্ট এখানে লিখুন...',
-        automatic_uploads: true,
-        file_picker_types: 'image',
-        images_upload_handler: handleImageUpload,
-      }}
-    />
+    <div className={theme === 'dark' ? 'ql-dark' : ''}>
+        <ReactQuill 
+            theme="snow"
+            value={value}
+            onChange={onChange}
+            modules={modules}
+            formats={formats}
+            placeholder={placeholder || 'আপনার কনটেন্ট এখানে লিখুন...'}
+        />
+    </div>
   );
+}
+
+// Add some basic dark theme support for Quill
+const styles = `
+.ql-dark .ql-editor {
+    color: hsl(var(--foreground));
+}
+.ql-dark .ql-snow .ql-stroke {
+    stroke: hsl(var(--border));
+}
+.ql-dark .ql-snow .ql-picker-label {
+    color: hsl(var(--foreground));
+}
+.ql-dark .ql-snow .ql-fill, .ql-dark .ql-snow .ql-stroke.ql-fill {
+    fill: hsl(var(--border));
+}
+.ql-dark .ql-toolbar {
+    border-color: hsl(var(--border));
+}
+.ql-dark .ql-container {
+    border-color: hsl(var(--border));
+}
+`;
+
+if (typeof window !== 'undefined') {
+    const styleSheet = document.createElement("style");
+    styleSheet.type = "text/css";
+    styleSheet.innerText = styles;
+    document.head.appendChild(styleSheet);
 }
