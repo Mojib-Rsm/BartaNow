@@ -15,6 +15,9 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
+import * as z from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -43,8 +46,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
-import { deleteMultipleArticlesAction } from "@/app/actions"
-import type { Article } from "@/lib/types"
+import { deleteMultipleArticlesAction, updateMultipleArticlesAction } from "@/app/actions"
+import type { Article, Category } from "@/lib/types"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getAllCategories } from "@/lib/api";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -97,6 +104,113 @@ const DeleteBulkConfirmationDialog = ({
     );
 };
 
+const bulkEditSchema = z.object({
+  status: z.enum(['Published', 'Draft', '']).optional(),
+  category: z.string().optional().or(z.literal('')),
+  tags: z.string().optional(),
+});
+
+type BulkEditFormValues = z.infer<typeof bulkEditSchema>;
+
+const BulkEditDialog = ({
+    selectedRows,
+    onEdited,
+    onCancel,
+}: {
+    selectedRows: Row<Article>[];
+    onEdited: () => void;
+    onCancel: () => void;
+}) => {
+    const { toast } = useToast();
+    const [isSaving, setIsSaving] = React.useState(false);
+    const [categories, setCategories] = React.useState<Category[]>([]);
+    const articleIds = selectedRows.map(row => row.original.id);
+
+    const form = useForm<BulkEditFormValues>({
+        resolver: zodResolver(bulkEditSchema),
+        defaultValues: {
+            status: '',
+            category: '',
+            tags: '',
+        }
+    });
+
+    React.useEffect(() => {
+        getAllCategories().then(setCategories);
+    }, []);
+
+    const handleSave = async (data: BulkEditFormValues) => {
+        if (!data.status && !data.category && !data.tags) {
+            toast({ variant: 'destructive', title: 'কিছুই পরিবর্তন করা হয়নি', description: 'অনুগ্রহ করে কমপক্ষে একটি ফিল্ড পরিবর্তন করুন।' });
+            return;
+        }
+
+        setIsSaving(true);
+        const result = await updateMultipleArticlesAction(articleIds, data);
+        if (result.success) {
+            toast({ title: 'সফল', description: result.message });
+            onEdited();
+        } else {
+            toast({ variant: 'destructive', title: 'ব্যর্থ', description: result.message });
+        }
+        setIsSaving(false);
+    };
+
+    return (
+        <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onCancel()}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>বাল্ক এডিট: {articleIds.length} টি আর্টিকেল</DialogTitle>
+                    <DialogDescription>
+                        নির্বাচিত আর্টিকেলগুলোর তথ্য একসাথে পরিবর্তন করুন। শুধুমাত্র যে ফিল্ডগুলো পূরণ করবেন সেগুলোই আপডেট হবে।
+                    </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={form.handleSubmit(handleSave)} className="py-4 space-y-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="status">স্ট্যাটাস</Label>
+                        <Select onValueChange={(value) => form.setValue('status', value as any)} defaultValue="">
+                            <SelectTrigger id="status">
+                                <SelectValue placeholder="স্ট্যাটাস পরিবর্তন করুন" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="">-- পরিবর্তন করবেন না --</SelectItem>
+                                <SelectItem value="Published">Published</SelectItem>
+                                <SelectItem value="Draft">Draft</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="category">ক্যাটাগরি</Label>
+                        <Select onValueChange={(value) => form.setValue('category', value)} defaultValue="">
+                            <SelectTrigger id="category">
+                                <SelectValue placeholder="ক্যাটাগরি পরিবর্তন করুন" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="">-- পরিবর্তন করবেন না --</SelectItem>
+                                {categories.map(cat => (
+                                    <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="tags">নতুন ট্যাগ যোগ করুন (কমা দিয়ে আলাদা করুন)</Label>
+                        <Input id="tags" {...form.register('tags')} placeholder="যেমন: নতুন ট্যাগ, আরও একটি" />
+                        <p className="text-xs text-muted-foreground">এই ট্যাগগুলো নির্বাচিত সব আর্টিকেলের বিদ্যমান ট্যাগের সাথে যোগ হবে।</p>
+                    </div>
+                </form>
+                <DialogFooter>
+                    <Button variant="ghost" onClick={onCancel}>বাতিল করুন</Button>
+                    <Button onClick={form.handleSubmit(handleSave)} disabled={isSaving}>
+                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        সংরক্ষণ করুন
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 
 export function DataTable<TData extends Article, TValue>({
   columns,
@@ -107,6 +221,7 @@ export function DataTable<TData extends Article, TValue>({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = React.useState(false);
+  const [isBulkEditOpen, setIsBulkEditOpen] = React.useState(false);
   const { toast } = useToast()
 
   const table = useReactTable({
@@ -147,6 +262,16 @@ export function DataTable<TData extends Article, TValue>({
                 onCancel={() => setIsDeleteConfirmOpen(false)}
             />
         )}
+         {isBulkEditOpen && (
+            <BulkEditDialog 
+                selectedRows={table.getFilteredSelectedRowModel().rows as Row<Article>[]}
+                onEdited={() => {
+                    setIsBulkEditOpen(false);
+                    table.resetRowSelection();
+                }}
+                onCancel={() => setIsBulkEditOpen(false)}
+            />
+        )}
         <div className="flex items-center py-4">
             <Input
             placeholder="শিরোনাম দিয়ে ফিল্টার করুন..."
@@ -159,7 +284,7 @@ export function DataTable<TData extends Article, TValue>({
              {numSelected > 0 && (
                 <div className="flex items-center gap-2 ml-4">
                     <span className="text-sm text-muted-foreground">{numSelected} টি নির্বাচিত</span>
-                     <Button variant="outline" size="sm" onClick={() => toast({ title: "আসন্ন ফিচার", description: "বাল্ক এডিটর শীঘ্রই আসছে।" })}>
+                     <Button variant="outline" size="sm" onClick={() => setIsBulkEditOpen(true)}>
                         <Edit className="mr-2 h-4 w-4" /> এডিট
                     </Button>
                     <Button variant="destructive" size="sm" onClick={() => setIsDeleteConfirmOpen(true)}>

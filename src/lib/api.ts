@@ -194,6 +194,25 @@ async function deleteMultipleMockArticles(articleIds: string[]): Promise<void> {
     mockDb.articles = mockDb.articles.filter(a => !articleIds.includes(a.id));
 }
 
+async function updateMultipleMockArticles(articleIds: string[], data: Partial<Pick<Article, 'status' | 'category'>>, newTags?: string[]): Promise<void> {
+    mockDb.articles.forEach(article => {
+        if (articleIds.includes(article.id)) {
+            if (data.status) {
+                article.status = data.status;
+            }
+            if (data.category) {
+                article.category = data.category;
+            }
+            if (newTags && newTags.length > 0) {
+                const currentTags = new Set(article.tags || []);
+                newTags.forEach(tag => currentTags.add(tag));
+                article.tags = Array.from(currentTags);
+            }
+        }
+    });
+}
+
+
 async function deleteMockUser(userId: string): Promise<void> {
     const index = mockDb.users.findIndex(u => u.id === userId);
     if (index > -1) mockDb.users.splice(index, 1);
@@ -599,6 +618,20 @@ async function deleteMultipleFirestoreArticles(articleIds: string[]): Promise<vo
     await batch.commit();
 }
 
+async function updateMultipleFirestoreArticles(articleIds: string[], data: Partial<Pick<Article, 'status' | 'category'>>, newTags?: string[]): Promise<void> {
+    const batch = db.batch();
+    for (const id of articleIds) {
+        const docRef = db.collection('articles').doc(id);
+        const updateData: any = { ...data };
+        if (newTags && newTags.length > 0) {
+            updateData.tags = admin.firestore.FieldValue.arrayUnion(...newTags);
+        }
+        batch.update(docRef, updateData);
+    }
+    await batch.commit();
+}
+
+
 async function deleteFirestoreUser(userId: string): Promise<void> {
     await db.collection('users').doc(userId).delete();
 }
@@ -950,6 +983,12 @@ export async function deleteMultipleArticles(articleIds: string[]): Promise<void
     if (!useFirestore || !db) return deleteMultipleMockArticles(articleIds);
     return deleteMultipleFirestoreArticles(articleIds);
 }
+
+export async function updateMultipleArticles(articleIds: string[], data: Partial<Pick<Article, 'status' | 'category'>>, newTags?: string[]): Promise<void> {
+    if (!useFirestore || !db) return updateMultipleMockArticles(articleIds, data, newTags);
+    return updateMultipleFirestoreArticles(articleIds, data, newTags);
+}
+
 
 export async function deleteUser(userId: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockUser(userId);

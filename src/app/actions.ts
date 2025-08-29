@@ -4,7 +4,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -1081,6 +1081,38 @@ export async function deleteMultipleArticlesAction(articleIds: string[]) {
     } catch (error) {
         console.error("Delete Multiple Articles Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'আর্টিকেলগুলো ডিলিট করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
+const bulkUpdateSchema = z.object({
+  status: z.enum(['Published', 'Draft', '']).optional(),
+  category: z.string().optional().or(z.literal('')),
+  tags: z.string().optional(),
+});
+
+export async function updateMultipleArticlesAction(articleIds: string[], data: z.infer<typeof bulkUpdateSchema>) {
+    try {
+        const updateData: Partial<Pick<Article, 'status' | 'category' | 'tags'>> = {};
+        
+        if (data.status) {
+            updateData.status = data.status as 'Published' | 'Draft';
+        }
+        if (data.category) {
+            updateData.category = data.category;
+        }
+
+        const tagArray = data.tags?.split(',').map(tag => tag.trim()).filter(Boolean);
+        
+        await updateMultipleArticles(articleIds, updateData, tagArray);
+
+        revalidatePath('/admin/articles');
+        revalidatePath('/');
+
+        return { success: true, message: `${articleIds.length} টি আর্টিকেল সফলভাবে আপডেট হয়েছে।` };
+    } catch (error) {
+        console.error("Bulk Update Articles Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'আর্টিকেলগুলো আপডেট করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
     }
 }
