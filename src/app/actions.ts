@@ -14,6 +14,7 @@ import { sendMail } from '@/lib/mailer';
 import { getWelcomeEmailHtml } from '@/lib/email-templates/welcome-email.js';
 import { getNewsletterHtml } from '@/lib/email-templates/newsletter-email.js';
 import { parseStringPromise } from 'xml2js';
+import { generateArticle } from '@/ai/flows/generate-article';
 
 
 export async function seedAction() {
@@ -86,7 +87,7 @@ export async function signupAction(data: SignupFormValues) {
 
     } catch (error) {
         console.error("Signup Error:", error);
-        const errorMessage = error instanceof Error ? error.message : 'একাউন্ট তৈরিতে একটি সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।';
+        const errorMessage = error instanceof Error ? error.message : 'একাউন্ট তৈরিতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
     }
 }
@@ -105,6 +106,17 @@ export async function getArticleAudioAction(articleId: string) {
     const fullText = [article.title, article.content].join('\n\n');
     const { media } = await textToSpeech(fullText);
     return media;
+}
+
+export async function generateArticleAction(prompt: string) {
+    try {
+        const article = await generateArticle({ prompt });
+        return { success: true, article };
+    } catch (error) {
+        console.error("Generate Article Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'আর্টিকেল তৈরি করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
 }
 
 const updateUserSchema = z.object({
@@ -169,18 +181,20 @@ export async function updateUserAction(data: UpdateUserFormValues) {
 
 
 const articleSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   title: z.string().min(10, "শিরোনাম কমপক্ষে ১০ অক্ষরের হতে হবে।"),
   content: z.string().min(50, "কনটেন্ট কমপক্ষে ৫০ অক্ষরের হতে হবে।"),
   category: z.enum(['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ']),
   imageUrl: z.string().optional().or(z.literal('')),
-  authorId: z.string().min(1, "লেখক আইডি প্রয়োজন।"),
+  publishedAt: z.string().optional(),
 });
 
-type ArticleFormValues = z.infer<typeof articleSchema>;
 
-export async function updateArticleAction(data: Omit<ArticleFormValues, 'authorId'> & { id: string }) {
-    const validation = articleSchema.omit({ authorId: true }).safeParse(data);
+export async function updateArticleAction(data: z.infer<typeof articleSchema>) {
+    if (!data.id) {
+        return { success: false, message: 'আর্টিকেল আইডি পাওয়া যায়নি।' };
+    }
+    const validation = articleSchema.safeParse(data);
 
     if (!validation.success) {
         return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
@@ -191,6 +205,7 @@ export async function updateArticleAction(data: Omit<ArticleFormValues, 'authorI
             title: data.title,
             content: data.content,
             category: data.category,
+            publishedAt: data.publishedAt || new Date().toISOString(),
         };
 
         if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
@@ -220,11 +235,13 @@ export async function updateArticleAction(data: Omit<ArticleFormValues, 'authorI
     }
 }
 
-const createArticleSchema = articleSchema.omit({ id: true });
+const createArticleSchema = articleSchema.omit({ id: true }).extend({
+    userId: z.string()
+});
 type CreateArticleFormValues = z.infer<typeof createArticleSchema>;
 
-export async function createArticleAction(data: Omit<CreateArticleFormValues, 'authorId'> & { userId: string }) {
-    const validation = createArticleSchema.omit({ authorId: true }).safeParse(data);
+export async function createArticleAction(data: CreateArticleFormValues) {
+    const validation = createArticleSchema.safeParse(data);
 
     if (!validation.success) {
         return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
@@ -249,7 +266,7 @@ export async function createArticleAction(data: Omit<CreateArticleFormValues, 'a
             authorId: author.id,
             authorName: author.name,
             authorAvatarUrl: author.avatarUrl || '',
-            publishedAt: new Date().toISOString(),
+            publishedAt: data.publishedAt || new Date().toISOString(),
         };
 
         const newArticle = await createArticle(newArticleData);

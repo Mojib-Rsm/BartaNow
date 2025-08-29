@@ -3,7 +3,7 @@
 
 import React, { useState, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Article } from '@/lib/types';
@@ -18,7 +18,9 @@ import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
 import RichTextEditor from '@/components/rich-text-editor';
-
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
 
 const formSchema = z.object({
   id: z.string(),
@@ -26,6 +28,8 @@ const formSchema = z.object({
   content: z.string().min(50, "কনটেন্ট কমপক্ষে ৫০ অক্ষরের হতে হবে।"),
   category: z.enum(['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ']),
   imageUrl: z.string().optional().or(z.literal('')),
+  publishedAt: z.date().optional(),
+  publishTime: z.string().optional(),
 });
 
 
@@ -49,6 +53,8 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
       content: article.content || '',
       category: article.category || 'সর্বশেষ',
       imageUrl: article.imageUrl || '',
+      publishedAt: article.publishedAt ? new Date(article.publishedAt) : new Date(),
+      publishTime: article.publishedAt ? format(new Date(article.publishedAt), 'HH:mm') : format(new Date(), 'HH:mm'),
     },
   });
 
@@ -67,7 +73,14 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
-    const result = await updateArticleAction(data);
+    
+    const publishedDate = data.publishedAt || new Date();
+    const [hours, minutes] = data.publishTime?.split(':').map(Number) || [0, 0];
+    publishedDate.setHours(hours, minutes);
+
+    const finalData = { ...data, publishedAt: publishedDate.toISOString() };
+
+    const result = await updateArticleAction(finalData);
     setLoading(false);
 
     if (result.success) {
@@ -131,30 +144,72 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
             )}
           </div>
 
-          <div className="grid gap-2">
-              <Label htmlFor="category">ক্যাটাগরি</Label>
-              <Select onValueChange={(value) => form.setValue('category', value as FormValues['category'])} defaultValue={form.getValues('category')}>
-                  <SelectTrigger id="category">
-                  <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
-                  </SelectTrigger>
-                  <SelectContent>
-                      {['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ'].map(cat => (
-                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                  </SelectContent>
-              </Select>
-                {form.formState.errors.category && (
-                  <p className="text-xs text-destructive">{form.formState.errors.category.message}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="category">ক্যাটাগরি</Label>
+                <Select onValueChange={(value) => form.setValue('category', value as FormValues['category'])} defaultValue={form.getValues('category')}>
+                    <SelectTrigger id="category">
+                    <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ'].map(cat => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                  {form.formState.errors.category && (
+                    <p className="text-xs text-destructive">{form.formState.errors.category.message}</p>
+                )}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="imageUrl">অথবা ইমেজ URL দিন</Label>
+              <Input id="imageUrl" {...form.register('imageUrl')} placeholder="একটি ছবি আপলোড করলে এই ফিল্ডটি উপেক্ষা করা হবে" />
+              {form.formState.errors.imageUrl && (
+                <p className="text-xs text-destructive">{form.formState.errors.imageUrl.message}</p>
               )}
+            </div>
           </div>
           
-           <div className="grid gap-2">
-            <Label htmlFor="imageUrl">অথবা ইমেজ URL দিন</Label>
-            <Input id="imageUrl" {...form.register('imageUrl')} placeholder="একটি ছবি আপলোড করলে এই ফিল্ডটি উপেক্ষা করা হবে" />
-            {form.formState.errors.imageUrl && (
-              <p className="text-xs text-destructive">{form.formState.errors.imageUrl.message}</p>
-            )}
-          </div>
+           <Card className="bg-muted/30">
+                <CardHeader>
+                    <CardTitle className="text-base">পোস্ট শিডিউল</CardTitle>
+                    <CardDescription>পোস্টটি কখন প্রকাশিত হবে তা নির্ধারণ করুন।</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                        <Label>প্রকাশের তারিখ</Label>
+                         <Controller
+                            control={form.control}
+                            name="publishedAt"
+                            render={({ field }) => (
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                            {field.value ? format(field.value, 'PPP', { locale: require('date-fns/locale/bn') }) : <span>একটি তারিখ নির্বাচন করুন</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            )}
+                        />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="publishTime">প্রকাশের সময়</Label>
+                        <Input
+                            id="publishTime"
+                            type="time"
+                            {...form.register('publishTime')}
+                        />
+                    </div>
+                </CardContent>
+            </Card>
 
 
           <div className="flex justify-end gap-2 pt-4">

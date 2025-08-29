@@ -2,7 +2,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Trash2 } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Trash2, Clock } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -31,6 +31,8 @@ import { useToast } from "@/hooks/use-toast"
 import { deleteArticleAction } from "@/app/actions"
 import { useRouter } from "next/navigation"
 import { useAuthorization } from "@/hooks/use-authorization"
+import { format } from "date-fns"
+import { bn } from "date-fns/locale"
 
 const DeleteConfirmationDialog = ({ article, onDeleted }: { article: Article, onDeleted: () => void }) => {
     const [isOpen, setIsOpen] = useState(false)
@@ -134,7 +136,20 @@ export const columns: ColumnDef<Article>[] = [
         </Button>
       )
     },
-    cell: ({ row }) => <div className="font-medium line-clamp-2">{row.getValue("title")}</div>,
+    cell: ({ row }) => {
+        const isScheduled = new Date(row.original.publishedAt) > new Date();
+        return (
+            <div className="font-medium line-clamp-2">
+                {row.getValue("title")}
+                {isScheduled && (
+                    <Badge variant="secondary" className="ml-2 bg-amber-500 text-white">
+                        <Clock className="mr-1 h-3 w-3" />
+                        শিডিউলড
+                    </Badge>
+                )}
+            </div>
+        )
+    },
   },
   {
     accessorKey: "category",
@@ -160,11 +175,7 @@ export const columns: ColumnDef<Article>[] = [
     },
     cell: ({ row }) => {
       const date = new Date(row.getValue("publishedAt"))
-      const formatted = new Intl.DateTimeFormat('bn-BD', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      }).format(date);
+      const formatted = format(date, "d MMMM, yyyy, h:mm a", { locale: bn });
       return <div className="text-right font-medium">{formatted}</div>
     },
   },
