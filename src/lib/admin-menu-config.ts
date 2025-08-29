@@ -21,7 +21,8 @@ import {
   LineChart,
   Link,
   MapPin,
-  Home
+  Home,
+  Megaphone
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
