@@ -7,7 +7,6 @@ import {
   ShieldCheck,
   ImageIcon,
   MessagesSquare,
-  BellRing,
   FileText,
   BarChartHorizontal,
   Rss,
@@ -54,7 +53,6 @@ export const adminMenuConfig: AdminMenuItem[] = [
         { path: '/admin/articles/create', label: 'Add New' },
         { path: '/admin/pages', label: 'Pages' },
         { path: '/admin/articles/categories', label: 'Categories' },
-        { path: '/admin/articles/tags', label: 'Tags' },
     ],
   },
    {
@@ -64,6 +62,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin', 'editor', 'reporter'],
   },
   {
+    path: '#staff-manages',
     label: 'Staff Manages',
     icon: Users,
     roles: ['admin', 'editor'],
@@ -72,6 +71,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     ],
   },
    {
+    path: '#roles-permissions',
     label: 'Roles & Permissions',
     icon: ShieldCheck,
     roles: ['admin'],
@@ -101,7 +101,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin'],
   },
    {
-    path: '/admin/subscribers',
+    path: '#contact-messages',
     label: 'Contact Messages',
     icon: Contact,
     roles: ['admin', 'editor'],
