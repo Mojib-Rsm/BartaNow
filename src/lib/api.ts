@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad } from './types';
@@ -8,6 +7,7 @@ import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
 import { sendMail } from './mailer';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
+import { getNewCommentEmailHtml } from './email-templates/new-comment-email';
 
 const useFirestore = process.env.DATABASE_TYPE === 'firestore';
 
@@ -269,8 +269,36 @@ async function getMockArticlesByMediaUrl(url: string): Promise<Article[]> {
     return mockDb.articles.filter(article => article.imageUrl === url);
 }
 
-async function getMockAllComments(): Promise<Comment[]> {
-    return [...mockDb.comments].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+type GetCommentsOptions = {
+    userName?: string;
+    articleId?: string;
+    status?: Comment['status'];
+}
+
+async function getMockAllComments(options: GetCommentsOptions = {}): Promise<Comment[]> {
+    let filteredComments = [...mockDb.comments];
+    if (options.userName) {
+        filteredComments = filteredComments.filter(c => c.userName.toLowerCase().includes(options.userName!.toLowerCase()));
+    }
+    if (options.articleId) {
+        filteredComments = filteredComments.filter(c => c.articleId === options.articleId);
+    }
+    if (options.status) {
+        filteredComments = filteredComments.filter(c => c.status === options.status);
+    }
+    return filteredComments.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+}
+
+
+async function createMockComment(data: Omit<Comment, 'id' | 'timestamp' | 'status'>): Promise<Comment> {
+    const newComment: Comment = {
+        id: `comment-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        status: 'pending',
+        ...data,
+    };
+    mockDb.comments.unshift(newComment);
+    return newComment;
 }
 
 async function updateMockComment(commentId: string, data: Partial<Comment>): Promise<Comment | undefined> {
@@ -716,10 +744,38 @@ async function getFirestoreArticlesByMediaUrl(url: string): Promise<Article[]> {
     return snapshot.docs.map(doc => doc.data() as Article);
 }
 
+async function getFirestoreAllComments(options: GetCommentsOptions = {}): Promise<Comment[]> {
+    let queryRef: admin.firestore.Query = db.collection('comments');
+    if (options.userName) {
+        // Firestore doesn't support partial string matches like 'includes' easily.
+        // For a real app, use a third-party search service like Algolia or Typesense.
+        // For now, we'll filter after fetching, which is inefficient for large datasets.
+    }
+     if (options.articleId) {
+        queryRef = queryRef.where('articleId', '==', options.articleId);
+    }
+    if (options.status) {
+        queryRef = queryRef.where('status', '==', options.status);
+    }
+    const snapshot = await queryRef.orderBy('timestamp', 'desc').get();
+    
+    let comments = snapshot.docs.map(doc => doc.data() as Comment);
+    if(options.userName) {
+        comments = comments.filter(c => c.userName.toLowerCase().includes(options.userName!.toLowerCase()));
+    }
+    
+    return comments;
+}
 
-async function getFirestoreAllComments(): Promise<Comment[]> {
-    const snapshot = await db.collection('comments').orderBy('timestamp', 'desc').get();
-    return snapshot.docs.map(doc => doc.data() as Comment);
+async function createFirestoreComment(data: Omit<Comment, 'id' | 'timestamp' | 'status'>): Promise<Comment> {
+    const newComment: Comment = {
+        id: `comment-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        timestamp: new Date().toISOString(),
+        status: 'pending',
+        ...data,
+    };
+    await db.collection('comments').doc(newComment.id).set(newComment);
+    return newComment;
 }
 
 async function updateFirestoreComment(commentId: string, data: Partial<Comment>): Promise<Comment | undefined> {
@@ -1207,9 +1263,27 @@ export async function getArticlesByMediaUrl(url: string): Promise<Article[]> {
     return getFirestoreArticlesByMediaUrl(url);
 }
 
-export async function getAllComments(): Promise<Comment[]> {
-    if (!useFirestore || !db) return getMockAllComments();
-    return getFirestoreAllComments();
+export async function getAllComments(options: GetCommentsOptions = {}): Promise<Comment[]> {
+    if (!useFirestore || !db) return getMockAllComments(options);
+    return getFirestoreAllComments(options);
+}
+
+export async function createComment(data: Omit<Comment, 'id' | 'timestamp' | 'status'>): Promise<Comment> {
+    const newComment = (!useFirestore || !db) ? await createMockComment(data) : await createFirestoreComment(data);
+
+    if (process.env.ADMIN_EMAIL) {
+        try {
+            const article = await getArticleById(newComment.articleId);
+            await sendMail({
+                to: process.env.ADMIN_EMAIL,
+                subject: `BartaNow-তে নতুন মন্তব্য: "${article?.title}"`,
+                html: getNewCommentEmailHtml({ comment: newComment, article: article as Article }),
+            });
+        } catch(mailError) {
+             console.error('Failed to send new comment notification email:', mailError);
+        }
+    }
+    return newComment;
 }
 
 export async function updateComment(commentId: string, data: Partial<Comment>): Promise<Comment | undefined> {

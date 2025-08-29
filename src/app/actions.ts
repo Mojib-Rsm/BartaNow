@@ -4,7 +4,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -553,6 +553,31 @@ export async function assignCategoryToMediaAction(mediaIds: string[], category: 
         return { success: false, message: errorMessage };
     }
 }
+
+const createCommentSchema = z.object({
+  text: z.string().min(1, "মন্তব্য খালি রাখা যাবে না।"),
+  articleId: z.string(),
+  userId: z.string(),
+  userName: z.string(),
+  userAvatar: z.string().url().or(z.literal('')),
+});
+
+export async function createCommentAction(data: z.infer<typeof createCommentSchema>) {
+    const validation = createCommentSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+    
+    try {
+        const newComment = await createComment(data);
+        revalidatePath(`/admin/comments`); // Revalidate admin page for new pending comment
+        return { success: true, message: 'মন্তব্য সফলভাবে জমা দেওয়া হয়েছে।', comment: newComment };
+    } catch (error) {
+        console.error("Create Comment Error:", error);
+        return { success: false, message: 'মন্তব্য জমা দিতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
 
 export async function updateCommentStatusAction(commentIds: string[], status: Comment['status']) {
     try {

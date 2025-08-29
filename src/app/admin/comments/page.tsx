@@ -1,10 +1,20 @@
+
 import { getAllComments } from "@/lib/api"
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
 import type { Comment } from "@/lib/types"
 
-export default async function CommentsManagementPage() {
-  const comments = await getAllComments();
+type SearchParams = {
+  searchParams?: {
+    userName?: string;
+    articleId?: string;
+    status?: Comment['status'];
+  }
+}
+
+export default async function CommentsManagementPage({ searchParams }: SearchParams) {
+  const { userName, articleId, status } = searchParams || {};
+  const comments = await getAllComments({ userName, articleId, status });
 
   return (
     <div className="w-full">
