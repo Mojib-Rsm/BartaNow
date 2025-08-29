@@ -43,6 +43,7 @@ export async function generateMetadata(
   return {
     title: article.title,
     description: article.aiSummary,
+    keywords: article.focusKeywords,
     openGraph: {
         title: article.title,
         description: article.aiSummary,

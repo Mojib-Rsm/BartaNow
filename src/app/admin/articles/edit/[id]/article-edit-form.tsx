@@ -36,6 +36,7 @@ const formSchema = z.object({
   publishTime: z.string().optional(),
   slug: z.string().min(3, "Slug কমপক্ষে ৩ অক্ষরের হতে হবে।"),
   tags: z.string().optional(),
+  focusKeywords: z.string().optional(),
   authorId: z.string(),
   status: z.enum(['Draft', 'Pending Review', 'Published', 'Scheduled']),
 });
@@ -78,6 +79,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
       publishTime: article.publishedAt ? format(new Date(article.publishedAt), 'HH:mm') : format(new Date(), 'HH:mm'),
       slug: article.slug || '',
       tags: article.tags?.join(', ') || '',
+      focusKeywords: article.focusKeywords?.join(', ') || '',
       authorId: article.authorId,
       status: article.status,
     },
@@ -104,6 +106,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
     publishedDate.setHours(hours, minutes);
 
     const tagArray = data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [];
+    const keywordsArray = data.focusKeywords?.split(',').map(kw => kw.trim()).filter(Boolean) || [];
 
     const status = publishedDate > new Date() && data.status === 'Published' ? 'Scheduled' : data.status;
 
@@ -111,7 +114,8 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
 
     const finalData: Partial<Article> = { 
         ...data, 
-        tags: tagArray, 
+        tags: tagArray,
+        focusKeywords: keywordsArray,
         publishedAt: publishedDate.toISOString(),
         status,
         authorName: selectedAuthor?.name,
@@ -226,6 +230,12 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
                 <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
                 <Input id="tags" {...form.register('tags')} placeholder="যেমন: নির্বাচন, বাংলাদেশ, ক্রিকেট" />
              </div>
+              <div className="grid gap-2">
+                  <Label htmlFor="focusKeywords">ফোকাস কীওয়ার্ড (কমা দিয়ে আলাদা করুন)</Label>
+                  <Input id="focusKeywords" {...form.register('focusKeywords')} placeholder="যেমন: নির্বাচন ২০২৪, নতুন সরকার" />
+              </div>
+          </div>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              <div className="grid gap-2">
                 <Label htmlFor="status">স্ট্যাটাস</Label>
                  <Controller

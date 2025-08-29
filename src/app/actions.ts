@@ -190,6 +190,7 @@ const articleSchema = z.object({
   slug: z.string().min(3, "Slug কমপক্ষে ৩ অক্ষরের হতে হবে।"),
   tags: z.array(z.string()).optional(),
   englishTitle: z.string().optional(),
+  focusKeywords: z.array(z.string()).optional(),
 });
 
 
@@ -212,6 +213,7 @@ export async function updateArticleAction(data: z.infer<typeof articleSchema>) {
             slug: data.slug,
             tags: data.tags,
             englishTitle: data.englishTitle,
+            focusKeywords: data.focusKeywords,
         };
 
         if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
@@ -276,6 +278,7 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             publishedAt: data.publishedAt || new Date().toISOString(),
             tags: data.tags,
             englishTitle: data.englishTitle,
+            focusKeywords: data.focusKeywords,
         };
 
         const newArticle = await createArticle(newArticleData);

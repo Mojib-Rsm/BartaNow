@@ -85,6 +85,7 @@ export interface Article {
   location?: string; // e.g., 'ঢাকা', 'চট্টগ্রাম'
   tags?: string[];
   englishTitle?: string;
+  focusKeywords?: string[];
   status: 'Published' | 'Draft' | 'Pending Review' | 'Scheduled';
 }
 
