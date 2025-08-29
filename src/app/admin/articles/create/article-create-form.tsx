@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, ChangeEvent, useEffect } from 'react';
@@ -12,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Upload, BrainCircuit, Lightbulb } from 'lucide-react';
-import { createArticleAction } from '@/app/actions';
+import { createArticleAction, rankHeadlineAction, suggestTrendingTopicsAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -21,12 +20,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { Textarea } from '@/components/ui/textarea';
-import { suggestTrendingTopicsAction, rankHeadlineAction } from '@/app/actions';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { useDebouncedCallback } from 'use-debounce';
 import type { Article } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
-import CustomEditor from '@/components/custom-editor';
+import RichTextEditor from '@/components/rich-text-editor';
 
 
 const formSchema = z.object({
@@ -261,7 +259,12 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
             <Controller
                 name="content"
                 control={form.control}
-                render={({ field }) => <CustomEditor {...field} />}
+                render={({ field }) => (
+                    <RichTextEditor
+                        value={field.value}
+                        onChange={field.onChange}
+                    />
+                )}
             />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>

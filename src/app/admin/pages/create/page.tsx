@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { createPageAction } from '@/app/actions';
 import Link from 'next/link';
-import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/rich-text-editor';
 
 const formSchema = z.object({
   title: z.string().min(3, "শিরোনাম কমপক্ষে ৩ অক্ষরের হতে হবে।"),
@@ -79,8 +78,17 @@ export default function PageCreateForm() {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="content">কনটেন্ট (অনুচ্ছেদ আলাদা করতে নতুন লাইন ব্যবহার করুন)</Label>
-            <Textarea id="content" {...form.register('content')} className="min-h-[300px]" placeholder="আপনার পেজের কনটেন্ট এখানে লিখুন..." />
+            <Label htmlFor="content">কনটেন্ট</Label>
+            <Controller
+                name="content"
+                control={form.control}
+                render={({ field }) => (
+                    <RichTextEditor
+                        value={field.value}
+                        onChange={field.onChange}
+                    />
+                )}
+            />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>
             )}

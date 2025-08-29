@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, ChangeEvent, useEffect } from 'react';
@@ -24,7 +23,7 @@ import { bn } from 'date-fns/locale';
 import { getAllUsers } from '@/lib/api';
 import { useAuthorization } from '@/hooks/use-authorization';
 import { Progress } from '@/components/ui/progress';
-import CustomEditor from '@/components/custom-editor';
+import RichTextEditor from '@/components/rich-text-editor';
 
 const formSchema = z.object({
   id: z.string(),
@@ -245,7 +244,12 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
              <Controller
                 name="content"
                 control={form.control}
-                render={({ field }) => <CustomEditor {...field} />}
+                render={({ field }) => (
+                    <RichTextEditor
+                        value={field.value}
+                        onChange={field.onChange}
+                    />
+                )}
             />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>
