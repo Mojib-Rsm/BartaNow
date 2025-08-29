@@ -3,8 +3,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Media, User, Article } from '@/lib/types';
-import { useForm } from 'react-hook-form';
+import type { Media, User, Article, Category } from '@/lib/types';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -14,17 +14,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Link as LinkIcon, Copy, FileText, Image as ImageIcon, Video, Music, Pencil } from 'lucide-react';
-import { updateMediaAction, getArticlesByMediaUrlAction } from '@/app/actions';
+import { updateMediaAction, getArticlesByMediaUrlAction, getAllCategories } from '@/app/actions';
 import Link from 'next/link';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
   id: z.string(),
   altText: z.string().optional(),
   caption: z.string().optional(),
   description: z.string().optional(),
+  category: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -44,6 +46,7 @@ const FileIcon = ({ mimeType, className }: { mimeType: string; className?: strin
 export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsFormProps) {
     const [loading, setLoading] = useState(false);
     const [usedInArticles, setUsedInArticles] = useState<Article[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const { toast } = useToast();
 
     const form = useForm<FormValues>({
@@ -53,6 +56,7 @@ export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsForm
             altText: media.altText || '',
             caption: media.caption || '',
             description: media.description || '',
+            category: media.category || '',
         },
     });
 
@@ -61,7 +65,12 @@ export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsForm
             const articles = await getArticlesByMediaUrlAction(media.url);
             setUsedInArticles(articles);
         }
+        async function fetchCategories() {
+            const cats = await getAllCategories();
+            setCategories(cats);
+        }
         fetchUsage();
+        fetchCategories();
     }, [media.url]);
 
     const onSubmit = async (data: FormValues) => {
@@ -105,9 +114,31 @@ export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsForm
                                 <Label htmlFor="fileName">ফাইলের নাম</Label>
                                 <Input id="fileName" value={media.fileName} readOnly disabled />
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="altText">বিকল্প টেক্সট (Alt Text)</Label>
-                                <Input id="altText" {...form.register('altText')} placeholder="SEO-এর জন্য ছবির বিবরণ" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="altText">বিকল্প টেক্সট (Alt Text)</Label>
+                                    <Input id="altText" {...form.register('altText')} placeholder="SEO-এর জন্য ছবির বিবরণ" />
+                                </div>
+                                 <div className="grid gap-2">
+                                    <Label htmlFor="category">ক্যাটাগরি</Label>
+                                    <Controller
+                                        name="category"
+                                        control={form.control}
+                                        render={({ field }) => (
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="">ক্যাটাগরি নেই</SelectItem>
+                                                    {categories.map(cat => (
+                                                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
+                                </div>
                             </div>
                              <div className="grid gap-2">
                                 <Label htmlFor="caption">ক্যাপশন</Label>

@@ -654,6 +654,7 @@ const media: Media[] = articles.map((article, index) => ({
     size: Math.floor(Math.random() * (500 * 1024 - 100 * 1024 + 1)) + (100 * 1024), // Random size between 100KB and 500KB
     uploadedAt: article.publishedAt,
     uploadedBy: article.authorId,
+    category: article.category,
 }));
 
 const notifications: Notification[] = [

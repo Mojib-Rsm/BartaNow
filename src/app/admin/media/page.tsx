@@ -5,8 +5,8 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Image as ImageIcon, Video, FileText, Search, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { getAllMedia, getAllUsers } from "@/lib/api";
-import type { Media, User } from "@/lib/types";
+import { getAllMedia, getAllUsers, getAllCategories } from "@/lib/api";
+import type { Media, User, Category } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { format } from 'date-fns';
@@ -20,6 +20,7 @@ export default function MediaManagementPage() {
     const [allMedia, setAllMedia] = useState<Media[]>([]);
     const [filteredMedia, setFilteredMedia] = useState<Media[]>([]);
     const [users, setUsers] = useState<User[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     
     const [filters, setFilters] = useState({
@@ -27,15 +28,21 @@ export default function MediaManagementPage() {
         date: undefined as Date | undefined,
         query: '',
         author: 'all',
+        category: 'all',
     });
 
     useEffect(() => {
         async function fetchData() {
             setLoading(true);
-            const [mediaItems, userItems] = await Promise.all([getAllMedia(), getAllUsers()]);
+            const [mediaItems, userItems, categoryItems] = await Promise.all([
+                getAllMedia(), 
+                getAllUsers(),
+                getAllCategories()
+            ]);
             setAllMedia(mediaItems);
             setFilteredMedia(mediaItems);
             setUsers(userItems);
+            setCategories(categoryItems);
             setLoading(false);
         }
         fetchData();
@@ -55,6 +62,10 @@ export default function MediaManagementPage() {
         
         if (filters.author !== 'all') {
             media = media.filter(item => item.uploadedBy === filters.author);
+        }
+        
+        if (filters.category !== 'all') {
+            media = media.filter(item => item.category === filters.category);
         }
 
         if (filters.query) {
@@ -101,7 +112,7 @@ export default function MediaManagementPage() {
                         />
                     </div>
                      <Select value={filters.type} onValueChange={(value) => setFilters(prev => ({...prev, type: value}))}>
-                        <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectTrigger className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[150px]">
                             <SelectValue placeholder="ফাইলের ধরন" />
                         </SelectTrigger>
                         <SelectContent>
@@ -113,7 +124,7 @@ export default function MediaManagementPage() {
                     </Select>
                      <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="outline" className="w-full sm:w-[240px] justify-start text-left font-normal">
+                            <Button variant="outline" className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[200px] justify-start text-left font-normal">
                                 {filters.date ? format(filters.date, 'PPP') : <span>যেকোনো তারিখ</span>}
                             </Button>
                         </PopoverTrigger>
@@ -127,13 +138,24 @@ export default function MediaManagementPage() {
                         </PopoverContent>
                     </Popover>
                     <Select value={filters.author} onValueChange={(value) => setFilters(prev => ({...prev, author: value}))}>
-                        <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectTrigger className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[150px]">
                             <SelectValue placeholder="লেখক" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">সব লেখক</SelectItem>
                             {users.map(user => (
                                 <SelectItem key={user.id} value={user.id}>{user.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select value={filters.category} onValueChange={(value) => setFilters(prev => ({...prev, category: value}))}>
+                        <SelectTrigger className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[150px]">
+                            <SelectValue placeholder="ক্যাটাগরি" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">সব ক্যাটাগরি</SelectItem>
+                            {categories.map(cat => (
+                                <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>

@@ -475,8 +475,11 @@ const updateMediaSchema = z.object({
   altText: z.string().optional(),
   caption: z.string().optional(),
   description: z.string().optional(),
-  width: z.number().optional(),
-  height: z.number().optional(),
+  category: z.string().optional(),
+  width: z.coerce.number().optional(),
+  height: z.coerce.number().optional(),
+  cropStrategy: z.enum(['maintain_ratio', 'force']).optional(),
+  hasWatermark: z.boolean().default(false).optional(),
 });
 export async function updateMediaAction(data: z.infer<typeof updateMediaSchema>) {
     const validation = updateMediaSchema.safeParse(data);

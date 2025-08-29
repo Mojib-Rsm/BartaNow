@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import type { Media, User } from '@/lib/types';
+import type { Media, User, Category } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { updateMediaAction } from '@/app/actions';
+import { updateMediaAction, getAllCategories } from '@/app/actions';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Switch } from '@/components/ui/switch';
@@ -24,6 +24,7 @@ const formSchema = z.object({
   altText: z.string().optional(),
   caption: z.string().optional(),
   description: z.string().optional(),
+  category: z.string().optional(),
   width: z.coerce.number().optional(),
   height: z.coerce.number().optional(),
   cropStrategy: z.enum(['maintain_ratio', 'force']).optional(),
@@ -70,6 +71,7 @@ function getTransformedUrl(
 
 export default function MediaEditForm({ media }: MediaEditFormProps) {
     const [loading, setLoading] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
     const router = useRouter();
     const { toast } = useToast();
 
@@ -80,12 +82,21 @@ export default function MediaEditForm({ media }: MediaEditFormProps) {
             altText: media.altText || '',
             caption: media.caption || '',
             description: media.description || '',
+            category: media.category || '',
             width: media.width || undefined,
             height: media.height || undefined,
             cropStrategy: media.cropStrategy || 'maintain_ratio',
             hasWatermark: media.hasWatermark || false,
         },
     });
+
+    useEffect(() => {
+        async function fetchCategories() {
+            const cats = await getAllCategories();
+            setCategories(cats);
+        }
+        fetchCategories();
+    }, []);
 
     const watchedValues = form.watch();
     const previewUrl = getTransformedUrl(media.url, watchedValues);
@@ -135,6 +146,26 @@ export default function MediaEditForm({ media }: MediaEditFormProps) {
                         <div className="grid gap-2">
                             <Label htmlFor="description">বিবরণ</Label>
                             <Textarea id="description" {...form.register('description')} placeholder="মিডিয়া সম্পর্কে বিস্তারিত" />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="category">ক্যাটাগরি</Label>
+                            <Controller
+                                name="category"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">ক্যাটাগরি নেই</SelectItem>
+                                            {categories.map(cat => (
+                                                <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
                         </div>
                         
                          <Card>

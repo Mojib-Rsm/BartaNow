@@ -148,6 +148,7 @@ export interface Media {
     altText?: string;
     caption?: string;
     description?: string;
+    category?: string;
     width?: number;
     height?: number;
     cropStrategy?: 'maintain_ratio' | 'force';
