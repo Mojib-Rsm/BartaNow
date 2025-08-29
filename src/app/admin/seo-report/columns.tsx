@@ -26,6 +26,12 @@ const getScoreColor = (score: number) => {
     return "bg-red-500";
 };
 
+const getStatusFromScore = (score: number): 'Good' | 'Needs Fix' | 'Poor' => {
+    if (score >= 80) return 'Good';
+    if (score >= 50) return 'Needs Fix';
+    return 'Poor';
+}
+
 export const columns: ColumnDef<AnalyzedArticle>[] = [
   {
     accessorKey: "title",
@@ -82,20 +88,19 @@ export const columns: ColumnDef<AnalyzedArticle>[] = [
    {
     id: "status",
     header: "স্ট্যাটাস",
+    accessorFn: (row) => getStatusFromScore(row.seo.score),
     cell: ({ row }) => {
         const score = row.original.seo.score;
-        let status: 'Good' | 'Needs Fix' | 'Poor' = 'Poor';
+        const status = getStatusFromScore(score);
         let variant: 'default' | 'destructive' | 'secondary' = 'destructive';
 
-        if (score >= 80) {
-            status = 'Good';
-            variant = 'default';
-        } else if (score >= 50) {
-            status = 'Needs Fix';
-            variant = 'secondary';
-        }
+        if (status === 'Good') variant = 'default';
+        else if (status === 'Needs Fix') variant = 'secondary';
         
         return <Badge variant={variant} className={cn(variant === 'default' && "bg-green-600")}>{status}</Badge>
-    }
+    },
+    filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id))
+    },
   },
 ]

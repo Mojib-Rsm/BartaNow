@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -62,7 +63,7 @@ export function SeoReportsTable<TData, TValue>({
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center gap-4 py-4">
         <Input
           placeholder="শিরোনাম দিয়ে ফিল্টার করুন..."
           value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
@@ -71,6 +72,22 @@ export function SeoReportsTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+        <Select
+          value={(table.getColumn("status")?.getFilterValue() as string) ?? "all"}
+          onValueChange={(value) =>
+            table.getColumn("status")?.setFilterValue(value === "all" ? null : value)
+          }
+        >
+            <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="স্ট্যাটাস অনুযায়ী ফিল্টার" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="all">সব স্ট্যাটাস</SelectItem>
+                <SelectItem value="Good">Good</SelectItem>
+                <SelectItem value="Needs Fix">Needs Fix</SelectItem>
+                <SelectItem value="Poor">Poor</SelectItem>
+            </SelectContent>
+        </Select>
       </div>
       <div className="rounded-md border">
         <Table>
