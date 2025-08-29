@@ -63,11 +63,20 @@ export interface User {
     entityType?: 'USER';
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  entityType?: 'CATEGORY';
+}
+
+
 export interface Article {
   id: string;
   slug: string;
   title: string;
-  category: 'রাজনীতি' | 'খেলা' | 'প্রযুক্তি' | 'বিনোদন' | 'অর্থনীতি' | 'আন্তর্জাতিক' | 'মতামত' | 'স্বাস্থ্য' | 'শিক্ষা' | 'পরিবেশ' | 'বিশেষ-কভারেজ' | 'জাতীয়' | 'ইসলামী-জীবন' | 'তথ্য-যাচাই' | 'মিম-নিউজ' | 'ভিডিও' | 'সর্বশেষ' | 'সম্পাদকের-পছন্দ';
+  category: string;
   content: string; // HTML content from the rich text editor
   imageUrl: string;
   imageHint?: string;

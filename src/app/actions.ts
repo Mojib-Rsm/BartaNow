@@ -4,8 +4,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed } from '@/lib/api';
-import type { Article, User, Page, Poll, PollOption, RssFeed } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, createCategory, updateCategory, deleteCategory } from '@/lib/api';
+import type { Article, User, Page, Poll, PollOption, RssFeed, Category } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -208,7 +208,7 @@ const articleSchema = z.object({
   id: z.string().optional(),
   title: z.string().min(10, "শিরোনাম কমপক্ষে ১০ অক্ষরের হতে হবে।"),
   content: z.string().min(50, "কনটেন্ট কমপক্ষে ৫০ অক্ষরের হতে হবে।"),
-  category: z.enum(['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ']),
+  category: z.string().min(1, "ক্যাটাগরি নির্বাচন করুন।"),
   imageUrl: z.string().optional().or(z.literal('')),
   publishedAt: z.string().optional(),
   slug: z.string().min(3, "Slug কমপক্ষে ৩ অক্ষরের হতে হবে।"),
@@ -871,12 +871,76 @@ export async function importWordPressAction(xmlContent: string) {
     }
 }
 
+// --- CATEGORY ACTIONS ---
+const categorySchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "ক্যাটাগরির নাম কমপক্ষে ২ অক্ষরের হতে হবে।"),
+  slug: z.string().min(2, "Slug কমপক্ষে ২ অক্ষরের হতে হবে।").optional().or(z.literal('')),
+  description: z.string().optional(),
+});
+
+type CategoryFormValues = z.infer<typeof categorySchema>;
+
+export async function createCategoryAction(data: CategoryFormValues) {
+    const validation = categorySchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+    
+    try {
+        const newCategory = await createCategory(data);
+        if (!newCategory) {
+            return { success: false, message: 'ক্যাটাগরিটি তৈরি করা যায়নি।' };
+        }
+        revalidatePath('/admin/articles/categories');
+        return { success: true, message: 'ক্যাটাগরি সফলভাবে তৈরি হয়েছে।', category: newCategory };
+    } catch (error) {
+        console.error("Create Category Error:", error);
+        return { success: false, message: 'ক্যাটাগরি তৈরি করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function updateCategoryAction(data: CategoryFormValues) {
+    if (!data.id) return { success: false, message: 'ক্যাটাগরি আইডি পাওয়া যায়নি।' };
+    
+    const validation = categorySchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+
+    try {
+        const updatedCategory = await updateCategory(data.id, data);
+        if (!updatedCategory) {
+            return { success: false, message: 'ক্যাটাগরিটি আপডেট করা যায়নি।' };
+        }
+        revalidatePath('/admin/articles/categories');
+        revalidatePath(`/admin/articles/categories/edit/${data.id}`);
+        return { success: true, message: 'ক্যাটাগরি সফলভাবে আপডেট হয়েছে।', category: updatedCategory };
+    } catch (error) {
+        console.error("Update Category Error:", error);
+        return { success: false, message: 'ক্যাটাগরি আপডেট করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function deleteCategoryAction(categoryId: string) {
+    try {
+        await deleteCategory(categoryId);
+        revalidatePath('/admin/articles/categories');
+        return { success: true, message: 'ক্যাটাগরি সফলভাবে ডিলিট হয়েছে।' };
+    } catch (error) {
+        console.error("Delete Category Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'ক্যাটাগরি ডিলিট করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
+
 // --- RSS FEED ACTIONS ---
 const rssFeedSchema = z.object({
     id: z.string().optional(),
     name: z.string().min(3, "ফিডের নাম কমপক্ষে ৩ অক্ষরের হতে হবে।"),
     url: z.string().url("অনুগ্রহ করে একটি সঠিক URL দিন।"),
-    defaultCategory: z.enum(['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ']),
+    defaultCategory: z.string().min(1),
     categoryMap: z.record(z.string()).default({}),
 });
 

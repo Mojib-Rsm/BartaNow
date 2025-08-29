@@ -2,7 +2,7 @@
 
 'use server';
 
-import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed } from './types';
+import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed, Category } from './types';
 import admin from 'firebase-admin';
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
@@ -53,11 +53,11 @@ async function generateSummariesForMockData() {
     const summaryPromises = mockDb.articles.map(async (article) => {
         if (!article.aiSummary) {
             try {
-                const { summary } = await summarizeArticle({ articleContent: article.content.join('\n\n') });
+                const { summary } = await summarizeArticle({ articleContent: article.content });
                 article.aiSummary = summary;
             } catch (e) {
                 console.error(`Could not generate summary for article ${article.id}`, e);
-                article.aiSummary = article.content[0].substring(0, 150) + '...'; // Fallback
+                article.aiSummary = article.content.substring(0, 150) + '...'; // Fallback
             }
         }
     });
@@ -89,7 +89,7 @@ async function getMockArticles({ page = 1, limit = 6, category, authorId, exclud
     if (excludeId) filteredArticles = filteredArticles.filter(a => a.id !== excludeId);
     if (query) {
         const q = query.toLowerCase();
-        filteredArticles = filteredArticles.filter(a => a.title.toLowerCase().includes(q) || a.content.join(' ').toLowerCase().includes(q));
+        filteredArticles = filteredArticles.filter(a => a.title.toLowerCase().includes(q) || a.content.toLowerCase().includes(q));
     }
     if (hasVideo) filteredArticles = filteredArticles.filter(a => !!a.videoUrl);
     if (editorsPick) filteredArticles = filteredArticles.filter(a => a.editorsPick);
@@ -360,6 +360,34 @@ async function deleteMockRssFeed(feedId: string): Promise<void> {
     if (index > -1) mockDb.rssFeeds.splice(index, 1);
 }
 
+async function getMockAllCategories(): Promise<Category[]> {
+    return [...mockDb.categories];
+}
+
+async function getMockCategoryById(id: string): Promise<Category | undefined> {
+    return mockDb.categories.find(c => c.id === id);
+}
+
+async function createMockCategory(data: Omit<Category, 'id'>): Promise<Category> {
+    const newCategory: Category = {
+        id: `cat-${Date.now()}`,
+        ...data,
+    };
+    mockDb.categories.unshift(newCategory);
+    return newCategory;
+}
+
+async function updateMockCategory(categoryId: string, data: Partial<Category>): Promise<Category | undefined> {
+    const catIndex = mockDb.categories.findIndex(c => c.id === categoryId);
+    if (catIndex === -1) return undefined;
+    mockDb.categories[catIndex] = { ...mockDb.categories[catIndex], ...data };
+    return mockDb.categories[catIndex];
+}
+
+async function deleteMockCategory(categoryId: string): Promise<void> {
+    const index = mockDb.categories.findIndex(c => c.id === categoryId);
+    if (index > -1) mockDb.categories.splice(index, 1);
+}
 
 // --- FIRESTORE IMPLEMENTATIONS ---
 
@@ -706,6 +734,39 @@ async function deleteFirestoreRssFeed(feedId: string): Promise<void> {
     await db.collection('rssFeeds').doc(feedId).delete();
 }
 
+async function getFirestoreAllCategories(): Promise<Category[]> {
+    const snapshot = await db.collection('categories').get();
+    return snapshot.docs.map(doc => doc.data() as Category);
+}
+
+async function getFirestoreCategoryById(id: string): Promise<Category | undefined> {
+    const doc = await db.collection('categories').doc(id).get();
+    return doc.exists ? doc.data() as Category : undefined;
+}
+
+async function createFirestoreCategory(data: Omit<Category, 'id'>): Promise<Category> {
+    const slug = data.slug || await translateForSlug(data.name);
+    const newCategory: Category = {
+        id: `cat-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        ...data,
+        slug: slug,
+    };
+    await db.collection('categories').doc(newCategory.id).set(newCategory);
+    return newCategory;
+}
+
+async function updateFirestoreCategory(categoryId: string, data: Partial<Category>): Promise<Category | undefined> {
+    const categoryRef = db.collection('categories').doc(categoryId);
+    await categoryRef.update(data);
+    const updatedDoc = await categoryRef.get();
+    return updatedDoc.data() as Category | undefined;
+}
+
+async function deleteFirestoreCategory(categoryId: string): Promise<void> {
+    await db.collection('categories').doc(categoryId).delete();
+}
+
+
 // --- PUBLIC API ---
 
 export async function getArticles(options: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
@@ -898,6 +959,31 @@ export async function updateRssFeed(feedId: string, data: Partial<RssFeed>): Pro
 export async function deleteRssFeed(feedId: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockRssFeed(feedId);
     return deleteFirestoreRssFeed(feedId);
+}
+
+export async function getAllCategories(): Promise<Category[]> {
+    if (!useFirestore || !db) return getMockAllCategories();
+    return getFirestoreAllCategories();
+}
+
+export async function getCategoryById(id: string): Promise<Category | undefined> {
+    if (!useFirestore || !db) return getMockCategoryById(id);
+    return getFirestoreCategoryById(id);
+}
+
+export async function createCategory(data: Omit<Category, 'id'>): Promise<Category> {
+    if (!useFirestore || !db) return createMockCategory(data);
+    return createFirestoreCategory(data);
+}
+
+export async function updateCategory(categoryId: string, data: Partial<Category>): Promise<Category | undefined> {
+    if (!useFirestore || !db) return updateMockCategory(categoryId, data);
+    return updateFirestoreCategory(categoryId, data);
+}
+
+export async function deleteCategory(categoryId: string): Promise<void> {
+    if (!useFirestore || !db) return deleteMockCategory(categoryId);
+    return deleteFirestoreCategory(categoryId);
 }
 
 // --- NON-CRUD APIs ---
