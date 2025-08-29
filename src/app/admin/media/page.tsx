@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Image as ImageIcon, Video, FileText, Search, Loader2, Trash2, FolderKanban } from "lucide-react";
+import { PlusCircle, Image as ImageIcon, Video, FileText, Search, Loader2, Trash2, FolderKanban, Download } from "lucide-react";
 import Link from "next/link";
 import { getAllMedia, getAllUsers, getAllCategories } from "@/lib/api";
 import type { Media, User, Category } from "@/lib/types";
@@ -143,6 +143,7 @@ export default function MediaManagementPage() {
     const [selectedMedia, setSelectedMedia] = useState<Set<string>>(new Set());
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [isAssignCategoryOpen, setIsAssignCategoryOpen] = useState(false);
+    const { toast } = useToast();
     
     const [filters, setFilters] = useState({
         type: 'all',
@@ -221,6 +222,39 @@ export default function MediaManagementPage() {
         }
     }
     
+    const handleDownloadSelected = async () => {
+        if (selectedMedia.size === 0) return;
+    
+        toast({ title: 'ডাউনলোড শুরু হচ্ছে...', description: `${selectedMedia.size} টি ফাইল ডাউনলোড করা হচ্ছে।` });
+    
+        for (const mediaId of selectedMedia) {
+            const mediaItem = allMedia.find(m => m.id === mediaId);
+            if (mediaItem) {
+                try {
+                    // Fetch the file as a blob
+                    const response = await fetch(mediaItem.url);
+                    if (!response.ok) throw new Error('Network response was not ok.');
+                    const blob = await response.blob();
+                    
+                    // Create a link and trigger the download
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = mediaItem.fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href); // Clean up
+    
+                    // Small delay to allow browser to process downloads
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                } catch (error) {
+                    console.error('Download failed for:', mediaItem.fileName, error);
+                    toast({ variant: "destructive", title: "ডাউনলোড ব্যর্থ", description: `"${mediaItem.fileName}" ফাইলটি ডাউনলোড করা যায়নি।` });
+                }
+            }
+        }
+    };
+    
     const numSelected = selectedMedia.size;
     const allVisibleSelected = numSelected > 0 && filteredMedia.every(m => selectedMedia.has(m.id));
     const someVisibleSelected = numSelected > 0 && !allVisibleSelected;
@@ -275,6 +309,10 @@ export default function MediaManagementPage() {
                      {numSelected > 0 ? (
                         <div className="flex items-center gap-4 w-full">
                             <p className="text-sm font-medium">{numSelected} টি আইটেম নির্বাচিত</p>
+                             <Button variant="outline" size="sm" onClick={handleDownloadSelected}>
+                                <Download className="mr-2 h-4 w-4" />
+                                নির্বাচিত সব ডাউনলোড করুন
+                            </Button>
                             <Button variant="outline" size="sm" onClick={() => setIsAssignCategoryOpen(true)}>
                                 <FolderKanban className="mr-2 h-4 w-4" />
                                 ক্যাটাগরি পরিবর্তন
@@ -400,3 +438,5 @@ export default function MediaManagementPage() {
         </div>
     );
 }
+
+    
