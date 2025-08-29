@@ -57,7 +57,7 @@ export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsForm
             altText: media.altText || '',
             caption: media.caption || '',
             description: media.description || '',
-            category: media.category || '',
+            category: media.category || '__none__',
         },
     });
 
@@ -76,7 +76,11 @@ export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsForm
 
     const onSubmit = async (data: FormValues) => {
         setLoading(true);
-        const result = await updateMediaAction(data);
+        const finalData = {
+            ...data,
+            category: data.category === '__none__' ? '' : data.category,
+        }
+        const result = await updateMediaAction(finalData);
         setLoading(false);
 
         if (result.success) {
@@ -131,7 +135,7 @@ export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsForm
                                                     <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="">ক্যাটাগরি নেই</SelectItem>
+                                                    <SelectItem value="__none__">ক্যাটাগরি নেই</SelectItem>
                                                     {categories.map(cat => (
                                                         <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                                                     ))}

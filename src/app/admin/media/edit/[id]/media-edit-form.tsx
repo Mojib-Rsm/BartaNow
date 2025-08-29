@@ -83,7 +83,7 @@ export default function MediaEditForm({ media }: MediaEditFormProps) {
             altText: media.altText || '',
             caption: media.caption || '',
             description: media.description || '',
-            category: media.category || '',
+            category: media.category || '__none__',
             width: media.width || undefined,
             height: media.height || undefined,
             cropStrategy: media.cropStrategy || 'maintain_ratio',
@@ -106,7 +106,11 @@ export default function MediaEditForm({ media }: MediaEditFormProps) {
         setLoading(true);
         // The final URL isn't saved, ImageKit generates it on the fly.
         // We only save the transformation parameters.
-        const result = await updateMediaAction(data);
+         const finalData = {
+            ...data,
+            category: data.category === '__none__' ? '' : data.category,
+        }
+        const result = await updateMediaAction(finalData);
         setLoading(false);
 
         if (result.success) {
@@ -159,7 +163,7 @@ export default function MediaEditForm({ media }: MediaEditFormProps) {
                                             <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">ক্যাটাগরি নেই</SelectItem>
+                                            <SelectItem value="__none__">ক্যাটাগরি নেই</SelectItem>
                                             {categories.map(cat => (
                                                 <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                                             ))}
