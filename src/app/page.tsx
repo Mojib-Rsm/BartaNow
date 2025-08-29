@@ -1,9 +1,12 @@
 
-import { getArticles, getMemeNews } from '@/lib/api';
+import { getArticles, getMemeNews, generateSummariesForMockData } from '@/lib/api';
 import HomePageClient from '@/components/home-page-client';
 import SeedButton from '@/components/seed-button';
 
 export default async function Home() {
+    // Ensure summaries are generated for mock data before fetching
+    await generateSummariesForMockData();
+
     const [
         initialArticles,
         latestArticlesResult,

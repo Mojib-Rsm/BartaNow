@@ -46,7 +46,7 @@ const generateNonAiSlug = (title: string) => {
         .replace(/-+$/, ''); // Trim - from end of text
 };
 
-async function generateSummariesForMockData() {
+export async function generateSummariesForMockData() {
     if (mockDb.articles.every(a => a.aiSummary)) {
         return;
     }
