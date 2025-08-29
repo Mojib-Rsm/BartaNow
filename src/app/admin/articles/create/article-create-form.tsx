@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, BrainCircuit, Lightbulb } from 'lucide-react';
-import { createArticleAction, rankHeadlineAction, suggestTrendingTopicsAction } from '@/app/actions';
+import { Loader2, Upload, BrainCircuit, Lightbulb, Sparkles } from 'lucide-react';
+import { createArticleAction, rankHeadlineAction, suggestTagsAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -51,8 +51,7 @@ type ArticleCreateFormProps = {
 export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [topicSuggestions, setTopicSuggestions] = useState<string[]>([]);
-  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [isSuggestingTags, setIsSuggestingTags] = useState(false);
   const [headlineRanking, setHeadlineRanking] = useState<{ score: number; feedback: string } | null>(null);
   const [isRanking, setIsRanking] = useState(false);
   const router = useRouter();
@@ -110,19 +109,25 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
     }
   };
   
-  const handleSuggestTopics = async () => {
-    setIsSuggesting(true);
+  const handleGenerateTags = async () => {
+    const content = form.getValues('content');
+    if (!content || content.length < 50) {
+        toast({ variant: "destructive", title: "কনটেন্ট প্রয়োজন", description: "AI ট্যাগ তৈরি করার জন্য কমপক্ষে ৫০ অক্ষরের কনটেন্ট প্রয়োজন।" });
+        return;
+    }
+    setIsSuggestingTags(true);
     try {
-      const result = await suggestTrendingTopicsAction();
-      if (result.success && result.topics) {
-        setTopicSuggestions(result.topics);
+      const result = await suggestTagsAction(content);
+      if (result.success && result.tags) {
+        form.setValue('tags', result.tags.join(', '));
+        toast({ title: "সফল", description: "AI আপনার জন্য ট্যাগ তৈরি করেছে।" });
       } else {
         toast({ variant: "destructive", title: "ব্যর্থ", description: result.message });
       }
     } catch (error) {
-      toast({ variant: "destructive", title: "ত্রুটি", description: "AI টপিক আনতে একটি সমস্যা হয়েছে।" });
+        toast({ variant: "destructive", title: "ত্রুটি", description: "AI ট্যাগ তৈরি করতে একটি সমস্যা হয়েছে।" });
     }
-    setIsSuggesting(false);
+    setIsSuggestingTags(false);
   };
   
   const handleRankHeadline = async () => {
@@ -300,7 +305,13 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
+                       <Button type="button" size="sm" variant="ghost" className="text-xs" onClick={handleGenerateTags} disabled={isSuggestingTags}>
+                          <Sparkles className="mr-2 h-3 w-3" />
+                          {isSuggestingTags ? 'জেনারেট হচ্ছে...' : 'AI দিয়ে ট্যাগ তৈরি করুন'}
+                       </Button>
+                    </div>
                   <Input id="tags" {...form.register('tags')} placeholder="যেমন: নির্বাচন, বাংলাদেশ, ক্রিকেট" />
                 </div>
                 <div className="grid gap-2">

@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Upload, Sparkles, BrainCircuit } from 'lucide-react';
-import { rankHeadlineAction, updateArticleAction } from '@/app/actions';
+import { rankHeadlineAction, suggestTagsAction, updateArticleAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -53,6 +53,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
   const [loading, setLoading] = useState(false);
   const [headlineRanking, setHeadlineRanking] = useState<{ score: number; feedback: string } | null>(null);
   const [isRanking, setIsRanking] = useState(false);
+  const [isSuggestingTags, setIsSuggestingTags] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(article.imageUrl);
   const [users, setUsers] = useState<User[]>([]);
   const router = useRouter();
@@ -119,6 +120,27 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
       });
     }
     setIsRanking(false);
+  };
+  
+  const handleGenerateTags = async () => {
+    const content = form.getValues('content');
+    if (!content || content.length < 50) {
+        toast({ variant: "destructive", title: "কনটেন্ট প্রয়োজন", description: "AI ট্যাগ তৈরি করার জন্য কমপক্ষে ৫০ অক্ষরের কনটেন্ট প্রয়োজন।" });
+        return;
+    }
+    setIsSuggestingTags(true);
+    try {
+      const result = await suggestTagsAction(content);
+      if (result.success && result.tags) {
+        form.setValue('tags', result.tags.join(', '));
+        toast({ title: "সফল", description: "AI আপনার জন্য ট্যাগ তৈরি করেছে।" });
+      } else {
+        toast({ variant: "destructive", title: "ব্যর্থ", description: result.message });
+      }
+    } catch (error) {
+        toast({ variant: "destructive", title: "ত্রুটি", description: "AI ট্যাগ তৈরি করতে একটি সমস্যা হয়েছে।" });
+    }
+    setIsSuggestingTags(false);
   };
 
 
@@ -285,7 +307,13 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
             
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              <div className="grid gap-2">
-                <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
+                <div className="flex items-center justify-between">
+                    <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
+                    <Button type="button" size="sm" variant="ghost" className="text-xs" onClick={handleGenerateTags} disabled={isSuggestingTags}>
+                        <Sparkles className="mr-2 h-3 w-3" />
+                        {isSuggestingTags ? 'জেনারেট হচ্ছে...' : 'AI দিয়ে ট্যাগ তৈরি করুন'}
+                    </Button>
+                </div>
                 <Input id="tags" {...form.register('tags')} placeholder="যেমন: নির্বাচন, বাংলাদেশ, ক্রিকেট" />
              </div>
               <div className="grid gap-2">

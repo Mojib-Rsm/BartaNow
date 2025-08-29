@@ -17,6 +17,7 @@ import { parseStringPromise } from 'xml2js';
 import { generateArticle } from '@/ai/flows/generate-article';
 import { suggestTrendingTopics } from '@/ai/flows/suggest-trending-topics';
 import { rankHeadline } from '@/ai/flows/rank-headline';
+import { suggestTagsForArticle } from '@/ai/flows/suggest-tags';
 
 
 export async function seedAction() {
@@ -139,6 +140,17 @@ export async function rankHeadlineAction(headline: string) {
     } catch (error) {
         console.error("Rank Headline Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'হেডলাইন রেটিং করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
+export async function suggestTagsAction(content: string) {
+    try {
+        const result = await suggestTagsForArticle({ content });
+        return { success: true, tags: result.tags };
+    } catch (error) {
+        console.error("Suggest Tags Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'ট্যাগ তৈরি করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
     }
 }
