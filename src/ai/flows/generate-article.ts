@@ -25,7 +25,7 @@ const ArticleVariantSchema = z.object({
 });
 
 const GenerateArticleOutputSchema = z.object({
-  variants: z.array(ArticleVariantSchema).describe('An array of 2 to 3 different versions of the generated news article. Each version should have a slightly different tone, angle, or headline to provide variety.'),
+  variants: z.array(ArticleVariantSchema).min(2).max(3).describe('An array of 2 to 3 different versions of the generated news article. Each version should have a slightly different tone, angle, or headline to provide variety.'),
 });
 
 export type GenerateArticleOutput = z.infer<typeof GenerateArticleOutputSchema>;
@@ -64,4 +64,3 @@ const generateArticleFlow = ai.defineFlow(
     return output!;
   }
 );
-

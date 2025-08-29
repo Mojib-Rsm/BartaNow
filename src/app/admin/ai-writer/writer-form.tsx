@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Sparkles, FileEdit } from 'lucide-react';
+import { Loader2, Sparkles, FileEdit, Lightbulb } from 'lucide-react';
 import { generateArticleAction, suggestTrendingTopicsAction } from '@/app/actions';
 import type { GenerateArticleOutput } from '@/ai/flows/generate-article';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from '@/components/ui/card';
@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useDebouncedCallback } from 'use-debounce';
 
 const formSchema = z.object({
   prompt: z.string().min(5, { message: 'বিষয়টি কমপক্ষে ৫ অক্ষরের হতে হবে।' }),
@@ -41,6 +42,34 @@ export default function WriterForm() {
       prompt: '',
     },
   });
+  
+  const debouncedSuggestHeadlines = useDebouncedCallback(async (topic: string) => {
+    if (topic.length < 10) {
+        setTopicSuggestions([]);
+        return;
+    }
+    setIsSuggesting(true);
+    try {
+      const result = await suggestTrendingTopicsAction(); // Re-using this for headline ideas based on a topic
+      if (result.success && result.topics) {
+        setTopicSuggestions(result.topics);
+      }
+    } catch (error) {
+      // Silently fail is okay here
+      console.error(error);
+    }
+    setIsSuggesting(false);
+  }, 500);
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'prompt') {
+        debouncedSuggestHeadlines(value.prompt || '');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, debouncedSuggestHeadlines]);
+
 
   const handleSuggestTopics = async () => {
     setIsSuggesting(true);
@@ -103,7 +132,7 @@ export default function WriterForm() {
 
   return (
     <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid gap-2">
                     <Label htmlFor="prompt">আর্টিকেলের বিষয় বা শিরোনাম</Label>
@@ -117,6 +146,19 @@ export default function WriterForm() {
                     <p className="text-xs text-destructive">{form.formState.errors.prompt.message}</p>
                     )}
                 </div>
+                {isSuggesting && <p className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> শিরোনামের জন্য আইডিয়া খোঁজা হচ্ছে...</p>}
+                {topicSuggestions.length > 0 && (
+                    <div className="p-4 border rounded-lg bg-muted/50">
+                        <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 text-yellow-500" /> শিরোনামের আইডিয়া</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {topicSuggestions.map((topic, i) => (
+                                <Badge key={i} variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground" onClick={() => form.setValue('prompt', topic)}>
+                                    {topic}
+                                </Badge>
+                            ))}
+                        </div>
+                    </div>
+                )}
                  <Button type="submit" disabled={loading}>
                     {loading ? (
                         <>
@@ -131,31 +173,6 @@ export default function WriterForm() {
                     )}
                 </Button>
             </form>
-             <Card className="bg-muted/50">
-                <CardHeader>
-                    <CardTitle className="text-lg">ট্রেন্ডিং টপিক</CardTitle>
-                    <CardDescription>
-                        এখান থেকে ট্রেন্ডিং টপিক নিয়ে আর্টিকেল লিখতে পারেন।
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {isSuggesting && <Loader2 className="h-5 w-5 animate-spin" />}
-                    {topicSuggestions.length > 0 && (
-                        <ul className="space-y-2 list-disc list-inside text-sm">
-                            {topicSuggestions.map((topic, i) => (
-                                <li key={i} className="hover:text-primary cursor-pointer" onClick={() => form.setValue('prompt', topic)}>
-                                    {topic}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </CardContent>
-                <CardFooter>
-                     <Button type="button" onClick={handleSuggestTopics} disabled={isSuggesting} variant="outline">
-                        {isSuggesting ? "সাজেশন আসছে..." : "নতুন টপিক খুঁজুন"}
-                     </Button>
-                </CardFooter>
-            </Card>
         </div>
 
         {generatedVariants && generatedVariants.length > 0 && (
@@ -204,3 +221,4 @@ export default function WriterForm() {
     </div>
   );
 }
+
