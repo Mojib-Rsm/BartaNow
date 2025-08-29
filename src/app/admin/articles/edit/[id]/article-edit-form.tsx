@@ -21,10 +21,12 @@ import RichTextEditor from '@/components/rich-text-editor';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
+import { bn } from 'date-fns/locale';
 
 const formSchema = z.object({
   id: z.string(),
   title: z.string().min(10, "শিরোনাম কমপক্ষে ১০ অক্ষরের হতে হবে।"),
+  englishTitle: z.string().optional(),
   content: z.string().min(50, "কনটেন্ট কমপক্ষে ৫০ অক্ষরের হতে হবে।"),
   category: z.enum(['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ']),
   imageUrl: z.string().optional().or(z.literal('')),
@@ -52,6 +54,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
     defaultValues: {
       id: article.id,
       title: article.title || '',
+      englishTitle: article.englishTitle || '',
       content: article.content || '',
       category: article.category || 'সর্বশেষ',
       imageUrl: article.imageUrl || '',
@@ -131,13 +134,18 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
                 </Button>
             </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="title">শিরোনাম</Label>
-            <Input id="title" {...form.register('title')} />
-            {form.formState.errors.title && (
-              <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
-            )}
-          </div>
+            <div className="grid gap-2">
+                <Label htmlFor="title">শিরোনাম</Label>
+                <Input id="title" {...form.register('title')} />
+                {form.formState.errors.title && (
+                <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
+                )}
+            </div>
+
+            <div className="grid gap-2">
+                <Label htmlFor="englishTitle">ইংরেজি শিরোনাম (ঐচ্ছিক)</Label>
+                <Input id="englishTitle" {...form.register('englishTitle')} placeholder="English Title for SEO" />
+            </div>
 
           <div className="grid gap-2">
             <Label htmlFor="slug">লিংক (URL Slug)</Label>
@@ -204,7 +212,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <Button variant="outline" className="w-full justify-start text-left font-normal">
-                                            {field.value ? format(field.value, 'PPP', { locale: require('date-fns/locale/bn') }) : <span>একটি তারিখ নির্বাচন করুন</span>}
+                                            {field.value ? format(field.value, 'PPP', { locale: bn }) : <span>একটি তারিখ নির্বাচন করুন</span>}
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-auto p-0">
