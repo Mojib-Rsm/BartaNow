@@ -68,7 +68,7 @@ const ToolbarButton = ({ command, icon: Icon, arg, title }: { command: string; i
         document.execCommand(command, false, arg);
     };
     return (
-        <Button title={title} type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={handleExecCommand}>
+        <Button title={title} type="button" variant="ghost" size="icon" className="h-8 w-8" onMouseDown={handleExecCommand}>
             <Icon className="h-4 w-4" />
         </Button>
     );
@@ -84,24 +84,33 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         dispatch({ type: 'UPDATE_CONTENT', payload: newContent });
     }, [onChange]);
 
-    const handleUndo = () => dispatch({ type: 'UNDO' });
-    const handleRedo = () => dispatch({ type: 'REDO' });
+    const handleUndo = (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      dispatch({ type: 'UNDO' })
+    };
+    const handleRedo = (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      dispatch({ type: 'REDO' })
+    };
 
-    const handleLink = () => {
+    const handleLink = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
         const url = prompt("Enter the URL");
         if (url) {
             document.execCommand('createLink', false, url);
         }
     };
     
-    const handleImage = () => {
+    const handleImage = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
         const url = prompt("Enter the Image URL");
         if (url) {
             document.execCommand('insertImage', false, url);
         }
     };
 
-    const handleTable = () => {
+    const handleTable = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
         const rows = parseInt(prompt("Enter number of rows", "2") || "0");
         const cols = parseInt(prompt("Enter number of columns", "2") || "0");
         if (rows > 0 && cols > 0) {
@@ -113,7 +122,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
                 }
                 table += '</tr>';
             }
-            table += '</table>';
+            table += '</table><p><br></p>';
             document.execCommand('insertHTML', false, table);
         }
     }
@@ -130,8 +139,8 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     return (
         <div className="rounded-md border border-input bg-background">
             <div className="p-1 border-b flex items-center gap-1 flex-wrap">
-                <ToolbarButton command="undo" icon={Undo} title="Undo" />
-                <ToolbarButton command="redo" icon={Redo} title="Redo" />
+                <Button title="Undo" type="button" variant="ghost" size="icon" className="h-8 w-8" onMouseDown={handleUndo}><Undo className="h-4 w-4" /></Button>
+                <Button title="Redo" type="button" variant="ghost" size="icon" className="h-8 w-8" onMouseDown={handleRedo}><Redo className="h-4 w-4" /></Button>
                 <Separator orientation="vertical" className="h-8 mx-1" />
                 <ToolbarButton command="formatBlock" icon={Heading1} arg="h1" title="Heading 1" />
                 <ToolbarButton command="formatBlock" icon={Heading2} arg="h2" title="Heading 2" />
@@ -151,9 +160,9 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
                 <ToolbarButton command="justifyCenter" icon={AlignCenter} title="Align Center" />
                 <ToolbarButton command="justifyRight" icon={AlignRight} title="Align Right" />
                 <Separator orientation="vertical" className="h-8 mx-1" />
-                <Button title="Insert Link" type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={handleLink}><Link2 className="h-4 w-4" /></Button>
-                <Button title="Insert Image" type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={handleImage}><ImageIcon className="h-4 w-4" /></Button>
-                <Button title="Insert Table" type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={handleTable}><Table className="h-4 w-4" /></Button>
+                <Button title="Insert Link" type="button" variant="ghost" size="icon" className="h-8 w-8" onMouseDown={handleLink}><Link2 className="h-4 w-4" /></Button>
+                <Button title="Insert Image" type="button" variant="ghost" size="icon" className="h-8 w-8" onMouseDown={handleImage}><ImageIcon className="h-4 w-4" /></Button>
+                <Button title="Insert Table" type="button" variant="ghost" size="icon" className="h-8 w-8" onMouseDown={handleTable}><Table className="h-4 w-4" /></Button>
                 <ToolbarButton command="insertHorizontalRule" icon={Minus} title="Horizontal Line" />
             </div>
             <div
