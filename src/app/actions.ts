@@ -112,8 +112,8 @@ export async function getArticleAudioAction(articleId: string) {
 
 export async function generateArticleAction(prompt: string) {
     try {
-        const article = await generateArticle({ prompt });
-        return { success: true, article };
+        const result = await generateArticle({ prompt });
+        return { success: true, article: result };
     } catch (error) {
         console.error("Generate Article Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'আর্টিকেল তৈরি করতে একটি সমস্যা হয়েছে।';
