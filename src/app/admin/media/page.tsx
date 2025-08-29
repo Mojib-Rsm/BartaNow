@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Image as ImageIcon, Video, FileText, Search, Loader2 } from "lucide-react";
+import { PlusCircle, Image as ImageIcon, Video, FileText, Search, Loader2, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { getAllMedia, getAllUsers, getAllCategories } from "@/lib/api";
 import type { Media, User, Category } from "@/lib/types";
@@ -15,6 +16,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useDebouncedCallback } from 'use-debounce';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from '@/hooks/use-toast';
+import { deleteMultipleMediaAction } from '@/app/actions';
+
+const DeleteConfirmationDialog = ({ selectedIds, onDeleted, onCancel }: { selectedIds: string[], onDeleted: () => void, onCancel: () => void }) => {
+    const { toast } = useToast();
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        const result = await deleteMultipleMediaAction(selectedIds);
+        if (result.success) {
+            toast({ title: "সফল", description: result.message });
+            onDeleted();
+        } else {
+            toast({ variant: "destructive", title: "ব্যর্থ", description: result.message });
+        }
+        setIsDeleting(false);
+    };
+
+    return (
+        <AlertDialog open={true} onOpenChange={onCancel}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>আপনি কি নিশ্চিত?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        এই কাজটি আনডু করা যাবে না। এটি স্থায়ীভাবে {selectedIds.length} টি মিডিয়া ফাইল ডিলিট করে দেবে।
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={onCancel}>বাতিল করুন</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                        {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        ডিলিট করুন
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+};
 
 export default function MediaManagementPage() {
     const [allMedia, setAllMedia] = useState<Media[]>([]);
@@ -22,6 +74,8 @@ export default function MediaManagementPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedMedia, setSelectedMedia] = useState<Set<string>>(new Set());
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     
     const [filters, setFilters] = useState({
         type: 'all',
@@ -31,20 +85,21 @@ export default function MediaManagementPage() {
         category: 'all',
     });
 
+    const fetchData = async () => {
+        setLoading(true);
+        const [mediaItems, userItems, categoryItems] = await Promise.all([
+            getAllMedia(), 
+            getAllUsers(),
+            getAllCategories()
+        ]);
+        setAllMedia(mediaItems);
+        setFilteredMedia(mediaItems);
+        setUsers(userItems);
+        setCategories(categoryItems);
+        setLoading(false);
+    };
+
     useEffect(() => {
-        async function fetchData() {
-            setLoading(true);
-            const [mediaItems, userItems, categoryItems] = await Promise.all([
-                getAllMedia(), 
-                getAllUsers(),
-                getAllCategories()
-            ]);
-            setAllMedia(mediaItems);
-            setFilteredMedia(mediaItems);
-            setUsers(userItems);
-            setCategories(categoryItems);
-            setLoading(false);
-        }
         fetchData();
     }, []);
 
@@ -79,6 +134,31 @@ export default function MediaManagementPage() {
         applyFilters();
     }, [filters, allMedia, applyFilters]);
 
+    const handleSelectMedia = (id: string, isSelected: boolean) => {
+        setSelectedMedia(prev => {
+            const newSet = new Set(prev);
+            if (isSelected) {
+                newSet.add(id);
+            } else {
+                newSet.delete(id);
+            }
+            return newSet;
+        });
+    };
+    
+    const handleSelectAll = (isChecked: boolean) => {
+        if(isChecked) {
+            setSelectedMedia(new Set(filteredMedia.map(m => m.id)));
+        } else {
+            setSelectedMedia(new Set());
+        }
+    }
+    
+    const numSelected = selectedMedia.size;
+    const allVisibleSelected = numSelected > 0 && filteredMedia.every(m => selectedMedia.has(m.id));
+    const someVisibleSelected = numSelected > 0 && !allVisibleSelected;
+
+
     const getFileIcon = (mimeType: string) => {
         if (mimeType.startsWith('image/')) return <ImageIcon className="h-8 w-8 text-muted-foreground" />;
         if (mimeType.startsWith('video/')) return <Video className="h-8 w-8 text-muted-foreground" />;
@@ -87,6 +167,17 @@ export default function MediaManagementPage() {
 
     return (
         <div className="w-full">
+            {isDeleteConfirmOpen && (
+                <DeleteConfirmationDialog 
+                    selectedIds={Array.from(selectedMedia)}
+                    onDeleted={() => {
+                        setIsDeleteConfirmOpen(false);
+                        setSelectedMedia(new Set());
+                        fetchData(); // Refetch data
+                    }}
+                    onCancel={() => setIsDeleteConfirmOpen(false)}
+                />
+            )}
             <div className="flex flex-wrap gap-4 justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold">মিডিয়া লাইব্রেরি</h1>
@@ -102,63 +193,75 @@ export default function MediaManagementPage() {
             
             <Card className="mb-6">
                 <CardContent className="p-4 flex flex-wrap items-center gap-4">
-                    <div className="relative flex-grow min-w-[200px]">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                            placeholder="ফাইলের নাম দিয়ে সার্চ করুন..." 
-                            className="pl-8" 
-                            value={filters.query}
-                            onChange={(e) => setFilters(prev => ({ ...prev, query: e.target.value }))}
-                        />
-                    </div>
-                     <Select value={filters.type} onValueChange={(value) => setFilters(prev => ({...prev, type: value}))}>
-                        <SelectTrigger className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[150px]">
-                            <SelectValue placeholder="ফাইলের ধরন" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">সব ধরন</SelectItem>
-                            <SelectItem value="image">ছবি</SelectItem>
-                            <SelectItem value="video">ভিডিও</SelectItem>
-                            <SelectItem value="application">ডকুমেন্ট</SelectItem>
-                        </SelectContent>
-                    </Select>
-                     <Popover>
-                        <PopoverTrigger asChild>
-                            <Button variant="outline" className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[200px] justify-start text-left font-normal">
-                                {filters.date ? format(filters.date, 'PPP') : <span>যেকোনো তারিখ</span>}
+                     {numSelected > 0 ? (
+                        <div className="flex items-center gap-4 w-full">
+                            <p className="text-sm font-medium">{numSelected} টি আইটেম নির্বাচিত</p>
+                             <Button variant="destructive" onClick={() => setIsDeleteConfirmOpen(true)}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                নির্বাচিত সব ডিলিট করুন
                             </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                                mode="single"
-                                selected={filters.date}
-                                onSelect={(date) => setFilters(prev => ({...prev, date: date}))}
-                                initialFocus
+                        </div>
+                    ) : (
+                    <>
+                        <div className="relative flex-grow min-w-[200px]">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                                placeholder="ফাইলের নাম দিয়ে সার্চ করুন..." 
+                                className="pl-8" 
+                                value={filters.query}
+                                onChange={(e) => setFilters(prev => ({ ...prev, query: e.target.value }))}
                             />
-                        </PopoverContent>
-                    </Popover>
-                    <Select value={filters.author} onValueChange={(value) => setFilters(prev => ({...prev, author: value}))}>
-                        <SelectTrigger className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[150px]">
-                            <SelectValue placeholder="লেখক" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">সব লেখক</SelectItem>
-                            {users.map(user => (
-                                <SelectItem key={user.id} value={user.id}>{user.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Select value={filters.category} onValueChange={(value) => setFilters(prev => ({...prev, category: value}))}>
-                        <SelectTrigger className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[150px]">
-                            <SelectValue placeholder="ক্যাটাগরি" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">সব ক্যাটাগরি</SelectItem>
-                            {categories.map(cat => (
-                                <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                        </div>
+                        <Select value={filters.type} onValueChange={(value) => setFilters(prev => ({...prev, type: value}))}>
+                            <SelectTrigger className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[150px]">
+                                <SelectValue placeholder="ফাইলের ধরন" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">সব ধরন</SelectItem>
+                                <SelectItem value="image">ছবি</SelectItem>
+                                <SelectItem value="video">ভিডিও</SelectItem>
+                                <SelectItem value="application">ডকুমেন্ট</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[200px] justify-start text-left font-normal">
+                                    {filters.date ? format(filters.date, 'PPP') : <span>যেকোনো তারিখ</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={filters.date}
+                                    onSelect={(date) => setFilters(prev => ({...prev, date: date as Date}))}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                        <Select value={filters.author} onValueChange={(value) => setFilters(prev => ({...prev, author: value}))}>
+                            <SelectTrigger className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[150px]">
+                                <SelectValue placeholder="লেখক" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">সব লেখক</SelectItem>
+                                {users.map(user => (
+                                    <SelectItem key={user.id} value={user.id}>{user.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select value={filters.category} onValueChange={(value) => setFilters(prev => ({...prev, category: value}))}>
+                            <SelectTrigger className="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:w-[150px]">
+                                <SelectValue placeholder="ক্যাটাগরি" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">সব ক্যাটাগরি</SelectItem>
+                                {categories.map(cat => (
+                                    <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </>
+                    )}
                 </CardContent>
             </Card>
 
@@ -167,10 +270,26 @@ export default function MediaManagementPage() {
                     <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
             ) : filteredMedia.length > 0 ? (
+                <>
+                <div className="flex items-center gap-2 mb-4">
+                     <Checkbox
+                        id="select-all"
+                        checked={allVisibleSelected}
+                        onCheckedChange={(checked) => handleSelectAll(Boolean(checked))}
+                     />
+                    <label htmlFor="select-all" className="text-sm font-medium">সবগুলো নির্বাচন করুন</label>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                     {filteredMedia.map(item => (
-                       <Link href={`/admin/media/${item.id}`} key={item.id}>
-                            <Card className="group overflow-hidden h-full">
+                       <Card key={item.id} className={cn("group overflow-hidden h-full relative", selectedMedia.has(item.id) && "ring-2 ring-primary border-primary")}>
+                            <div className="absolute top-2 left-2 z-10">
+                                <Checkbox 
+                                    className="bg-white"
+                                    checked={selectedMedia.has(item.id)} 
+                                    onCheckedChange={(checked) => handleSelectMedia(item.id, Boolean(checked))}
+                                />
+                            </div>
+                           <Link href={`/admin/media/${item.id}`} className="block h-full">
                                 <CardContent className="p-0 flex flex-col h-full">
                                     <div className="relative aspect-square w-full bg-muted flex items-center justify-center">
                                         {item.mimeType.startsWith('image/') ? (
@@ -184,10 +303,11 @@ export default function MediaManagementPage() {
                                         <p className="text-muted-foreground">{format(new Date(item.uploadedAt), 'PP')}</p>
                                     </div>
                                 </CardContent>
-                            </Card>
-                        </Link>
+                            </Link>
+                        </Card>
                     ))}
                 </div>
+                </>
             ) : (
                 <div className="text-center py-16 border-2 border-dashed rounded-lg">
                     <p className="text-muted-foreground">কোনো মিডিয়া খুঁজে পাওয়া যায়নি।</p>

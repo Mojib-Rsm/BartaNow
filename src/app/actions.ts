@@ -4,7 +4,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -498,6 +498,18 @@ export async function updateMediaAction(data: z.infer<typeof updateMediaSchema>)
     } catch (error) {
         console.error("Update Media Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'মিডিয়া আপডেট করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
+export async function deleteMultipleMediaAction(mediaIds: string[]) {
+    try {
+        await deleteMultipleMedia(mediaIds);
+        revalidatePath('/admin/media');
+        return { success: true, message: 'নির্বাচিত মিডিয়া সফলভাবে ডিলিট হয়েছে।' };
+    } catch (error) {
+        console.error("Delete Multiple Media Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'মিডিয়া ডিলিট করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
     }
 }
