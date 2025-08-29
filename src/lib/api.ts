@@ -230,6 +230,14 @@ async function deleteMultipleMockMedia(mediaIds: string[]): Promise<void> {
     mockDb.media = mockDb.media.filter(m => !mediaIds.includes(m.id));
 }
 
+async function assignMockCategoryToMedia(mediaIds: string[], category: string): Promise<void> {
+    mockDb.media.forEach(mediaItem => {
+        if (mediaIds.includes(mediaItem.id)) {
+            mediaItem.category = category;
+        }
+    });
+}
+
 async function getMockArticlesByMediaUrl(url: string): Promise<Article[]> {
     return mockDb.articles.filter(article => article.imageUrl === url);
 }
@@ -624,6 +632,15 @@ async function deleteMultipleFirestoreMedia(mediaIds: string[]): Promise<void> {
     mediaIds.forEach(id => {
         const docRef = db.collection('media').doc(id);
         batch.delete(docRef);
+    });
+    await batch.commit();
+}
+
+async function assignCategoryToFirestoreMedia(mediaIds: string[], category: string): Promise<void> {
+    const batch = db.batch();
+    mediaIds.forEach(id => {
+        const docRef = db.collection('media').doc(id);
+        batch.update(docRef, { category: category });
     });
     await batch.commit();
 }
@@ -1088,6 +1105,11 @@ export async function updateMedia(id: string, data: Partial<Media>): Promise<Med
 export async function deleteMultipleMedia(mediaIds: string[]): Promise<void> {
     if (!useFirestore || !db) return deleteMultipleMockMedia(mediaIds);
     return deleteMultipleFirestoreMedia(mediaIds);
+}
+
+export async function assignCategoryToMedia(mediaIds: string[], category: string): Promise<void> {
+    if (!useFirestore || !db) return assignMockCategoryToMedia(mediaIds, category);
+    return assignCategoryToFirestoreMedia(mediaIds, category);
 }
 
 export async function getArticlesByMediaUrl(url: string): Promise<Article[]> {

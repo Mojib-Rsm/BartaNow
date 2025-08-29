@@ -4,7 +4,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -510,6 +510,18 @@ export async function deleteMultipleMediaAction(mediaIds: string[]) {
     } catch (error) {
         console.error("Delete Multiple Media Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'মিডিয়া ডিলিট করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
+export async function assignCategoryToMediaAction(mediaIds: string[], category: string) {
+    try {
+        await assignCategoryToMedia(mediaIds, category);
+        revalidatePath('/admin/media');
+        return { success: true, message: `${mediaIds.length} টি মিডিয়াকে "${category}" ক্যাটাগরিতে সরানো হয়েছে।` };
+    } catch (error) {
+        console.error("Assign Category Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'ক্যাটাগরি পরিবর্তন করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
     }
 }

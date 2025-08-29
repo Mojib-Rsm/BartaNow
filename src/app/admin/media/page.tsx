@@ -1,10 +1,9 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Image as ImageIcon, Video, FileText, Search, Loader2, Trash2 } from "lucide-react";
+import { PlusCircle, Image as ImageIcon, Video, FileText, Search, Loader2, Trash2, FolderMove } from "lucide-react";
 import Link from "next/link";
 import { getAllMedia, getAllUsers, getAllCategories } from "@/lib/api";
 import type { Media, User, Category } from "@/lib/types";
@@ -27,9 +26,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
-import { deleteMultipleMediaAction } from '@/app/actions';
+import { deleteMultipleMediaAction, assignCategoryToMediaAction } from '@/app/actions';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 
 const DeleteConfirmationDialog = ({ selectedIds, onDeleted, onCancel }: { selectedIds: string[], onDeleted: () => void, onCancel: () => void }) => {
     const { toast } = useToast();
@@ -48,7 +49,7 @@ const DeleteConfirmationDialog = ({ selectedIds, onDeleted, onCancel }: { select
     };
 
     return (
-        <AlertDialog open={true} onOpenChange={onCancel}>
+        <AlertDialog open={true} onOpenChange={(isOpen) => !isOpen && onCancel()}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>আপনি কি নিশ্চিত?</AlertDialogTitle>
@@ -68,6 +69,71 @@ const DeleteConfirmationDialog = ({ selectedIds, onDeleted, onCancel }: { select
     );
 };
 
+const AssignCategoryDialog = ({
+  selectedIds,
+  categories,
+  onAssigned,
+  onCancel
+}: {
+  selectedIds: string[],
+  categories: Category[],
+  onAssigned: () => void,
+  onCancel: () => void
+}) => {
+  const { toast } = useToast();
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+
+  const handleAssignCategory = async () => {
+    if (!selectedCategory) {
+        toast({ variant: "destructive", title: "ত্রুটি", description: "অনুগ্রহ করে একটি ক্যাটাগরি নির্বাচন করুন।" });
+        return;
+    }
+    setIsAssigning(true);
+    const result = await assignCategoryToMediaAction(selectedIds, selectedCategory);
+     if (result.success) {
+        toast({ title: "সফল", description: result.message });
+        onAssigned();
+    } else {
+        toast({ variant: "destructive", title: "ব্যর্থ", description: result.message });
+    }
+    setIsAssigning(false);
+  }
+
+  return (
+    <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>ক্যাটাগরি পরিবর্তন করুন</DialogTitle>
+          <DialogDescription>
+            নির্বাচিত {selectedIds.length} টি মিডিয়া ফাইলের জন্য একটি নতুন ক্যাটাগরি নির্বাচন করুন।
+          </DialogDescription>
+        </DialogHeader>
+        <div className="py-4">
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger>
+                  <SelectValue placeholder="একটি ক্যাটাগরি নির্বাচন করুন..." />
+              </SelectTrigger>
+              <SelectContent>
+                  {categories.map(cat => (
+                      <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                  ))}
+              </SelectContent>
+          </Select>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onCancel}>বাতিল করুন</Button>
+          <Button onClick={handleAssignCategory} disabled={isAssigning}>
+            {isAssigning && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            ক্যাটাগরি নির্ধারণ করুন
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+
 export default function MediaManagementPage() {
     const [allMedia, setAllMedia] = useState<Media[]>([]);
     const [filteredMedia, setFilteredMedia] = useState<Media[]>([]);
@@ -76,6 +142,7 @@ export default function MediaManagementPage() {
     const [loading, setLoading] = useState(true);
     const [selectedMedia, setSelectedMedia] = useState<Set<string>>(new Set());
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [isAssignCategoryOpen, setIsAssignCategoryOpen] = useState(false);
     
     const [filters, setFilters] = useState({
         type: 'all',
@@ -178,6 +245,18 @@ export default function MediaManagementPage() {
                     onCancel={() => setIsDeleteConfirmOpen(false)}
                 />
             )}
+             {isAssignCategoryOpen && (
+                <AssignCategoryDialog
+                    selectedIds={Array.from(selectedMedia)}
+                    categories={categories}
+                    onAssigned={() => {
+                        setIsAssignCategoryOpen(false);
+                        setSelectedMedia(new Set());
+                        fetchData();
+                    }}
+                    onCancel={() => setIsAssignCategoryOpen(false)}
+                />
+            )}
             <div className="flex flex-wrap gap-4 justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold">মিডিয়া লাইব্রেরি</h1>
@@ -196,9 +275,13 @@ export default function MediaManagementPage() {
                      {numSelected > 0 ? (
                         <div className="flex items-center gap-4 w-full">
                             <p className="text-sm font-medium">{numSelected} টি আইটেম নির্বাচিত</p>
-                             <Button variant="destructive" onClick={() => setIsDeleteConfirmOpen(true)}>
+                            <Button variant="outline" size="sm" onClick={() => setIsAssignCategoryOpen(true)}>
+                                <FolderMove className="mr-2 h-4 w-4" />
+                                ক্যাটাগরি পরিবর্তন
+                            </Button>
+                             <Button variant="destructive" size="sm" onClick={() => setIsDeleteConfirmOpen(true)}>
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                নির্বাচিত সব ডিলিট করুন
+                                ডিলিট করুন
                             </Button>
                         </div>
                     ) : (
