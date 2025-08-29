@@ -93,6 +93,7 @@ const DeleteBulkConfirmationDialog = ({
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
+        </AlertDialog>
     );
 };
 
@@ -179,8 +180,10 @@ export function DataTable<TData extends Article, TValue>({
                     .map((column) => {
                         const columnIdMap: { [key: string]: string } = {
                             'title': 'শিরোনাম',
+                            'status': 'স্ট্যাটাস',
                             'category': 'ক্যাটাগরি',
                             'authorName': 'লেখক',
+                            'tags': 'ট্যাগ',
                             'publishedAt': 'প্রকাশের তারিখ',
                         };
                         return (

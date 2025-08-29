@@ -202,7 +202,7 @@ export const columns: ColumnDef<Article>[] = [
                 {tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
             </div>
         )
-    }
+    },
   },
   {
     accessorKey: "publishedAt",
