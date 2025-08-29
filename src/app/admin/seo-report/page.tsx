@@ -3,6 +3,8 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { getArticles } from "@/lib/api";
 import { SeoOverview } from "./seo-overview";
 import type { Metadata } from 'next';
+import { SeoReportsTable } from "./seo-reports-table";
+import { columns } from "./columns";
 
 export const metadata: Metadata = {
   title: 'SEO রিপোর্ট',
@@ -18,6 +20,7 @@ export default async function SeoReportPage() {
         let issues: string[] = [];
 
         // Title length check
+        const hasMetaTitle = !!article.englishTitle && article.englishTitle.length > 0;
         if (article.title.length > 40 && article.title.length < 70) score += 20;
         else if (article.title.length < 40) issues.push("শিরোনামটি খুব ছোট");
         else issues.push("শিরোনামটি খুব দীর্ঘ");
@@ -27,7 +30,8 @@ export default async function SeoReportPage() {
         else issues.push("আর্টিকেলের লিংক (slug) নেই");
 
         // AI Summary as meta description
-        if (article.aiSummary && article.aiSummary.length > 70 && article.aiSummary.length < 160) score += 20;
+        const hasGoodMetaDescription = article.aiSummary && article.aiSummary.length > 70 && article.aiSummary.length < 160;
+        if (hasGoodMetaDescription) score += 20;
         else if (!article.aiSummary) issues.push("মেটা ডেসক্রিপশন (AI Summary) নেই");
         else issues.push("মেটা ডেসক্রিপশনের দৈর্ঘ্য مناسب নয়");
         
@@ -36,7 +40,8 @@ export default async function SeoReportPage() {
         else issues.push("ফিচার্ড ইমেজ নেই");
         
         // Content length check
-        if (article.content.length > 1500) score += 15; // Roughly 300 words
+        const wordCount = article.content.split(/\s+/).length;
+        if (wordCount > 300) score += 15; // Roughly 300 words
         else issues.push("কনটেন্ট খুব ছোট");
         
         // Tags check
@@ -52,6 +57,9 @@ export default async function SeoReportPage() {
             seo: {
                 score: score,
                 issues: issues,
+                wordCount: wordCount,
+                hasMetaTitle: hasMetaTitle,
+                hasGoodMetaDescription: hasGoodMetaDescription,
             }
         };
     });
@@ -69,13 +77,11 @@ export default async function SeoReportPage() {
             <CardHeader>
                 <CardTitle>আর্টিকেলভিত্তিক বিশ্লেষণ</CardTitle>
                 <CardDescription>
-                    এখানে প্রতিটি আর্টিকেলের SEO স্কোর এবং উন্নতির জন্য পরামর্শ দেখানো হবে। (শীঘ্রই আসছে...)
+                    এখানে প্রতিটি আর্টিকেলের SEO স্কোর এবং উন্নতির জন্য পরামর্শ দেখানো হচ্ছে।
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                 <div className="text-center py-16 border-2 border-dashed rounded-lg">
-                    <p className="text-muted-foreground">এই ফিচারটি শীঘ্রই আসছে।</p>
-                </div>
+                <SeoReportsTable columns={columns} data={analyzedArticles} />
             </CardContent>
         </Card>
 
