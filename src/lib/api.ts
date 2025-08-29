@@ -227,6 +227,10 @@ async function getMockMediaById(id: string): Promise<Media | undefined> {
     return mockDb.media.find(m => m.id === id);
 }
 
+async function getMockMediaByFileName(fileName: string): Promise<Media | undefined> {
+    return mockDb.media.find(m => m.fileName.toLowerCase() === fileName.toLowerCase());
+}
+
 async function getMockAllMedia(): Promise<Media[]> {
     return [...mockDb.media].sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 }
@@ -648,6 +652,12 @@ async function getFirestoreNotificationsForUser(userId: string): Promise<Notific
 async function getFirestoreMediaById(id: string): Promise<Media | undefined> {
     const doc = await db.collection('media').doc(id).get();
     return doc.exists ? doc.data() as Media : undefined;
+}
+
+async function getFirestoreMediaByFileName(fileName: string): Promise<Media | undefined> {
+    const snapshot = await db.collection('media').where('fileName', '==', fileName).limit(1).get();
+    if (snapshot.empty) return undefined;
+    return snapshot.docs[0].data() as Media;
 }
 
 async function getFirestoreAllMedia(): Promise<Media[]> {
@@ -1142,6 +1152,11 @@ export async function getNotificationsForUser(userId: string): Promise<Notificat
 export async function getMediaById(id: string): Promise<Media | undefined> {
     if (!useFirestore || !db) return getMockMediaById(id);
     return getFirestoreMediaById(id);
+}
+
+export async function getMediaByFileName(fileName: string): Promise<Media | undefined> {
+    if (!useFirestore || !db) return getMockMediaByFileName(fileName);
+    return getFirestoreMediaByFileName(fileName);
 }
 
 export async function getAllMedia(): Promise<Media[]> {

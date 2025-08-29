@@ -4,7 +4,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -297,11 +297,27 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             return { success: false, message: 'লেখক খুঁজে পাওয়া যায়নি।' };
         }
 
-        let finalImageUrl = data.imageUrl || 'https://picsum.photos/seed/placeholder/800/600';
-        if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
-            finalImageUrl = await uploadImage(data.imageUrl, `article-${Date.now()}.png`);
+        let finalImageUrl = data.imageUrl;
+
+        // 1. If no image is provided, try to find one automatically
+        if (!finalImageUrl) {
+            const possibleImageName = `${data.slug}.jpg`; // or .png, etc. This is a simplification.
+            const matchedMedia = await getMediaByFileName(possibleImageName);
+            if (matchedMedia) {
+                finalImageUrl = matchedMedia.url;
+            }
         }
         
+        // 2. If an image is uploaded as base64, upload it to ImageKit
+        if (finalImageUrl && finalImageUrl.startsWith('data:image')) {
+            finalImageUrl = await uploadImage(finalImageUrl, `article-${Date.now()}.png`);
+        }
+        
+        // 3. Fallback to a placeholder if no image is found or uploaded
+        if (!finalImageUrl) {
+            finalImageUrl = 'https://picsum.photos/seed/placeholder/800/600';
+        }
+
         const newArticleData: Omit<Article, 'id' | 'aiSummary'> = {
             title: data.title,
             slug: data.slug,
@@ -1098,8 +1114,8 @@ export async function deleteMultipleArticlesAction(articleIds: string[]) {
 }
 
 const bulkUpdateSchema = z.object({
-  status: z.enum(['Published', 'Draft', '']).optional(),
-  category: z.string().optional().or(z.literal('')),
+  status: z.enum(['Published', 'Draft', '__no_change__']).optional(),
+  category: z.string().optional(),
   tags: z.string().optional(),
 });
 
@@ -1107,10 +1123,10 @@ export async function updateMultipleArticlesAction(articleIds: string[], data: z
     try {
         const updateData: Partial<Pick<Article, 'status' | 'category' | 'tags'>> = {};
         
-        if (data.status) {
+        if (data.status && data.status !== '__no_change__') {
             updateData.status = data.status as 'Published' | 'Draft';
         }
-        if (data.category) {
+        if (data.category && data.category !== '__no_change__') {
             updateData.category = data.category;
         }
 
