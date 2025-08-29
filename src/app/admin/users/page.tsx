@@ -1,4 +1,5 @@
 
+
 import { getAllUsers } from "@/lib/api"
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
@@ -16,12 +17,12 @@ export default async function UserManagementPage() {
             <h1 className="text-3xl font-bold">ব্যবহারকারী ম্যানেজমেন্ট</h1>
             <p className="text-muted-foreground">এখান থেকে সব ব্যবহারকারী দেখুন এবং তাদের রোল পরিচালনা করুন।</p>
         </div>
-        <Button asChild>
+        {/* <Button asChild>
             <Link href="#">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 নতুন ব্যবহারকারী যোগ করুন
             </Link>
-        </Button>
+        </Button> */}
       </div>
       <DataTable columns={columns} data={users} />
     </div>

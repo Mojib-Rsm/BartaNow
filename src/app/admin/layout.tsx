@@ -1,9 +1,11 @@
 
+
 'use client';
 
 import Link from 'next/link';
 import {
   Menu,
+  ChevronDown,
 } from 'lucide-react';
 import {
   Sheet,
@@ -25,6 +27,68 @@ import { useEffect, useState } from 'react';
 import type { User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { adminMenuConfig } from '@/lib/admin-menu-config';
+import type { AdminMenuItem } from '@/lib/admin-menu-config';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { cn } from '@/lib/utils';
+
+
+const NavLink = ({ item, isActive, isChild = false }: { item: Omit<AdminMenuItem, 'children'>, isActive: boolean, isChild?: boolean }) => {
+    const linkClasses = cn(
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-primary-foreground transition-all hover:text-white hover:bg-sidebar-accent",
+        isActive ? 'bg-sidebar-accent text-white font-bold' : 'text-primary-foreground/80',
+        isChild && "pl-10 pr-3"
+    );
+    return (
+        <Link href={item.path!} className={linkClasses}>
+            {!isChild && <item.icon className="h-4 w-4" />}
+            {item.label}
+        </Link>
+    );
+};
+
+const NavCollapsible = ({ item, currentPath }: { item: AdminMenuItem, currentPath: string }) => {
+    const isParentActive = item.children?.some(child => currentPath.startsWith(child.path!));
+    const [isOpen, setIsOpen] = useState(isParentActive);
+    
+    return (
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <CollapsibleTrigger asChild>
+                 <button className={cn(
+                    "w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-primary-foreground transition-all hover:text-white hover:bg-sidebar-accent",
+                    isParentActive ? 'bg-sidebar-accent text-white font-bold' : 'text-primary-foreground/80'
+                )}>
+                    <div className="flex items-center gap-3">
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
+                    </div>
+                    <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-1 py-1">
+                {item.children?.map(child => {
+                    const isChildActive = currentPath.startsWith(child.path!);
+                    return (
+                        <NavLink key={child.path} item={child} isActive={isChildActive} isChild={true} />
+                    )
+                })}
+            </CollapsibleContent>
+        </Collapsible>
+    )
+}
+
+const renderNavLinks = (currentPath: string) => {
+    return adminMenuConfig.map((item) => {
+      const hasAccess = true; // Simplified for now
+      if (!hasAccess) return null;
+      
+      if(item.children && item.children.length > 0) {
+        return <NavCollapsible key={item.label} item={item} currentPath={currentPath} />
+      }
+
+      const isActive = item.exactMatch ? currentPath === item.path : currentPath.startsWith(item.path!);
+      return <NavLink key={item.path} item={item} isActive={isActive} />;
+    });
+};
 
 export default function AdminLayout({
   children,
@@ -60,13 +124,6 @@ export default function AdminLayout({
     window.dispatchEvent(new Event('storage'));
     router.push('/');
   };
-
-
-  const isActive = (path: string) => {
-    if (path === '/admin' && pathname === '/admin') return true;
-    if(path === '/admin') return false; // Avoid matching parent for all children
-    return pathname.startsWith(path);
-  };
   
   if (!user) {
     return (
@@ -78,24 +135,6 @@ export default function AdminLayout({
 
   const userInitials = user.name ? user.name.split(' ').map((n) => n[0]).join('') : '';
 
-  const sidebarLinks = adminMenuConfig.map((item) => {
-      const hasAccess = !item.roles || (user?.role && item.roles.includes(user.role));
-      if (!hasAccess) return null;
-      
-      const linkClasses = `flex items-center gap-3 rounded-lg px-3 py-2 text-primary-foreground transition-all hover:text-white hover:bg-sidebar-accent ${isActive(item.path) ? 'bg-sidebar-accent text-white font-bold' : 'text-primary-foreground/80'}`;
-
-      return (
-        <Link
-          key={item.path}
-          href={item.path}
-          className={linkClasses}
-        >
-          <item.icon className="h-4 w-4" />
-          {item.label}
-        </Link>
-      );
-  });
-
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-sidebar md:block">
@@ -105,9 +144,9 @@ export default function AdminLayout({
                <Image src={logoUrl} alt="BartaNow Logo" width={140} height={35} />
             </Link>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 overflow-y-auto">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-              {sidebarLinks}
+              {renderNavLinks(pathname)}
             </nav>
           </div>
         </div>
@@ -133,7 +172,7 @@ export default function AdminLayout({
                 </div>
                 <nav className="flex-1 overflow-auto p-4">
                     <div className="grid gap-2 text-lg font-medium">
-                        {sidebarLinks}
+                        {renderNavLinks(pathname)}
                     </div>
                 </nav>
             </SheetContent>

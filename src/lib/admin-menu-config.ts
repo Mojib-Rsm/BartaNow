@@ -17,15 +17,20 @@ import {
   Palette,
   UploadCloud,
   BrainCircuit,
+  Tags,
+  LayoutGrid,
+  PlusCircle,
+  FileSignature
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type AdminMenuItem = {
-  path: string;
+  path?: string;
   label: string;
   icon: LucideIcon;
   roles?: ('admin' | 'editor' | 'reporter' | 'user')[];
-  children?: AdminMenuItem[];
+  children?: Omit<AdminMenuItem, 'icon' | 'children'>[];
+  exactMatch?: boolean;
 };
 
 export const adminMenuConfig: AdminMenuItem[] = [
@@ -34,30 +39,43 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'ড্যাশবোর্ড',
     icon: BarChart2,
     roles: ['admin', 'editor', 'reporter'],
+    exactMatch: true,
   },
   {
-    path: '/admin/articles',
-    label: 'আর্টিকেলসমূহ',
+    label: 'আর্টিকেলস',
     icon: Newspaper,
     roles: ['admin', 'editor', 'reporter'],
-  },
-  {
-    path: '/admin/ai-writer',
-    label: 'AI কনটেন্ট রাইটার',
-    icon: BrainCircuit,
-    roles: ['admin', 'editor', 'reporter'],
+    children: [
+        { path: '/admin/articles', label: 'সকল আর্টিকেল' },
+        { path: '/admin/articles/create', label: 'নতুন যোগ করুন' },
+        { path: '/admin/articles/categories', label: 'ক্যাটাগরি' },
+        { path: '/admin/articles/tags', label: 'ট্যাগ' },
+    ],
   },
    {
-    path: '/admin/pages',
+    label: 'AI টুলস',
+    icon: BrainCircuit,
+    roles: ['admin', 'editor', 'reporter'],
+    children: [
+        { path: '/admin/ai-writer', label: 'কনটেন্ট রাইটার' },
+    ],
+  },
+   {
     label: 'পেজসমূহ',
     icon: FileText,
     roles: ['admin', 'editor'],
+    children: [
+        { path: '/admin/pages', label: 'সকল পেজ' },
+        { path: '/admin/pages/create', label: 'নতুন যোগ করুন' },
+    ],
   },
   {
-    path: '/admin/users',
     label: 'ব্যবহারকারীগণ',
     icon: Users,
     roles: ['admin', 'editor'],
+     children: [
+        { path: '/admin/users', label: 'সকল ব্যবহারকারী' },
+    ],
   },
   {
     path: '/admin/comments',
@@ -66,40 +84,33 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin', 'editor'],
   },
   {
-    path: '/admin/polls',
-    label: 'জরিপ',
+    label: 'এনগেজমেন্ট',
     icon: BarChartHorizontal,
     roles: ['admin', 'editor', 'reporter'],
+    children: [
+        { path: '/admin/polls', label: 'জরিপ' },
+        { path: '/admin/subscribers', label: 'সাবস্ক্রাইবার' },
+        { path: '/admin/newsletter', label: 'নিউজলেটার' },
+        { path: '/admin/notifications', label: 'নোটিফিকেশন' },
+    ]
   },
   {
-    path: '/admin/subscribers',
-    label: 'সাবস্ক্রাইবার',
-    icon: Users,
-    roles: ['admin', 'editor'],
-  },
-  {
-    path: '/admin/newsletter',
-    label: 'নিউজলেটার',
-    icon: Send,
-    roles: ['admin', 'editor'],
-  },
-  {
-    path: '/admin/media',
     label: 'মিডিয়া',
     icon: ImageIcon,
     roles: ['admin', 'editor', 'reporter'],
+     children: [
+        { path: '/admin/media', label: 'লাইব্রেরি' },
+        { path: '/admin/media/upload', label: 'নতুন আপলোড' },
+    ],
   },
   {
-    path: '/admin/import',
-    label: 'WordPress ইম্পোর্ট',
+    label: 'ইম্পোর্ট ও সিঙ্ক',
     icon: UploadCloud,
-    roles: ['admin'],
-  },
-  {
-    path: '/admin/rss',
-    label: 'RSS ফিড',
-    icon: Rss,
     roles: ['admin', 'editor'],
+     children: [
+        { path: '/admin/import', label: 'WordPress ইম্পোর্ট' },
+        { path: '/admin/rss', label: 'RSS ফিড' },
+    ],
   },
   {
     path: '/admin/appearance',
@@ -112,12 +123,6 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'বিজ্ঞাপন',
     icon: Megaphone,
     roles: ['admin'],
-  },
-  {
-    path: '/admin/notifications',
-    label: 'নোটিফিকেশন',
-    icon: BellRing,
-    roles: ['admin', 'editor'],
   },
   {
     path: '/admin/settings',
