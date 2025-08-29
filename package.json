@@ -5,7 +5,7 @@
   "private": true,
   "description": "Welcome to BartaNow, a professional starter project for a modern news website. This project is built with Next.js and Tailwind CSS, demonstrating best practices for server-side rendering (SSR), API design, and component architecture.",
   "scripts": {
-    "dev": "next dev --turbopack --port 9002",
+    "dev": "next dev --turbopack",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
