@@ -622,7 +622,7 @@ const comments: Comment[] = [
         userAvatar: 'https://i.pravatar.cc/150?u=regular-user', 
         text: 'দারুণ খেলেছে বাংলাদেশ! এই জয়টা খুব দরকার ছিল।', 
         timestamp: '2024-07-22T11:00:00Z',
-        isApproved: true,
+        status: 'approved',
     },
     {
         id: 'comment-2', 
@@ -632,7 +632,7 @@ const comments: Comment[] = [
         userAvatar: 'https://i.pravatar.cc/150?u=admin-user', 
         text: '5G প্রযুক্তি আমাদের দেশের জন্য একটি নতুন দিগন্ত উন্মোচন করবে। অসাধারণ উদ্যোগ!', 
         timestamp: '2024-07-21T15:00:00Z',
-        isApproved: true,
+        status: 'approved',
     },
     { 
         id: 'comment-3', 
@@ -642,7 +642,7 @@ const comments: Comment[] = [
         userAvatar: 'https://i.pravatar.cc/150?u=editor-user', 
         text: 'এই ম্যাচের বিশ্লেষণধর্মী একটি ফলো-আপ আর্টিকেল করা যেতে পারে।', 
         timestamp: '2024-07-22T12:30:00Z',
-        isApproved: false, // Example of an unapproved comment
+        status: 'pending',
     },
 ];
 

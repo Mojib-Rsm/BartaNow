@@ -135,7 +135,7 @@ export interface Comment {
     userAvatar: string;
     text: string;
     timestamp: string; // ISO date string
-    isApproved: boolean;
+    status: 'pending' | 'approved' | 'spam' | 'trashed';
     entityType?: 'COMMENT';
 }
 

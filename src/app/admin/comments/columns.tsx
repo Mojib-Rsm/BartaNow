@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Trash2, CheckCircle, XCircle, BadgeCheck } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Trash2, CheckCircle, XCircle, BadgeCheck, ShieldAlert, BadgeInfo } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge"
 import type { Comment } from "@/lib/types"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { deleteCommentAction, approveCommentAction } from "@/app/actions"
+import { updateCommentStatusAction, deleteCommentAction } from "@/app/actions"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
@@ -63,7 +63,7 @@ const DeleteConfirmationDialog = ({ commentId, onDeleted }: { commentId: string,
                 }}
             >
                 <Trash2 className="mr-2 h-4 w-4" />
-                ডিলিট করুন
+                স্থায়ীভাবে ডিলিট করুন
             </DropdownMenuItem>
             <AlertDialogContent>
                 <AlertDialogHeader>
@@ -82,6 +82,14 @@ const DeleteConfirmationDialog = ({ commentId, onDeleted }: { commentId: string,
         </AlertDialog>
     )
 }
+
+const statusMap: Record<Comment['status'], { text: string; icon: React.ElementType; className: string; }> = {
+    pending: { text: 'বিচারাধীন', icon: BadgeInfo, className: 'bg-yellow-500 hover:bg-yellow-600' },
+    approved: { text: 'অনুমোদিত', icon: CheckCircle, className: 'bg-green-600 hover:bg-green-700' },
+    spam: { text: 'স্প্যাম', icon: ShieldAlert, className: 'bg-orange-500 hover:bg-orange-600' },
+    trashed: { text: 'ট্র্যাশড', icon: Trash2, className: 'bg-gray-500 hover:bg-gray-600' },
+};
+
 
 export const columns: ColumnDef<Comment>[] = [
   {
@@ -130,18 +138,16 @@ export const columns: ColumnDef<Comment>[] = [
     }
   },
   {
-    accessorKey: "isApproved",
+    accessorKey: "status",
     header: "স্ট্যাটাস",
     cell: ({ row }) => {
-        const isApproved = row.getValue("isApproved") as boolean;
+        const status = row.getValue("status") as Comment['status'];
+        const { text, icon: Icon, className } = statusMap[status] || { text: 'Unknown', icon: BadgeInfo, className: 'bg-gray-400' };
+
         return (
-            <Badge variant={isApproved ? "default" : "secondary"} className={cn(isApproved ? "bg-green-600 hover:bg-green-700" : "bg-yellow-500 hover:bg-yellow-600", "text-white")}>
-                {isApproved ? (
-                    <CheckCircle className="mr-1 h-3 w-3" />
-                ) : (
-                    <XCircle className="mr-1 h-3 w-3" />
-                )}
-                {isApproved ? 'অনুমোদিত' : 'বিচারাধীন'}
+            <Badge className={cn(className, "text-white")}>
+                <Icon className="mr-1 h-3 w-3" />
+                {text}
             </Badge>
         )
     },
@@ -178,8 +184,8 @@ export const columns: ColumnDef<Comment>[] = [
       const router = useRouter()
       const { toast } = useToast()
 
-      const handleApprove = async () => {
-          const result = await approveCommentAction(comment.id);
+      const handleStatusChange = async (newStatus: Comment['status']) => {
+          const result = await updateCommentStatusAction([comment.id], newStatus);
           if (result.success) {
             toast({ title: "সফল", description: result.message })
             router.refresh();
@@ -199,10 +205,28 @@ export const columns: ColumnDef<Comment>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>অ্যাকশন</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {!comment.isApproved && (
-                <DropdownMenuItem onClick={handleApprove}>
+            {comment.status !== 'approved' && (
+                <DropdownMenuItem onClick={() => handleStatusChange('approved')}>
                     <BadgeCheck className="mr-2 h-4 w-4" />
                     অনুমোদন করুন
+                </DropdownMenuItem>
+            )}
+            {comment.status !== 'spam' && (
+                <DropdownMenuItem onClick={() => handleStatusChange('spam')}>
+                     <ShieldAlert className="mr-2 h-4 w-4" />
+                    স্প্যাম হিসেবে চিহ্নিত করুন
+                </DropdownMenuItem>
+            )}
+             {comment.status !== 'trashed' && (
+                <DropdownMenuItem onClick={() => handleStatusChange('trashed')}>
+                    <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+                    ট্র্যাশ করুন
+                </DropdownMenuItem>
+            )}
+            {comment.status === 'trashed' && (
+                 <DropdownMenuItem onClick={() => handleStatusChange('pending')}>
+                    <BadgeCheck className="mr-2 h-4 w-4" />
+                    পুনরুদ্ধার করুন
                 </DropdownMenuItem>
             )}
             <DeleteConfirmationDialog commentId={comment.id} onDeleted={() => router.refresh()} />

@@ -286,6 +286,14 @@ async function deleteMockComment(commentId: string): Promise<void> {
     if (index > -1) mockDb.comments.splice(index, 1);
 }
 
+async function updateMockCommentStatus(commentIds: string[], status: Comment['status']): Promise<void> {
+    mockDb.comments.forEach(comment => {
+        if (commentIds.includes(comment.id)) {
+            comment.status = status;
+        }
+    });
+}
+
 
 async function getMockAllPages(): Promise<Page[]> {
     return [...mockDb.pages];
@@ -724,6 +732,16 @@ async function updateFirestoreComment(commentId: string, data: Partial<Comment>)
 async function deleteFirestoreComment(commentId: string): Promise<void> {
     await db.collection('comments').doc(commentId).delete();
 }
+
+async function updateFirestoreCommentStatus(commentIds: string[], status: Comment['status']): Promise<void> {
+    const batch = db.batch();
+    commentIds.forEach(id => {
+        const docRef = db.collection('comments').doc(id);
+        batch.update(docRef, { status });
+    });
+    await batch.commit();
+}
+
 
 async function getFirestoreAllPages(): Promise<Page[]> {
     const snapshot = await db.collection('pages').orderBy('lastUpdatedAt', 'desc').get();
@@ -1202,6 +1220,11 @@ export async function updateComment(commentId: string, data: Partial<Comment>): 
 export async function deleteComment(commentId: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockComment(commentId);
     return deleteFirestoreComment(commentId);
+}
+
+export async function updateCommentStatus(commentIds: string[], status: Comment['status']): Promise<void> {
+    if (!useFirestore || !db) return updateMockCommentStatus(commentIds, status);
+    return updateFirestoreCommentStatus(commentIds, status);
 }
 
 export async function getAllContactMessages(): Promise<ContactMessage[]> {

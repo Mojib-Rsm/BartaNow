@@ -4,8 +4,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName } from '@/lib/api';
-import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus } from '@/lib/api';
+import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -554,16 +554,14 @@ export async function assignCategoryToMediaAction(mediaIds: string[], category: 
     }
 }
 
-
-export async function approveCommentAction(commentId: string) {
+export async function updateCommentStatusAction(commentIds: string[], status: Comment['status']) {
     try {
-        await updateComment(commentId, { isApproved: true });
+        await updateCommentStatus(commentIds, status);
         revalidatePath('/admin/comments');
-        return { success: true, message: 'মন্তব্য সফলভাবে অনুমোদন করা হয়েছে।' };
+        return { success: true, message: `${commentIds.length} টি মন্তব্য সফলভাবে আপডেট করা হয়েছে।` };
     } catch (error) {
-        console.error("Approve Comment Error:", error);
-        const errorMessage = error instanceof Error ? error.message : 'মন্তব্য অনুমোদন করতে একটি সমস্যা হয়েছে।';
-        return { success: false, message: errorMessage };
+        console.error("Update Comment Status Error:", error);
+        return { success: false, message: 'মন্তব্য আপডেট করতে একটি সমস্যা হয়েছে।' };
     }
 }
 

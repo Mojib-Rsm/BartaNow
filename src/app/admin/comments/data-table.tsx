@@ -5,6 +5,7 @@ import * as React from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
+  Row,
   SortingState,
   VisibilityState,
   flexRender,
@@ -31,14 +32,18 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, CheckCircle, ShieldAlert, Trash2, Loader2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
+import type { Comment } from "@/lib/types"
+import { updateCommentStatusAction } from "@/app/actions"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends Comment, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -46,6 +51,9 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [isProcessing, setIsProcessing] = React.useState(false)
+  const router = useRouter()
+  const { toast } = useToast()
 
 
   const table = useReactTable({
@@ -71,6 +79,22 @@ export function DataTable<TData, TValue>({
         }
     }
   })
+  
+  const numSelected = table.getFilteredSelectedRowModel().rows.length;
+
+  const handleBulkAction = async (status: Comment['status']) => {
+    setIsProcessing(true);
+    const selectedIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id);
+    const result = await updateCommentStatusAction(selectedIds, status);
+    if (result.success) {
+        toast({ title: 'সফল', description: result.message });
+        table.resetRowSelection();
+        router.refresh();
+    } else {
+        toast({ variant: 'destructive', title: 'ব্যর্থ', description: result.message });
+    }
+    setIsProcessing(false);
+  };
 
   return (
     <div className="w-full">
@@ -83,6 +107,20 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
             />
+             {numSelected > 0 && (
+                <div className="flex items-center gap-2 ml-4">
+                    <span className="text-sm text-muted-foreground">{numSelected} টি নির্বাচিত</span>
+                     <Button variant="outline" size="sm" onClick={() => handleBulkAction('approved')} disabled={isProcessing}>
+                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />} অনুমোদন
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleBulkAction('spam')} disabled={isProcessing}>
+                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldAlert className="mr-2 h-4 w-4" />} স্প্যাম
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleBulkAction('trashed')} disabled={isProcessing}>
+                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />} ট্র্যাশ
+                    </Button>
+                </div>
+            )}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="ml-auto">
@@ -98,7 +136,7 @@ export function DataTable<TData, TValue>({
                             'userName': 'ব্যবহারকারী',
                             'text': 'মন্তব্য',
                             'articleId': 'আর্টিকেল',
-                            'isApproved': 'স্ট্যাটাস',
+                            'status': 'স্ট্যাটাস',
                             'timestamp': 'তারিখ',
                         };
                         return (
