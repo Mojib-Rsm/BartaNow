@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.876.0",
@@ -55,7 +56,6 @@
     "next-themes": "^0.3.0",
     "node-pushnotifications": "^3.1.1",
     "nodemailer": "^6.9.14",
-    "patch-package": "^8.0.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
@@ -83,6 +83,7 @@
     "@types/web-push": "^3.6.4",
     "@types/xml2js": "^0.4.14",
     "genkit-cli": "^1.14.1",
+    "patch-package": "^8.0.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.0",
