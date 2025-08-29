@@ -16,7 +16,7 @@ import { createArticleAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
-import { Editor } from '@tinymce/tinymce-react';
+import RichTextEditor from '@/components/rich-text-editor';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -261,25 +261,9 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
               name="content"
               control={form.control}
               render={({ field }) => (
-                <Editor
-                    apiKey="YOUR_TINYMCE_API_KEY" // Replace with your actual TinyMCE API key
-                    onInit={(evt, editor) => {}}
+                <RichTextEditor
                     value={field.value}
                     onEditorChange={field.onChange}
-                    init={{
-                        height: 500,
-                        menubar: true,
-                        plugins: [
-                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'emoticons'
-                        ],
-                        toolbar: 'undo redo | blocks | ' +
-                            'bold italic forecolor | alignleft aligncenter ' +
-                            'alignright alignjustify | bullist numlist outdent indent | ' +
-                            'removeformat | image media link | emoticons | help',
-                        content_style: 'body { font-family:Noto Sans Bengali,PT Sans,sans-serif; font-size:16px }',
-                    }}
                 />
               )}
             />

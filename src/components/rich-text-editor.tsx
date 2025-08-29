@@ -6,6 +6,42 @@ import { Editor } from '@tinymce/tinymce-react';
 import { useTheme } from 'next-themes';
 import { uploadInArticleImageAction } from '@/app/actions';
 
+// Self-hosted imports
+import 'tinymce/tinymce';
+import 'tinymce/models/dom';
+import 'tinymce/themes/silver';
+import 'tinymce/icons/default';
+import 'tinymce/skins/ui/oxide/skin.css';
+
+// Plugins
+import 'tinymce/plugins/advlist';
+import 'tinymce/plugins/anchor';
+import 'tinymce/plugins/autolink';
+import 'tinymce/plugins/charmap';
+import 'tinymce/plugins/code';
+import 'tinymce/plugins/fullscreen';
+import 'tinymce/plugins/help';
+import 'tinymce/plugins/image';
+import 'tinymce/plugins/insertdatetime';
+import 'tinymce/plugins/link';
+import 'tinymce/plugins/lists';
+import 'tinymce/plugins/media';
+import 'tinymce/plugins/preview';
+import 'tinymce/plugins/searchreplace';
+import 'tinymce/plugins/table';
+import 'tinymce/plugins/visualblocks';
+import 'tinymce/plugins/wordcount';
+import 'tinymce/plugins/emoticons';
+import 'tinymce/plugins/emoticons/js/emojis';
+
+
+// Content CSS
+import 'tinymce/skins/content/default/content.css';
+import 'tinymce/skins/ui/oxide/content.css';
+import 'tinymce/skins/content/dark/content.css';
+import 'tinymce/skins/ui/oxide-dark/content.css';
+
+
 type RichTextEditorProps = {
   value: string;
   onEditorChange: (value: string) => void;
@@ -39,11 +75,15 @@ export default function RichTextEditor({ value, onEditorChange, placeholder }: R
 
   return (
       <Editor
-        apiKey="no-api-key"
         onInit={(evt, editor) => editorRef.current = editor}
         value={value}
         onEditorChange={onEditorChange}
         init={{
+          skin_url: '/skins/ui/oxide',
+          content_css_url: [
+            '/skins/ui/oxide/content.css',
+            '/skins/content/default/content.css'
+          ],
           height: 500,
           menubar: true,
           plugins: [
@@ -56,8 +96,6 @@ export default function RichTextEditor({ value, onEditorChange, placeholder }: R
             'alignright alignjustify | bullist numlist outdent indent | ' +
             'removeformat | image media link | emoticons | help',
           content_style: 'body { font-family:Noto Sans Bengali,PT Sans,sans-serif; font-size:16px }',
-          skin: theme === 'dark' ? 'oxide-dark' : 'oxide',
-          content_css: theme === 'dark' ? 'dark' : 'default',
           placeholder: placeholder || 'আপনার কনটেন্ট এখানে লিখুন...',
           images_upload_handler: handleImageUpload,
           automatic_uploads: true,
