@@ -1,83 +1,68 @@
 
 'use client';
 
-import React from 'react';
-import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css'; // Import the styles
+import React, { useRef } from 'react';
+import { Editor } from '@tinymce/tinymce-react';
 import { useTheme } from 'next-themes';
-
-// Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+import { uploadInArticleImageAction } from '@/app/actions';
 
 type RichTextEditorProps = {
   value: string;
-  onChange: (value: string) => void;
+  onEditorChange: (value: string) => void;
   placeholder?: string;
 };
 
-export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onEditorChange, placeholder }: RichTextEditorProps) {
+  const editorRef = useRef<any>(null);
   const { theme } = useTheme();
 
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, false] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-      ['link', 'image'],
-      ['clean']
-    ],
+  const handleImageUpload = async (blobInfo: any, success: any, failure: any, progress: any) => {
+      const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+          reader.readAsDataURL(blobInfo.blob());
+      });
+
+      try {
+          const result = await uploadInArticleImageAction(base64, blobInfo.blob().name);
+          if ('location' in result) {
+              success(result.location);
+          } else {
+              failure(`Image upload failed: ${result.error.message}`);
+          }
+      } catch (error) {
+           const message = error instanceof Error ? error.message : 'Unknown error';
+           failure(`HTTP Error: ${message}`);
+      }
   };
 
-  const formats = [
-    'header',
-    'bold', 'italic', 'underline', 'strike', 'blockquote',
-    'list', 'bullet', 'indent',
-    'link', 'image'
-  ];
-
-  // The 'dark' class will be on the html element, which Quill doesn't see directly.
-  // We can't easily switch Quill's theme, but the default theme adapts reasonably well.
-  // For a full dark theme, custom CSS would be required to override Quill's default styles.
-  
   return (
-    <div className={theme === 'dark' ? 'ql-dark' : ''}>
-        <ReactQuill 
-            theme="snow"
-            value={value}
-            onChange={onChange}
-            modules={modules}
-            formats={formats}
-            placeholder={placeholder || 'আপনার কনটেন্ট এখানে লিখুন...'}
-        />
-    </div>
+      <Editor
+        apiKey="no-api-key"
+        onInit={(evt, editor) => editorRef.current = editor}
+        value={value}
+        onEditorChange={onEditorChange}
+        init={{
+          height: 500,
+          menubar: true,
+          plugins: [
+            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'emoticons'
+          ],
+          toolbar: 'undo redo | blocks | ' +
+            'bold italic forecolor | alignleft aligncenter ' +
+            'alignright alignjustify | bullist numlist outdent indent | ' +
+            'removeformat | image media link | emoticons | help',
+          content_style: 'body { font-family:Noto Sans Bengali,PT Sans,sans-serif; font-size:16px }',
+          skin: theme === 'dark' ? 'oxide-dark' : 'oxide',
+          content_css: theme === 'dark' ? 'dark' : 'default',
+          placeholder: placeholder || 'আপনার কনটেন্ট এখানে লিখুন...',
+          images_upload_handler: handleImageUpload,
+          automatic_uploads: true,
+          file_picker_types: 'image media',
+        }}
+      />
   );
-}
-
-// Add some basic dark theme support for Quill
-const styles = `
-.ql-dark .ql-editor {
-    color: hsl(var(--foreground));
-}
-.ql-dark .ql-snow .ql-stroke {
-    stroke: hsl(var(--border));
-}
-.ql-dark .ql-snow .ql-picker-label {
-    color: hsl(var(--foreground));
-}
-.ql-dark .ql-snow .ql-fill, .ql-dark .ql-snow .ql-stroke.ql-fill {
-    fill: hsl(var(--border));
-}
-.ql-dark .ql-toolbar {
-    border-color: hsl(var(--border));
-}
-.ql-dark .ql-container {
-    border-color: hsl(var(--border));
-}
-`;
-
-if (typeof window !== 'undefined') {
-    const styleSheet = document.createElement("style");
-    styleSheet.type = "text/css";
-    styleSheet.innerText = styles;
-    document.head.appendChild(styleSheet);
 }

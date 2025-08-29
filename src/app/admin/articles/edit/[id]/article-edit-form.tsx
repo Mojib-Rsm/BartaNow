@@ -196,7 +196,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
               render={({ field }) => (
                 <RichTextEditor
                   value={field.value}
-                  onChange={field.onChange}
+                  onEditorChange={field.onChange}
                 />
               )}
             />
