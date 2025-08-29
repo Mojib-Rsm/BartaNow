@@ -21,19 +21,22 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       onEditorChange={onChange}
       init={{
         height: 350,
-        menubar: false,
+        menubar: 'edit view insert format tools table help',
         plugins: [
-          'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-          'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-          'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+          'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview', 'anchor',
+          'searchreplace', 'visualblocks', 'code', 'fullscreen', 'insertdatetime',
+          'media', 'table', 'code', 'help', 'wordcount', 'emoticons'
         ],
         toolbar: 'undo redo | blocks | ' +
-          'bold italic forecolor | alignleft aligncenter ' +
-          'alignright alignjustify | bullist numlist outdent indent | ' +
-          'removeformat | help',
+          'bold italic underline strikethrough | forecolor backcolor | ' +
+          'alignleft aligncenter alignright alignjustify | ' +
+          'bullist numlist outdent indent | link image media | ' +
+          'blockquote emoticons | removeformat | help',
+        block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3; Heading 4=h4; Blockquote=blockquote',
         content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
         skin: theme === 'dark' ? 'oxide-dark' : 'oxide',
         content_css: theme === 'dark' ? 'dark' : 'default',
+        placeholder: placeholder || 'আপনার কনটেন্ট এখানে লিখুন...',
       }}
     />
   );
