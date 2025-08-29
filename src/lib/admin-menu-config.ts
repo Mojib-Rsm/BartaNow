@@ -27,6 +27,7 @@ import {
   FolderOpen,
   Image,
   Edit,
+  FileUp,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -140,6 +141,15 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'Location',
     icon: MapPin,
     roles: ['admin'],
+  },
+   {
+    label: 'Tools',
+    icon: Settings,
+    roles: ['admin'],
+    path: '#tools',
+    children: [
+        { path: '/admin/import', label: 'Import' },
+    ],
   },
   {
     path: '/admin/settings',
