@@ -16,7 +16,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
   return (
     <Editor
-      apiKey="YOUR_TINYMCE_API_KEY" // Replace with your own API key
+      apiKey="no-api-key" // Using "no-api-key" allows full functionality with a domain warning. Replace with your own key for production.
       value={value}
       onEditorChange={onChange}
       init={{
