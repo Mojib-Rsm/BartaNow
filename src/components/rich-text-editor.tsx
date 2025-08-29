@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useCallback, useRef } from 'react';
@@ -11,26 +10,13 @@ type RichTextEditorProps = {
     onChange: (value: string) => void;
 };
 
-const ToolbarButton = ({ command, icon: Icon }: { command: string, icon: React.ElementType }) => {
+const ToolbarButton = ({ command, icon: Icon, arg }: { command: string, icon: React.ElementType, arg?: string }) => {
     const handleExecCommand = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        document.execCommand(command, false);
+        document.execCommand(command, false, arg);
     };
     return (
-        <Toggle size="sm" onPressedChange={() => document.execCommand(command, false)} aria-label={command}>
-            <Icon className="h-4 w-4" />
-        </Toggle>
-    );
-};
-
-const HeadingButton = ({ level }: { level: 1 | 2 }) => {
-    const handleExecCommand = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        document.execCommand('formatBlock', false, `h${level}`);
-    };
-    const Icon = level === 1 ? Heading1 : Heading2;
-    return (
-        <Toggle size="sm" onPressedChange={handleExecCommand} aria-label={`heading ${level}`}>
+        <Toggle size="sm" onPressedChange={() => document.execCommand(command, false, arg)} aria-label={command}>
             <Icon className="h-4 w-4" />
         </Toggle>
     );
@@ -47,8 +33,8 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     return (
         <div className="rounded-md border border-input bg-background">
             <div className="p-2 border-b flex items-center gap-1 flex-wrap">
-                <HeadingButton level={1} />
-                <HeadingButton level={2} />
+                <ToolbarButton command="formatBlock" icon={Heading1} arg="h1" />
+                <ToolbarButton command="formatBlock" icon={Heading2} arg="h2" />
                 <Separator orientation="vertical" className="h-6" />
                 <ToolbarButton command="bold" icon={Bold} />
                 <ToolbarButton command="italic" icon={Italic} />
