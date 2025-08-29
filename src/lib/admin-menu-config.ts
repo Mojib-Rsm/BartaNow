@@ -1,4 +1,5 @@
 
+
 import {
   LayoutGrid,
   Newspaper,
@@ -23,7 +24,9 @@ import {
   Megaphone,
   BarChart,
   Contact,
-  FolderOpen
+  FolderOpen,
+  Image,
+  Edit,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -88,6 +91,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     children: [
         { path: '/admin/media', label: 'Library' },
         { path: '/admin/media/upload', label: 'Add New' },
+        { path: '/admin/media/edit', label: 'Editor' },
     ],
   },
   {

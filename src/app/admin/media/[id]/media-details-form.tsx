@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -12,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Link as LinkIcon, Copy, FileText, Image as ImageIcon, Video, Music } from 'lucide-react';
+import { Loader2, Link as LinkIcon, Copy, FileText, Image as ImageIcon, Video, Music, Pencil } from 'lucide-react';
 import { updateMediaAction, getArticlesByMediaUrlAction } from '@/app/actions';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -148,7 +149,7 @@ export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsForm
             </div>
             <div className="lg:col-span-1 space-y-6">
                 <Card>
-                    <CardHeader className="p-0">
+                    <CardHeader className="p-0 relative">
                         <div className="relative aspect-video w-full bg-muted flex items-center justify-center rounded-t-lg overflow-hidden">
                             {media.mimeType.startsWith('image/') ? (
                                 <Image src={media.url} alt={media.fileName} fill className="object-contain" />
@@ -163,6 +164,14 @@ export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsForm
                                 <FileIcon mimeType={media.mimeType} className="h-16 w-16 text-muted-foreground" />
                             )}
                         </div>
+                        {media.mimeType.startsWith('image/') && (
+                             <Button asChild size="sm" className="absolute top-2 right-2">
+                                <Link href={`/admin/media/edit/${media.id}`}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Edit Image
+                                </Link>
+                            </Button>
+                        )}
                     </CardHeader>
                     <CardContent className="p-4 space-y-3 text-sm">
                         <div className="flex items-center gap-2">

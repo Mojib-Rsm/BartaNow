@@ -4,7 +4,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, createCategory, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -475,6 +475,8 @@ const updateMediaSchema = z.object({
   altText: z.string().optional(),
   caption: z.string().optional(),
   description: z.string().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
 });
 export async function updateMediaAction(data: z.infer<typeof updateMediaSchema>) {
     const validation = updateMediaSchema.safeParse(data);
@@ -487,6 +489,7 @@ export async function updateMediaAction(data: z.infer<typeof updateMediaSchema>)
         if (!updatedMedia) {
             return { success: false, message: 'মিডিয়া আপডেট করা যায়নি।' };
         }
+        revalidatePath(`/admin/media/edit/${data.id}`);
         revalidatePath(`/admin/media/${data.id}`);
         return { success: true, message: 'মিডিয়া সফলভাবে আপডেট হয়েছে।', media: updatedMedia };
     } catch (error) {
