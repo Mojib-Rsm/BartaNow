@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useDropzone, Accept } from 'react-dropzone';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { uploadMediaAction } from '@/app/actions';
@@ -12,6 +12,18 @@ import { Progress } from '@/components/ui/progress';
 
 type UploadFormProps = {
   userId: string;
+};
+
+// Define the acceptable file types
+const accept: Accept = {
+    'image/jpeg': ['.jpg', '.jpeg'],
+    'image/png': ['.png'],
+    'image/gif': ['.gif'],
+    'image/webp': ['.webp'],
+    'video/mp4': ['.mp4'],
+    'audio/mpeg': ['.mp3'],
+    'application/pdf': ['.pdf'],
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
 };
 
 export default function UploadForm({ userId }: UploadFormProps) {
@@ -25,7 +37,7 @@ export default function UploadForm({ userId }: UploadFormProps) {
     setFiles(prevFiles => [...prevFiles, ...acceptedFiles]);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept });
 
   const removeFile = (fileName: string) => {
     setFiles(files.filter(file => file.name !== fileName));
@@ -52,20 +64,28 @@ export default function UploadForm({ userId }: UploadFormProps) {
       formData.append('file', file);
       formData.append('userId', userId);
       
-      const result = await uploadMediaAction(formData);
-
-      if (result.success) {
-        toast({
-          title: 'আপলোড সফল',
-          description: `ফাইল '${file.name}' সফলভাবে আপলোড হয়েছে।`,
-        });
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'আপলোড ব্যর্থ',
-          description: result.message,
-        });
+      try {
+        const result = await uploadMediaAction(formData);
+        if (result.success) {
+            toast({
+            title: 'আপলোড সফল',
+            description: `ফাইল '${file.name}' সফলভাবে আপলোড হয়েছে।`,
+            });
+        } else {
+            toast({
+            variant: 'destructive',
+            title: 'আপলোড ব্যর্থ',
+            description: result.message,
+            });
+        }
+      } catch (error) {
+           toast({
+            variant: 'destructive',
+            title: 'ত্রুটি',
+            description: `'${file.name}' আপলোড করতে একটি সমস্যা হয়েছে।`,
+            });
       }
+      
       completedFiles++;
       setUploadProgress((completedFiles / totalFiles) * 100);
     }
@@ -88,23 +108,24 @@ export default function UploadForm({ userId }: UploadFormProps) {
         <UploadCloud className="w-12 h-12 text-muted-foreground" />
         <p className="mt-4 text-lg font-semibold">ফাইল টেনে এনে ছাড়ুন</p>
         <p className="text-sm text-muted-foreground">অথবা এখানে ক্লিক করে ফাইল নির্বাচন করুন</p>
+        <p className="text-xs text-muted-foreground mt-2">সমর্থিত ফাইল: JPG, PNG, GIF, WebP, MP4, MP3, PDF, DOCX</p>
       </div>
 
       {files.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">নির্বাচিত ফাইলসমূহ</h3>
-          <ul className="space-y-2">
+          <h3 className="text-lg font-semibold">নির্বাচিত ফাইলসমূহ ({files.length})</h3>
+          <ul className="space-y-2 max-h-60 overflow-y-auto pr-2">
             {files.map(file => (
               <li key={file.name} className="flex items-center justify-between p-2 bg-muted rounded-md">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 overflow-hidden">
                   {file.type.startsWith('image/') ? (
-                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                    <ImageIcon className="h-5 w-5 text-muted-foreground shrink-0" />
                   ) : (
-                    <File className="h-5 w-5 text-muted-foreground" />
+                    <File className="h-5 w-5 text-muted-foreground shrink-0" />
                   )}
-                  <span className="text-sm font-medium">{file.name}</span>
+                  <span className="text-sm font-medium truncate">{file.name}</span>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => removeFile(file.name)}>
+                <Button variant="ghost" size="icon" onClick={() => removeFile(file.name)} className="shrink-0">
                   <X className="h-4 w-4" />
                 </Button>
               </li>
