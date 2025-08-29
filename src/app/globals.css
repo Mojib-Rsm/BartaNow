@@ -1,5 +1,4 @@
 
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,7 +11,7 @@
     --card-foreground: 209 28% 17%;
     --popover: 0 0% 100%;
     --popover-foreground: 209 28% 17%;
-    --primary: 211 100% 50%; /* Blue #007BFF */
+    --primary: 217 91% 60%; /* Blue from image */
     --primary-foreground: 0 0% 100%;
     --secondary: 210 16% 93%; /* Light Gray #E9ECEF */
     --secondary-foreground: 209 28% 17%;
@@ -24,25 +23,25 @@
     --destructive-foreground: 210 40% 98%;
     --border: 210 15% 88%; /* Gray #DEE2E6 */
     --input: 210 15% 88%;
-    --ring: 211 100% 50%;
+    --ring: 217 91% 60%;
     --radius: 0.5rem;
 
     /* Chart Colors */
-    --chart-1: 211 100% 50%; /* Blue */
-    --chart-2: 266 70% 56%; /* Purple */
+    --chart-1: 217 91% 60%; /* Blue */
+    --chart-2: 14 100% 59%; /* Orange */
     --chart-3: 181 100% 41%; /* Cyan */
-    --chart-4: 45 100% 51%; /* Yellow */
-    --chart-5: 14 100% 59%; /* Orange */
+    --chart-4: 266 70% 56%; /* Purple */
+    --chart-5: 45 100% 51%; /* Yellow */
     
     /* Sidebar Colors */
-    --sidebar-background: 209 28% 17%; /* Dark Gray */
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 211 100% 50%;
+    --sidebar-background: 212 45% 15%; /* Dark Blue from image */
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 211 15% 45%;
+    --sidebar-accent: 217 91% 60%; /* Active Item color */
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 211 15% 35%;
-    --sidebar-ring: 211 100% 50%;
+    --sidebar-border: 212 45% 25%;
+    --sidebar-ring: 217 91% 60%;
   }
  
   .dark {
@@ -52,7 +51,7 @@
     --card-foreground: 210 20% 98%;
     --popover: 209 28% 17%;
     --popover-foreground: 210 20% 98%;
-    --primary: 211 100% 60%; /* Lighter Blue for contrast */
+    --primary: 217 91% 60%; /* Lighter Blue for contrast */
     --primary-foreground: 209 28% 17%;
     --secondary: 211 15% 25%; /* Muted Dark Gray */
     --secondary-foreground: 210 20% 98%;
@@ -64,24 +63,24 @@
     --destructive-foreground: 210 40% 98%;
     --border: 211 15% 35%;
     --input: 211 15% 35%;
-    --ring: 211 100% 60%;
+    --ring: 217 91% 60%;
 
      /* Chart Colors */
-    --chart-1: 211 100% 60%;
-    --chart-2: 266 70% 66%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 14 100% 69%;
     --chart-3: 181 100% 51%;
-    --chart-4: 45 100% 61%;
-    --chart-5: 14 100% 69%;
+    --chart-4: 266 70% 66%;
+    --chart-5: 45 100% 61%;
 
     /* Sidebar Colors */
-    --sidebar-background: 209 28% 17%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 211 100% 60%;
+    --sidebar-background: 212 45% 15%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 209 28% 17%;
-    --sidebar-accent: 211 15% 45%;
+    --sidebar-accent: 217 91% 60%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 211 15% 35%;
-    --sidebar-ring: 211 100% 60%;
+    --sidebar-border: 212 45% 25%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
  

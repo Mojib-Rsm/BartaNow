@@ -1,10 +1,11 @@
+
 {
   "name": "bartanow",
   "version": "0.1.0",
   "private": true,
   "description": "Welcome to BartaNow, a professional starter project for a modern news website. This project is built with Next.js and Tailwind CSS, demonstrating best practices for server-side rendering (SSR), API design, and component architecture.",
   "scripts": {
-    "dev": "next dev --turbopack --hostname 0.0.0.0",
+    "dev": "next dev --turbopack",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
@@ -42,6 +43,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@tanstack/react-table": "^8.19.3",
+    "@tinymce/tinymce-react": "^5.1.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
@@ -66,6 +68,7 @@
     "rss": "^1.2.2",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
+    "tinymce": "^7.2.1",
     "use-debounce": "^10.0.1",
     "wav": "^1.0.2",
     "web-push": "^3.6.7",
@@ -78,6 +81,7 @@
     "@types/nodemailer": "^6.4.15",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/recharts": "^1.8.29",
     "@types/rss": "^0.0.32",
     "@types/wav": "^1.0.3",
     "@types/web-push": "^3.6.4",
