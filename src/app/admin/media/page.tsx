@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Image as ImageIcon, Video, FileText, Search, Loader2, Trash2, FolderMove } from "lucide-react";
+import { PlusCircle, Image as ImageIcon, Video, FileText, Search, Loader2, Trash2, FolderKanban } from "lucide-react";
 import Link from "next/link";
 import { getAllMedia, getAllUsers, getAllCategories } from "@/lib/api";
 import type { Media, User, Category } from "@/lib/types";
@@ -276,7 +276,7 @@ export default function MediaManagementPage() {
                         <div className="flex items-center gap-4 w-full">
                             <p className="text-sm font-medium">{numSelected} টি আইটেম নির্বাচিত</p>
                             <Button variant="outline" size="sm" onClick={() => setIsAssignCategoryOpen(true)}>
-                                <FolderMove className="mr-2 h-4 w-4" />
+                                <FolderKanban className="mr-2 h-4 w-4" />
                                 ক্যাটাগরি পরিবর্তন
                             </Button>
                              <Button variant="destructive" size="sm" onClick={() => setIsDeleteConfirmOpen(true)}>
