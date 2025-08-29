@@ -12,7 +12,7 @@ type RichTextEditorProps = {
 
 export default function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     const { theme } = useTheme();
-    const apiKey = process.env.NEXT_PUBLIC_TINYMCE_API_KEY || 'no-api-key';
+    const apiKey = "8qc0gdfs2nrsdczkqmlz9zl6e1rmyxg97decp49mgggnakm1";
 
     const handleImageUpload = async (blobInfo: any, success: (url: string) => void, failure: (err: string) => void) => {
         const file = blobInfo.blob();
