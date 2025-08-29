@@ -2,12 +2,9 @@
 'use client';
 
 import React from 'react';
-import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css'; // Import Quill styles
+import { Editor } from '@tinymce/tinymce-react';
 import { useTheme } from 'next-themes';
-
-// Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+import { uploadInArticleImageAction } from '@/app/actions';
 
 type RichTextEditorProps = {
   value: string;
@@ -16,48 +13,43 @@ type RichTextEditorProps = {
 };
 
 export default function RichTextEditor({ value, onEditorChange, placeholder }: RichTextEditorProps) {
-    const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
-    const modules = {
-        toolbar: [
-            [{ 'header': [1, 2, 3, false] }],
-            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-            [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-            ['link', 'image'],
-            ['clean']
+  const handleImageUpload = (blobInfo: any): Promise<string> => {
+    return new Promise(async (resolve, reject) => {
+        const result = await uploadInArticleImageAction(blobInfo.base64(), blobInfo.filename());
+        if ('location' in result) {
+            resolve(result.location);
+        } else {
+            reject(result.error.message);
+        }
+    });
+  };
+
+  return (
+    <Editor
+      apiKey="no-api-key"
+      value={value}
+      onEditorChange={(content) => onEditorChange(content)}
+      init={{
+        height: 500,
+        menubar: false,
+        plugins: [
+          'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+          'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+          'insertdatetime', 'media', 'table', 'help', 'wordcount'
         ],
-    };
-
-    return (
-        <div className={theme === 'dark' ? 'quill-dark' : ''}>
-            <ReactQuill
-                theme="snow"
-                value={value}
-                onChange={onEditorChange}
-                modules={modules}
-                placeholder={placeholder || 'আপনার কনটেন্ট এখানে লিখুন...'}
-                style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}
-            />
-             <style jsx global>{`
-                .quill-dark .ql-toolbar {
-                    background: hsl(var(--card));
-                    border-color: hsl(var(--border));
-                }
-                .quill-dark .ql-container {
-                    background: hsl(var(--card));
-                    border-color: hsl(var(--border));
-                    color: hsl(var(--card-foreground));
-                }
-                .quill-dark .ql-editor {
-                    color: hsl(var(--card-foreground));
-                }
-                .quill-dark .ql-snow .ql-stroke {
-                    stroke: hsl(var(--primary-foreground));
-                }
-                 .quill-dark .ql-snow .ql-picker-label {
-                    color: hsl(var(--primary-foreground));
-                }
-            `}</style>
-        </div>
-    );
+        toolbar: 'undo redo | blocks | ' +
+          'bold italic forecolor | alignleft aligncenter ' +
+          'alignright alignjustify | bullist numlist outdent indent | ' +
+          'removeformat | image media link | help',
+        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+        skin: resolvedTheme === 'dark' ? 'oxide-dark' : 'oxide',
+        content_css: resolvedTheme === 'dark' ? 'dark' : 'default',
+        images_upload_handler: handleImageUpload,
+        automatic_uploads: true,
+        file_picker_types: 'image media',
+      }}
+    />
+  );
 }
