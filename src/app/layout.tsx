@@ -33,7 +33,7 @@ import { usePathname } from 'next/navigation';
 //   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002'),
 // };
 
-function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+function RootContent({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isAdminRoute = pathname.startsWith('/admin');
 
@@ -77,7 +77,7 @@ export default function RootLayout({
             <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
           )}
           
-          <AdminLayoutContent>{children}</AdminLayoutContent>
+          <RootContent>{children}</RootContent>
 
           <PushNotificationManager />
           <Toaster />

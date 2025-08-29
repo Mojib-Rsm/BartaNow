@@ -24,6 +24,7 @@ import {
   Megaphone,
   BarChart,
   Contact,
+  FolderOpen
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
