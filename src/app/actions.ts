@@ -189,6 +189,7 @@ const articleSchema = z.object({
   publishedAt: z.string().optional(),
   slug: z.string().min(3, "Slug কমপক্ষে ৩ অক্ষরের হতে হবে।"),
   tags: z.array(z.string()).optional(),
+  englishTitle: z.string().optional(),
 });
 
 
@@ -210,6 +211,7 @@ export async function updateArticleAction(data: z.infer<typeof articleSchema>) {
             publishedAt: data.publishedAt || new Date().toISOString(),
             slug: data.slug,
             tags: data.tags,
+            englishTitle: data.englishTitle,
         };
 
         if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
@@ -273,6 +275,7 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             authorAvatarUrl: author.avatarUrl || '',
             publishedAt: data.publishedAt || new Date().toISOString(),
             tags: data.tags,
+            englishTitle: data.englishTitle,
         };
 
         const newArticle = await createArticle(newArticleData);
@@ -902,5 +905,17 @@ export async function deleteRssFeedAction(feedId: string) {
         console.error("Delete RSS Feed Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'RSS ফিড ডিলিট করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
+    }
+}
+
+// Action for TinyMCE image uploads
+export async function uploadInArticleImageAction(base64Image: string, fileName: string): Promise<{ location: string } | { error: { message: string } }> {
+    try {
+        const imageUrl = await uploadImage(base64Image, fileName);
+        return { location: imageUrl };
+    } catch (error) {
+        console.error("In-article image upload error:", error);
+        const message = error instanceof Error ? error.message : 'Image upload failed';
+        return { error: { message } };
     }
 }
