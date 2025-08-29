@@ -3,8 +3,6 @@
 
 import Link from 'next/link';
 import {
-  Home,
-  PanelLeft,
   Menu,
 } from 'lucide-react';
 import {
@@ -66,7 +64,8 @@ export default function AdminLayout({
 
   const isActive = (path: string) => {
     if (path === '/admin' && pathname === '/admin') return true;
-    return path !== '/admin' && pathname.startsWith(path);
+    if(path === '/admin') return false; // Avoid matching parent for all children
+    return pathname.startsWith(path);
   };
   
   if (!user) {
@@ -170,5 +169,3 @@ export default function AdminLayout({
     </div>
   );
 }
-
-    

@@ -16,6 +16,7 @@ import {
   Rss,
   Palette,
   UploadCloud,
+  BrainCircuit,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -38,6 +39,12 @@ export const adminMenuConfig: AdminMenuItem[] = [
     path: '/admin/articles',
     label: 'আর্টিকেলসমূহ',
     icon: Newspaper,
+    roles: ['admin', 'editor', 'reporter'],
+  },
+  {
+    path: '/admin/ai-writer',
+    label: 'AI কনটেন্ট রাইটার',
+    icon: BrainCircuit,
     roles: ['admin', 'editor', 'reporter'],
   },
    {

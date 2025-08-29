@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,19 +11,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, Sparkles, BrainCircuit, Lightbulb } from 'lucide-react';
+import { Loader2, Upload, BrainCircuit, Lightbulb } from 'lucide-react';
 import { createArticleAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
-import RichTextEditor from '@/components/rich-text-editor';
+import { Editor } from '@tinymce/tinymce-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { Textarea } from '@/components/ui/textarea';
-import { generateArticleAction, suggestTrendingTopicsAction, rankHeadlineAction } from '@/app/actions';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { suggestTrendingTopicsAction, rankHeadlineAction } from '@/app/actions';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { useDebouncedCallback } from 'use-debounce';
 import type { Article } from '@/lib/types';
@@ -51,27 +50,26 @@ type ArticleCreateFormProps = {
 
 export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
   const [loading, setLoading] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [aiPrompt, setAiPrompt] = useState("");
   const [topicSuggestions, setTopicSuggestions] = useState<string[]>([]);
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [headlineRanking, setHeadlineRanking] = useState<{ score: number; feedback: string } | null>(null);
   const [isRanking, setIsRanking] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
+      title: searchParams.get('title') || '',
       englishTitle: '',
-      content: '',
-      category: 'সর্বশেষ',
+      content: searchParams.get('content') || '',
+      category: (searchParams.get('category') as FormValues['category']) || 'সর্বশেষ',
       imageUrl: '',
       publishedAt: new Date(),
       publishTime: format(new Date(), 'HH:mm'),
-      slug: '',
+      slug: searchParams.get('slug') || '',
       tags: '',
       focusKeywords: '',
       status: 'Draft',
@@ -91,12 +89,12 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
 
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
-      if (name === 'title') {
+      if (name === 'title' && !searchParams.get('title')) { // Only auto-generate if not pre-filled
         debouncedSlugGeneration(value.title || '');
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, debouncedSlugGeneration]);
+  }, [form, debouncedSlugGeneration, searchParams]);
 
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -110,43 +108,6 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleGenerateArticle = async () => {
-    if (!aiPrompt.trim()) {
-        toast({
-            variant: "destructive",
-            title: "প্রম্পট প্রয়োজন",
-            description: "আর্টিকেল তৈরি করতে অনুগ্রহ করে একটি বিষয় বা শিরোনাম লিখুন।",
-        });
-        return;
-    }
-    setAiLoading(true);
-    try {
-        const result = await generateArticleAction(aiPrompt);
-        if (result.success && result.article) {
-            form.setValue('title', result.article.title);
-            form.setValue('content', result.article.content);
-            form.setValue('category', result.article.category as FormValues['category']);
-            toast({
-                title: "সফল",
-                description: "AI আপনার জন্য একটি আর্টিকেল তৈরি করেছে।",
-            });
-        } else {
-            toast({
-                variant: "destructive",
-                title: "ব্যর্থ",
-                description: result.message,
-            });
-        }
-    } catch (error) {
-         toast({
-            variant: "destructive",
-            title: "ত্রুটি",
-            description: "AI আর্টিকেল তৈরি করতে একটি সমস্যা হয়েছে।",
-        });
-    }
-    setAiLoading(false);
   };
   
   const handleSuggestTopics = async () => {
@@ -236,70 +197,11 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
         <CardTitle className="text-2xl font-headline">নতুন আর্টিকেল তৈরি করুন</CardTitle>
         <CardDescription>
           নতুন আর্টিকেলের জন্য সব তথ্য পূরণ করুন। লেখক হিসেবে আপনাকে স্বয়ংক্রিয়ভাবে নির্বাচন করা হবে।
+          <br/>
+          আপনি চাইলে <Link href="/admin/ai-writer" className="text-primary hover:underline">AI কনটেন্ট রাইটার</Link> ব্যবহার করে একটি খসড়া তৈরি করতে পারেন।
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="bg-muted/50">
-                <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <Sparkles className="text-primary" />
-                        এআই আর্টিকেল রাইটার
-                    </CardTitle>
-                    <CardDescription>
-                        এখানে একটি বিষয় বা শিরোনাম লিখে দিন, এআই আপনার জন্য একটি খসড়া আর্টিকেল তৈরি করে দেবে।
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Textarea
-                        placeholder="যেমন: বাংলাদেশের রাজনীতিতে নতুন মেরুকরণ"
-                        value={aiPrompt}
-                        onChange={(e) => setAiPrompt(e.target.value)}
-                        disabled={aiLoading}
-                    />
-                </CardContent>
-                <CardFooter>
-                     <Button type="button" onClick={handleGenerateArticle} disabled={aiLoading}>
-                        {aiLoading ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                তৈরি হচ্ছে...
-                            </>
-                        ) : "AI দিয়ে তৈরি করুন"}
-                     </Button>
-                </CardFooter>
-            </Card>
-             <Card className="bg-muted/50">
-                <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <Lightbulb className="text-amber-500" />
-                        AI টপিক সাজেশন
-                    </CardTitle>
-                    <CardDescription>
-                        ভাইরাল হতে পারে এমন ট্রেন্ডিং টপিক খুঁজে পেতে এখানে ক্লিক করুন।
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {isSuggesting && <Loader2 className="h-5 w-5 animate-spin" />}
-                    {topicSuggestions.length > 0 && (
-                        <ul className="space-y-2 list-disc list-inside text-sm">
-                            {topicSuggestions.map((topic, i) => (
-                                <li key={i} className="hover:text-primary cursor-pointer" onClick={() => setAiPrompt(topic)}>
-                                    {topic}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </CardContent>
-                <CardFooter>
-                     <Button type="button" onClick={handleSuggestTopics} disabled={isSuggesting} variant="outline">
-                        {isSuggesting ? "সাজেশন আসছে..." : "Suggest Topics"}
-                     </Button>
-                </CardFooter>
-            </Card>
-        </div>
-
-
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
           <div className="flex flex-col items-center gap-4">
@@ -359,9 +261,25 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
               name="content"
               control={form.control}
               render={({ field }) => (
-                <RichTextEditor
-                  value={field.value}
-                  onEditorChange={field.onChange}
+                <Editor
+                    apiKey="YOUR_TINYMCE_API_KEY" // Replace with your actual TinyMCE API key
+                    onInit={(evt, editor) => {}}
+                    value={field.value}
+                    onEditorChange={field.onChange}
+                    init={{
+                        height: 500,
+                        menubar: true,
+                        plugins: [
+                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'emoticons'
+                        ],
+                        toolbar: 'undo redo | blocks | ' +
+                            'bold italic forecolor | alignleft aligncenter ' +
+                            'alignright alignjustify | bullist numlist outdent indent | ' +
+                            'removeformat | image media link | emoticons | help',
+                        content_style: 'body { font-family:Noto Sans Bengali,PT Sans,sans-serif; font-size:16px }',
+                    }}
                 />
               )}
             />
