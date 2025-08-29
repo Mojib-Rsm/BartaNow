@@ -15,6 +15,8 @@ import { getWelcomeEmailHtml } from '@/lib/email-templates/welcome-email.js';
 import { getNewsletterHtml } from '@/lib/email-templates/newsletter-email.js';
 import { parseStringPromise } from 'xml2js';
 import { generateArticle } from '@/ai/flows/generate-article';
+import { suggestTrendingTopics } from '@/ai/flows/suggest-trending-topics';
+import { rankHeadline } from '@/ai/flows/rank-headline';
 
 
 export async function seedAction() {
@@ -115,6 +117,28 @@ export async function generateArticleAction(prompt: string) {
     } catch (error) {
         console.error("Generate Article Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'আর্টিকেল তৈরি করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
+export async function suggestTrendingTopicsAction() {
+    try {
+        const result = await suggestTrendingTopics();
+        return { success: true, topics: result.suggestions };
+    } catch (error) {
+        console.error("Suggest Topics Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'ট্রেন্ডিং টপিক আনতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
+    }
+}
+
+export async function rankHeadlineAction(headline: string) {
+    try {
+        const ranking = await rankHeadline({ headline });
+        return { success: true, ranking };
+    } catch (error) {
+        console.error("Rank Headline Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'হেডলাইন রেটিং করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
     }
 }

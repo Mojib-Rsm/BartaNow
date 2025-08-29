@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, Sparkles } from 'lucide-react';
+import { Loader2, Upload, Sparkles, BrainCircuit, Lightbulb } from 'lucide-react';
 import { createArticleAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,11 +22,12 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { Textarea } from '@/components/ui/textarea';
-import { generateArticleAction } from '@/app/actions';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { generateArticleAction, suggestTrendingTopicsAction, rankHeadlineAction } from '@/app/actions';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { useDebouncedCallback } from 'use-debounce';
 import type { Article } from '@/lib/types';
+import { Progress } from '@/components/ui/progress';
 
 const formSchema = z.object({
   title: z.string().min(10, "শিরোনাম কমপক্ষে ১০ অক্ষরের হতে হবে।"),
@@ -53,6 +54,10 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
   const [aiLoading, setAiLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
+  const [topicSuggestions, setTopicSuggestions] = useState<string[]>([]);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [headlineRanking, setHeadlineRanking] = useState<{ score: number; feedback: string } | null>(null);
+  const [isRanking, setIsRanking] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -143,6 +148,54 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
     }
     setAiLoading(false);
   };
+  
+  const handleSuggestTopics = async () => {
+    setIsSuggesting(true);
+    try {
+      const result = await suggestTrendingTopicsAction();
+      if (result.success && result.topics) {
+        setTopicSuggestions(result.topics);
+      } else {
+        toast({ variant: "destructive", title: "ব্যর্থ", description: result.message });
+      }
+    } catch (error) {
+      toast({ variant: "destructive", title: "ত্রুটি", description: "AI টপিক আনতে একটি সমস্যা হয়েছে।" });
+    }
+    setIsSuggesting(false);
+  };
+  
+  const handleRankHeadline = async () => {
+    const title = form.getValues('title');
+    if (!title.trim() || title.length < 10) {
+      toast({
+        variant: "destructive",
+        title: "শিরোনাম প্রয়োজন",
+        description: "রেটিং করার জন্য অনুগ্রহ করে কমপক্ষে ১০ অক্ষরের একটি শিরোনাম লিখুন।",
+      });
+      return;
+    }
+    setIsRanking(true);
+    setHeadlineRanking(null);
+    try {
+      const result = await rankHeadlineAction(title);
+      if (result.success && result.ranking) {
+        setHeadlineRanking(result.ranking);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "ব্যর্থ",
+          description: result.message,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "ত্রুটি",
+        description: "AI রেটিং আনতে একটি সমস্যা হয়েছে।",
+      });
+    }
+    setIsRanking(false);
+  };
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
@@ -186,35 +239,66 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <Card className="bg-muted/50">
-            <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                    <Sparkles className="text-primary" />
-                    এআই আর্টিকেল রাইটার
-                </CardTitle>
-                <CardDescription>
-                    এখানে একটি বিষয় বা শিরোনাম লিখে দিন, এআই আপনার জন্য একটি খসড়া আর্টিকেল তৈরি করে দেবে।
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Textarea
-                    placeholder="যেমন: বাংলাদেশের রাজনীতিতে নতুন মেরুকরণ"
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    disabled={aiLoading}
-                />
-            </CardContent>
-            <CardFooter>
-                 <Button type="button" onClick={handleGenerateArticle} disabled={aiLoading}>
-                    {aiLoading ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            তৈরি হচ্ছে...
-                        </>
-                    ) : "AI দিয়ে তৈরি করুন"}
-                 </Button>
-            </CardFooter>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="bg-muted/50">
+                <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        <Sparkles className="text-primary" />
+                        এআই আর্টিকেল রাইটার
+                    </CardTitle>
+                    <CardDescription>
+                        এখানে একটি বিষয় বা শিরোনাম লিখে দিন, এআই আপনার জন্য একটি খসড়া আর্টিকেল তৈরি করে দেবে।
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Textarea
+                        placeholder="যেমন: বাংলাদেশের রাজনীতিতে নতুন মেরুকরণ"
+                        value={aiPrompt}
+                        onChange={(e) => setAiPrompt(e.target.value)}
+                        disabled={aiLoading}
+                    />
+                </CardContent>
+                <CardFooter>
+                     <Button type="button" onClick={handleGenerateArticle} disabled={aiLoading}>
+                        {aiLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                তৈরি হচ্ছে...
+                            </>
+                        ) : "AI দিয়ে তৈরি করুন"}
+                     </Button>
+                </CardFooter>
+            </Card>
+             <Card className="bg-muted/50">
+                <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        <Lightbulb className="text-amber-500" />
+                        AI টপিক সাজেশন
+                    </CardTitle>
+                    <CardDescription>
+                        ভাইরাল হতে পারে এমন ট্রেন্ডিং টপিক খুঁজে পেতে এখানে ক্লিক করুন।
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {isSuggesting && <Loader2 className="h-5 w-5 animate-spin" />}
+                    {topicSuggestions.length > 0 && (
+                        <ul className="space-y-2 list-disc list-inside text-sm">
+                            {topicSuggestions.map((topic, i) => (
+                                <li key={i} className="hover:text-primary cursor-pointer" onClick={() => setAiPrompt(topic)}>
+                                    {topic}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </CardContent>
+                <CardFooter>
+                     <Button type="button" onClick={handleSuggestTopics} disabled={isSuggesting} variant="outline">
+                        {isSuggesting ? "সাজেশন আসছে..." : "Suggest Topics"}
+                     </Button>
+                </CardFooter>
+            </Card>
+        </div>
+
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
@@ -239,6 +323,21 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
                 {form.formState.errors.title && (
                 <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
                 )}
+                <div className="flex items-start gap-4 mt-2">
+                    <Button type="button" size="sm" variant="outline" onClick={handleRankHeadline} disabled={isRanking}>
+                      <BrainCircuit className="mr-2 h-4 w-4" />
+                      {isRanking ? "রেটিং হচ্ছে..." : "AI দিয়ে রেটিং করুন"}
+                    </Button>
+                    {headlineRanking && (
+                      <div className="w-full">
+                          <div className="flex justify-between items-center mb-1">
+                              <Label className="text-sm font-bold">হেডলাইন স্কোর: {headlineRanking.score}/১০০</Label>
+                          </div>
+                           <Progress value={headlineRanking.score} className="h-2" />
+                          <p className="text-xs text-muted-foreground mt-1">{headlineRanking.feedback}</p>
+                      </div>
+                    )}
+                </div>
             </div>
 
              <div className="grid gap-2">

@@ -10,10 +10,10 @@ import type { Article, User } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload } from 'lucide-react';
-import { updateArticleAction } from '@/app/actions';
+import { Loader2, Upload, Sparkles, BrainCircuit } from 'lucide-react';
+import { rankHeadlineAction, updateArticleAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -24,6 +24,7 @@ import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { getAllUsers } from '@/lib/api';
 import { useAuthorization } from '@/hooks/use-authorization';
+import { Progress } from '@/components/ui/progress';
 
 const formSchema = z.object({
   id: z.string(),
@@ -50,6 +51,8 @@ type ArticleEditFormProps = {
 
 export default function ArticleEditForm({ article }: ArticleEditFormProps) {
   const [loading, setLoading] = useState(false);
+  const [headlineRanking, setHeadlineRanking] = useState<{ score: number; feedback: string } | null>(null);
+  const [isRanking, setIsRanking] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(article.imageUrl);
   const [users, setUsers] = useState<User[]>([]);
   const router = useRouter();
@@ -84,6 +87,40 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
       status: article.status,
     },
   });
+  
+  const handleRankHeadline = async () => {
+    const title = form.getValues('title');
+    if (!title.trim() || title.length < 10) {
+      toast({
+        variant: "destructive",
+        title: "শিরোনাম প্রয়োজন",
+        description: "রেটিং করার জন্য অনুগ্রহ করে কমপক্ষে ১০ অক্ষরের একটি শিরোনাম লিখুন।",
+      });
+      return;
+    }
+    setIsRanking(true);
+    setHeadlineRanking(null);
+    try {
+      const result = await rankHeadlineAction(title);
+      if (result.success && result.ranking) {
+        setHeadlineRanking(result.ranking);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "ব্যর্থ",
+          description: result.message,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "ত্রুটি",
+        description: "AI রেটিং আনতে একটি সমস্যা হয়েছে।",
+      });
+    }
+    setIsRanking(false);
+  };
+
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -173,6 +210,21 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
                 {form.formState.errors.title && (
                 <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
                 )}
+                 <div className="flex items-start gap-4 mt-2">
+                    <Button type="button" size="sm" variant="outline" onClick={handleRankHeadline} disabled={isRanking}>
+                      <BrainCircuit className="mr-2 h-4 w-4" />
+                      {isRanking ? "রেটিং হচ্ছে..." : "AI দিয়ে রেটিং করুন"}
+                    </Button>
+                    {headlineRanking && (
+                      <div className="w-full">
+                          <div className="flex justify-between items-center mb-1">
+                              <Label className="text-sm font-bold">হেডলাইন স্কোর: {headlineRanking.score}/১০০</Label>
+                          </div>
+                           <Progress value={headlineRanking.score} className="h-2" />
+                          <p className="text-xs text-muted-foreground mt-1">{headlineRanking.feedback}</p>
+                      </div>
+                    )}
+                 </div>
             </div>
 
             <div className="grid gap-2">

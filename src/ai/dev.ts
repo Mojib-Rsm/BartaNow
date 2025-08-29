@@ -7,3 +7,5 @@ import '@/ai/flows/summarize-article.ts';
 import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/translate-for-slug.ts';
 import '@/ai/flows/generate-article.ts';
+import '@/ai/flows/suggest-trending-topics.ts';
+import '@/ai/flows/rank-headline.ts';
