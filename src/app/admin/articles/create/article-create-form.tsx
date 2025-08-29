@@ -26,6 +26,8 @@ import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { useDebouncedCallback } from 'use-debounce';
 import type { Article } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
+import CustomEditor from '@/components/custom-editor';
+
 
 const formSchema = z.object({
   title: z.string().min(10, "শিরোনাম কমপক্ষে ১০ অক্ষরের হতে হবে।"),
@@ -257,16 +259,9 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
           <div className="grid gap-2">
             <Label htmlFor="content">কনটেন্ট</Label>
             <Controller
-              name="content"
-              control={form.control}
-              render={({ field }) => (
-                <Textarea
-                    id="content"
-                    {...field}
-                    className="min-h-[400px]"
-                    placeholder="আপনার আর্টিকেলের কনটেন্ট এখানে লিখুন..."
-                />
-              )}
+                name="content"
+                control={form.control}
+                render={({ field }) => <CustomEditor {...field} />}
             />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>
