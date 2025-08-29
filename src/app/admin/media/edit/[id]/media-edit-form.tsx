@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Media, User } from '@/lib/types';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,8 @@ import { Loader2 } from 'lucide-react';
 import { updateMediaAction } from '@/app/actions';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
   id: z.string(),
@@ -24,6 +26,8 @@ const formSchema = z.object({
   description: z.string().optional(),
   width: z.coerce.number().optional(),
   height: z.coerce.number().optional(),
+  cropStrategy: z.enum(['maintain_ratio', 'force']).optional(),
+  hasWatermark: z.boolean().default(false),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -32,23 +36,37 @@ type MediaEditFormProps = {
     media: Media;
 };
 
-function getTransformedUrl(originalUrl: string, width?: number, height?: number): string {
-    if (!width && !height) return originalUrl;
-    
-    // This is a basic transformation for ImageKit. 
-    // It can be expanded with more options like crop, quality etc.
-    const transformParts = [];
+function getTransformedUrl(
+    originalUrl: string,
+    { width, height, cropStrategy, hasWatermark }: { width?: number; height?: number; cropStrategy?: string; hasWatermark?: boolean }
+): string {
+    const transformParts: string[] = [];
+
     if (width) transformParts.push(`w-${width}`);
     if (height) transformParts.push(`h-${height}`);
-    
-    const transformString = transformParts.join(',');
 
-    // Check if URL already has transformations
-    if (originalUrl.includes('?tr=')) {
-        return `${originalUrl},${transformString}`;
+    if (width && height) {
+        if (cropStrategy === 'maintain_ratio') {
+            transformParts.push('c-at_max');
+        } else if (cropStrategy === 'force') {
+            transformParts.push('c-force');
+        }
     }
-    return `${originalUrl}?tr=${transformString}`;
+
+    if (hasWatermark) {
+        // Example text watermark. This can be customized with logos, etc.
+        // l-text: Layer-type text, ie-BartaNow: text encoded, fs-24: font size, co-FFFFFF: color,
+        // pa-10: padding, bg-00000080: background color with opacity, po-south: position south
+        transformParts.push('l-text,ie-BartaNow,fs-24,co-FFFFFF,pa-10,bg-00000080,po-south');
+    }
+    
+    if (transformParts.length === 0) return originalUrl;
+
+    // Remove existing transformations if any
+    const baseUrl = originalUrl.split('?tr=')[0];
+    return `${baseUrl}?tr=${transformParts.join(',')}`;
 }
+
 
 export default function MediaEditForm({ media }: MediaEditFormProps) {
     const [loading, setLoading] = useState(false);
@@ -64,16 +82,19 @@ export default function MediaEditForm({ media }: MediaEditFormProps) {
             description: media.description || '',
             width: media.width || undefined,
             height: media.height || undefined,
+            cropStrategy: media.cropStrategy || 'maintain_ratio',
+            hasWatermark: media.hasWatermark || false,
         },
     });
 
-    const watchedWidth = form.watch('width');
-    const watchedHeight = form.watch('height');
-    const previewUrl = getTransformedUrl(media.url, watchedWidth, watchedHeight);
+    const watchedValues = form.watch();
+    const previewUrl = getTransformedUrl(media.url, watchedValues);
 
     const onSubmit = async (data: FormValues) => {
         setLoading(true);
-        const result = await updateMediaAction({ ...data, url: previewUrl });
+        // The final URL isn't saved, ImageKit generates it on the fly.
+        // We only save the transformation parameters.
+        const result = await updateMediaAction(data);
         setLoading(false);
 
         if (result.success) {
@@ -115,16 +136,57 @@ export default function MediaEditForm({ media }: MediaEditFormProps) {
                             <Label htmlFor="description">বিবরণ</Label>
                             <Textarea id="description" {...form.register('description')} placeholder="মিডিয়া সম্পর্কে বিস্তারিত" />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="width">প্রস্থ (Width)</Label>
-                                <Input id="width" type="number" {...form.register('width')} placeholder="e.g., 800" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="height">উচ্চতা (Height)</Label>
-                                <Input id="height" type="number" {...form.register('height')} placeholder="e.g., 600" />
-                            </div>
-                        </div>
+                        
+                         <Card>
+                            <CardHeader className="p-4">
+                                <CardTitle className="text-base">ট্রান্সফরমেশন</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-4 pt-0 space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="width">প্রস্থ (Width)</Label>
+                                        <Input id="width" type="number" {...form.register('width')} placeholder="e.g., 800" />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="height">উচ্চতা (Height)</Label>
+                                        <Input id="height" type="number" {...form.register('height')} placeholder="e.g., 600" />
+                                    </div>
+                                </div>
+                                <Controller
+                                    control={form.control}
+                                    name="cropStrategy"
+                                    render={({ field }) => (
+                                        <div className="grid gap-2">
+                                            <Label>Crop Strategy</Label>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="ক্রপ স্ট্র্যাটেজি নির্বাচন করুন" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="maintain_ratio">Maintain Ratio</SelectItem>
+                                                    <SelectItem value="force">Force Crop</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    )}
+                                />
+                                 <Controller
+                                    control={form.control}
+                                    name="hasWatermark"
+                                    render={({ field }) => (
+                                        <div className="flex items-center space-x-2 pt-2">
+                                            <Switch
+                                                id="hasWatermark"
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                            <Label htmlFor="hasWatermark">ওয়াটারমার্ক যোগ করুন</Label>
+                                        </div>
+                                     )}
+                                />
+                            </CardContent>
+                        </Card>
+
                          <div className="flex justify-start gap-2 pt-4">
                               <Button type="button" variant="ghost" asChild>
                                   <Link href={`/admin/media/${media.id}`}>বাতিল করুন</Link>

@@ -150,6 +150,8 @@ export interface Media {
     description?: string;
     width?: number;
     height?: number;
+    cropStrategy?: 'maintain_ratio' | 'force';
+    hasWatermark?: boolean;
     duration?: number; // for audio/video
     uploadedAt: string; // ISO date string
     uploadedBy: string; // userId
