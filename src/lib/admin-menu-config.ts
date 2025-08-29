@@ -110,7 +110,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin'],
   },
    {
-    path: '#contact-messages',
+    path: '/admin/contact-messages',
     label: 'Contact Messages',
     icon: Contact,
     roles: ['admin', 'editor'],

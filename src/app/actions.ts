@@ -4,8 +4,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment } from '@/lib/api';
-import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage } from '@/lib/api';
+import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -1165,5 +1165,53 @@ export async function updateMultipleArticlesAction(articleIds: string[], data: z
         console.error("Bulk Update Articles Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'আর্টিকেলগুলো আপডেট করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
+    }
+}
+
+// --- CONTACT MESSAGE ACTIONS ---
+const contactMessageSchema = z.object({
+  name: z.string().min(3, "নাম কমপক্ষে ৩ অক্ষরের হতে হবে।"),
+  email: z.string().email("সঠিক ইমেইল দিন।"),
+  subject: z.string().optional(),
+  message: z.string().min(10, "বার্তা কমপক্ষে ১০ অক্ষরের হতে হবে।"),
+});
+
+export async function createContactMessageAction(data: z.infer<typeof contactMessageSchema>) {
+    const validation = contactMessageSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+
+    try {
+        const newMessage = await createContactMessage(data);
+        if (!newMessage) {
+            return { success: false, message: 'বার্তা পাঠানো যায়নি।' };
+        }
+        return { success: true, message: 'আপনার বার্তা সফলভাবে পাঠানো হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।' };
+    } catch (error) {
+        console.error("Create Contact Message Error:", error);
+        return { success: false, message: 'বার্তা পাঠাতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function updateContactMessageAction(messageId: string, data: Partial<Pick<ContactMessage, 'isRead'>>) {
+    try {
+        await updateContactMessage(messageId, data);
+        revalidatePath('/admin/contact-messages');
+        return { success: true, message: 'বার্তা আপডেট হয়েছে।' };
+    } catch (error) {
+        console.error("Update Contact Message Error:", error);
+        return { success: false, message: 'বার্তা আপডেট করতে সমস্যা হয়েছে।' };
+    }
+}
+
+export async function deleteContactMessageAction(messageId: string) {
+    try {
+        await deleteContactMessage(messageId);
+        revalidatePath('/admin/contact-messages');
+        return { success: true, message: 'বার্তা সফলভাবে ডিলিট করা হয়েছে।' };
+    } catch (error) {
+        console.error("Delete Contact Message Error:", error);
+        return { success: false, message: 'বার্তা ডিলিট করতে সমস্যা হয়েছে।' };
     }
 }

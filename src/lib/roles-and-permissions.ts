@@ -3,7 +3,7 @@
 import type { User, Role, Permission } from './types';
 
 // Define all available permissions in the system
-const allPermissions: Record<Permission, string> = {
+export const allPermissions: Record<Permission, string> = {
     'create_article': 'আর্টিকেল তৈরি করুন',
     'edit_article': 'আর্টিকেল এডিট করুন',
     'delete_article': 'আর্টিকেল ডিলিট করুন',
@@ -42,6 +42,13 @@ const allPermissions: Record<Permission, string> = {
     'delete_rss': 'RSS ফিড ডিলিট করুন',
     
     'login_as_user': 'অন্য ব্যবহারকারী হিসেবে লগইন করুন',
+    'manage_tags': 'ট্যাগ পরিচালনা',
+    'create_tag': 'ট্যাগ তৈরি',
+    'edit_tag': 'ট্যাগ এডিট',
+    'delete_tag': 'ট্যাগ ডিলিট',
+    'view_reports': 'রিপোর্ট দেখা',
+    'view_contact_messages': 'যোগাযোগ বার্তা দেখা',
+    'delete_contact_message': 'যোগাযোগ বার্তা ডিলিট'
 };
 
 
@@ -76,6 +83,8 @@ export const roles: Record<User['role'], Role> = {
       'create_rss',
       'edit_rss',
       'delete_rss',
+      'view_contact_messages',
+      'delete_contact_message',
     ],
   },
   reporter: {

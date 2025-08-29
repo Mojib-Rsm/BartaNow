@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad } from './types';
@@ -488,6 +489,29 @@ async function getMockAllContactMessages(): Promise<ContactMessage[]> {
     return [...mockDb.contactMessages].sort((a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime());
 }
 
+async function createMockContactMessage(data: Omit<ContactMessage, 'id' | 'isRead' | 'receivedAt'>): Promise<ContactMessage> {
+    const newMessage: ContactMessage = {
+        id: `msg-${Date.now()}`,
+        isRead: false,
+        receivedAt: new Date().toISOString(),
+        ...data,
+    };
+    mockDb.contactMessages.unshift(newMessage);
+    return newMessage;
+}
+
+async function updateMockContactMessage(id: string, data: Partial<ContactMessage>): Promise<ContactMessage | undefined> {
+    const msgIndex = mockDb.contactMessages.findIndex(m => m.id === id);
+    if (msgIndex === -1) return undefined;
+    mockDb.contactMessages[msgIndex] = { ...mockDb.contactMessages[msgIndex], ...data };
+    return mockDb.contactMessages[msgIndex];
+}
+
+async function deleteMockContactMessage(id: string): Promise<void> {
+    const index = mockDb.contactMessages.findIndex(m => m.id === id);
+    if (index > -1) mockDb.contactMessages.splice(index, 1);
+}
+
 async function getMockAllAds(): Promise<Ad[]> {
     return [...mockDb.ads];
 }
@@ -974,6 +998,34 @@ async function deleteFirestoreCategory(categoryId: string): Promise<void> {
     await db.collection('categories').doc(categoryId).delete();
 }
 
+async function getFirestoreAllContactMessages(): Promise<ContactMessage[]> {
+    const snapshot = await db.collection('contactMessages').orderBy('receivedAt', 'desc').get();
+    return snapshot.docs.map(doc => doc.data() as ContactMessage);
+}
+
+async function createFirestoreContactMessage(data: Omit<ContactMessage, 'id' | 'isRead' | 'receivedAt'>): Promise<ContactMessage> {
+    const newMessage: ContactMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        isRead: false,
+        receivedAt: new Date().toISOString(),
+        entityType: 'CONTACT_MESSAGE',
+        ...data,
+    };
+    await db.collection('contactMessages').doc(newMessage.id).set(newMessage);
+    return newMessage;
+}
+
+async function updateFirestoreContactMessage(id: string, data: Partial<ContactMessage>): Promise<ContactMessage | undefined> {
+    const msgRef = db.collection('contactMessages').doc(id);
+    await msgRef.update(data);
+    const updatedDoc = await msgRef.get();
+    return updatedDoc.data() as ContactMessage | undefined;
+}
+
+async function deleteFirestoreContactMessage(id: string): Promise<void> {
+    await db.collection('contactMessages').doc(id).delete();
+}
+
 // --- PUBLIC API ---
 
 export async function getArticles(options: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
@@ -1303,8 +1355,22 @@ export async function updateCommentStatus(commentIds: string[], status: Comment[
 
 export async function getAllContactMessages(): Promise<ContactMessage[]> {
     if (!useFirestore || !db) return getMockAllContactMessages();
-    // Firestore implementation would be similar to others
-    return getMockAllContactMessages();
+    return getFirestoreAllContactMessages();
+}
+
+export async function createContactMessage(data: Omit<ContactMessage, 'id' | 'isRead' | 'receivedAt'>): Promise<ContactMessage> {
+    if (!useFirestore || !db) return createMockContactMessage(data);
+    return createFirestoreContactMessage(data);
+}
+
+export async function updateContactMessage(id: string, data: Partial<ContactMessage>): Promise<ContactMessage | undefined> {
+    if (!useFirestore || !db) return updateMockContactMessage(id, data);
+    return updateFirestoreContactMessage(id, data);
+}
+
+export async function deleteContactMessage(id: string): Promise<void> {
+    if (!useFirestore || !db) return deleteMockContactMessage(id);
+    return deleteFirestoreContactMessage(id);
 }
 
 export async function getAllAds(): Promise<Ad[]> {
