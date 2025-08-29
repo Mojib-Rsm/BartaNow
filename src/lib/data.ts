@@ -74,7 +74,7 @@ const authors: Author[] = [
   { id: 'author-3', name: 'আলিয়া চৌধুরী', slug: 'alia-chowdhury', avatarUrl: 'https://i.pravatar.cc/150?u=author-3', bio: 'আলিয়া চৌধুরী পরিবেশ এবং স্বাস্থ্য নিয়ে কাজ করেন। তার গবেষণাধর্মী লেখাগুলো সচেতনতা তৈরিতে সাহায্য করে।' },
 ];
 
-const articlesData: Omit<Article, 'slug'>[] = [
+const articlesData: Omit<Article, 'slug' | 'status'>[] = [
   {
     id: '1',
     title: 'খেলা: বাংলাদেশের দুর্দান্ত জয়ে এশিয়া কাপ শুরু',
@@ -507,6 +507,7 @@ const articlesData: Omit<Article, 'slug'>[] = [
 const articles: Article[] = articlesData.map(article => ({
     ...article,
     slug: generateNonAiSlug(article.title),
+    status: 'Published' // Default status for mock data
 }));
 
 const pages: Page[] = [
