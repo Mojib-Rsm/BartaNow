@@ -48,6 +48,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'Posts',
     icon: Newspaper,
     roles: ['admin', 'editor', 'reporter'],
+    path: '#posts',
     children: [
         { path: '/admin/articles', label: 'All Posts' },
         { path: '/admin/articles/create', label: 'Add New' },
@@ -83,7 +84,8 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'Media / Gallery',
     icon: ImageIcon,
     roles: ['admin', 'editor', 'reporter'],
-     children: [
+    path: '#media-gallery',
+    children: [
         { path: '/admin/media', label: 'Library' },
         { path: '/admin/media/upload', label: 'Add New' },
     ],
