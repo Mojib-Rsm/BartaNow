@@ -1,5 +1,4 @@
 
-
 import {
   LayoutGrid,
   Newspaper,
@@ -22,7 +21,10 @@ import {
   Link,
   MapPin,
   Home,
-  Megaphone
+  Megaphone,
+  BarChart,
+  Contact,
+  HomeIcon
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -120,13 +122,13 @@ export const adminMenuConfig: AdminMenuItem[] = [
    {
     path: '/admin/subscribers',
     label: 'Contact Messages',
-    icon: MessagesSquare,
+    icon: Contact,
     roles: ['admin', 'editor'],
   },
    {
     path: '/admin/appearance',
     label: 'Home Page Manages',
-    icon: Palette,
+    icon: HomeIcon,
     roles: ['admin'],
   },
   {
@@ -138,7 +140,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
    {
     path: '#', // Placeholder
     label: 'Report',
-    icon: BarChartHorizontal,
+    icon: BarChart,
     roles: ['admin'],
   },
    {

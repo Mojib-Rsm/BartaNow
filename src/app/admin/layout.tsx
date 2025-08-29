@@ -97,7 +97,7 @@ const renderNavLinks = (currentPath: string) => {
     });
 };
 
-export default function AdminLayout({
+function AdminLayoutContent({
   children,
 }: {
   children: React.ReactNode;
@@ -236,3 +236,30 @@ export default function AdminLayout({
     </div>
   );
 }
+
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith('/admin');
+
+  // If it's an admin route, render the AdminLayoutContent directly.
+  if (isAdminRoute) {
+    return <AdminLayoutContent>{children}</AdminLayoutContent>;
+  }
+
+  // Otherwise, render the standard public layout (this part will not be used by /admin routes).
+  return (
+      <div className="font-body antialiased bg-background flex flex-col min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+              {children}
+          </main>
+          <Footer />
+      </div>
+  );
+}
+
