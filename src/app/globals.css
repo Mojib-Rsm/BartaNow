@@ -1,5 +1,4 @@
 
-@import 'react-quill/dist/quill.snow.css';
 
 @tailwind base;
 @tailwind components;
@@ -112,44 +111,5 @@
 
   .prose p {
     line-height: 1.8;
-  }
-
-  /* React Quill Editor Styles */
-  .ql-toolbar {
-    @apply rounded-t-lg border-input bg-card;
-  }
-  .ql-container {
-    @apply rounded-b-lg border-input bg-card text-foreground;
-    min-height: 250px;
-  }
-  .ql-editor {
-    @apply text-base;
-  }
-  .ql-snow .ql-stroke {
-    @apply stroke-current text-foreground/70;
-  }
-  .ql-snow .ql-fill {
-      @apply fill-current text-foreground/70;
-  }
-  .ql-snow .ql-picker-label {
-    @apply text-foreground/70;
-  }
-  .dark .ql-toolbar {
-    @apply bg-card border-border;
-  }
-  .dark .ql-container {
-     @apply bg-card border-border text-foreground;
-  }
-   .dark .ql-snow .ql-stroke {
-    @apply text-foreground/80;
-  }
-  .dark .ql-snow .ql-fill {
-      @apply text-foreground/80;
-  }
-  .dark .ql-snow .ql-picker-label {
-    @apply text-foreground/80;
-  }
-   .dark .ql-snow .ql-picker-options {
-    @apply bg-popover border-border;
   }
 }
