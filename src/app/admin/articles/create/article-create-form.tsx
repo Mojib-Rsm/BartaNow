@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Image from 'next/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { format, isFuture } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { Textarea } from '@/components/ui/textarea';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
@@ -66,12 +66,12 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
       content: searchParams.get('content') || '',
       category: (searchParams.get('category') as FormValues['category']) || 'সর্বশেষ',
       imageUrl: '',
-      publishedAt: new Date(),
-      publishTime: format(new Date(), 'HH:mm'),
+      publishedAt: searchParams.get('publishedAt') ? new Date(searchParams.get('publishedAt')!) : new Date(),
+      publishTime: searchParams.get('publishedAt') ? format(new Date(searchParams.get('publishedAt')!), 'HH:mm') : format(new Date(), 'HH:mm'),
       slug: searchParams.get('slug') || '',
       tags: '',
       focusKeywords: '',
-      status: 'Draft',
+      status: (searchParams.get('status') as FormValues['status']) || 'Draft',
     },
   });
 
@@ -173,7 +173,7 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
     const tagArray = data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [];
     const keywordsArray = data.focusKeywords?.split(',').map(kw => kw.trim()).filter(Boolean) || [];
     
-    const status = publishedDate > new Date() && data.status === 'Published' ? 'Scheduled' : data.status;
+    const status = isFuture(publishedDate) && data.status === 'Published' ? 'Scheduled' : data.status;
 
     const finalData = { ...data, tags: tagArray, focusKeywords: keywordsArray, publishedAt: publishedDate.toISOString(), status };
 

@@ -31,7 +31,7 @@ import { useToast } from "@/hooks/use-toast"
 import { deleteArticleAction } from "@/app/actions"
 import { useRouter } from "next/navigation"
 import { useAuthorization } from "@/hooks/use-authorization"
-import { format } from "date-fns"
+import { format, isFuture } from "date-fns"
 import { bn } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 
@@ -111,8 +111,8 @@ const statusVariantMap: { [key: string]: 'default' | 'secondary' | 'destructive'
 const statusColorMap: { [key: string]: string } = {
     Published: 'bg-green-600 hover:bg-green-700',
     Draft: 'bg-gray-500 hover:bg-gray-600',
-    'Pending Review': 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500',
-    Scheduled: 'bg-blue-500 hover:bg-blue-600 border-blue-500',
+    'Pending Review': 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500 text-black',
+    Scheduled: 'bg-amber-500 hover:bg-amber-600 border-amber-500',
 };
 
 
@@ -153,7 +153,7 @@ export const columns: ColumnDef<Article>[] = [
       )
     },
     cell: ({ row }) => {
-        const isScheduled = row.original.status === 'Scheduled';
+        const isScheduled = row.original.status === 'Scheduled' && isFuture(new Date(row.original.publishedAt));
         return (
             <div className="font-medium line-clamp-2">
                 {row.getValue("title")}
@@ -172,12 +172,15 @@ export const columns: ColumnDef<Article>[] = [
     header: "স্ট্যাটাস",
     cell: ({ row }) => {
         const status = row.getValue("status") as string;
+        const isScheduled = status === 'Scheduled' && isFuture(new Date(row.original.publishedAt));
+        const displayStatus = isScheduled ? 'Scheduled' : status;
+
         return (
             <Badge 
-                variant={statusVariantMap[status] || 'outline'}
-                className={cn(statusColorMap[status], 'text-white')}
+                variant={statusVariantMap[displayStatus] || 'outline'}
+                className={cn(statusColorMap[displayStatus], 'text-white')}
             >
-                {status}
+                {displayStatus}
             </Badge>
         )
     },

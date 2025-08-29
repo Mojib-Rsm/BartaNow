@@ -19,6 +19,11 @@ import { useRouter } from 'next/navigation';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useDebouncedCallback } from 'use-debounce';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { bn } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
   prompt: z.string().min(5, { message: 'বিষয়টি কমপক্ষে ৫ অক্ষরের হতে হবে।' }),
@@ -33,6 +38,9 @@ export default function WriterForm() {
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [generatedVariants, setGeneratedVariants] = useState<ArticleVariant[] | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<ArticleVariant | null>(null);
+  const [publishDate, setPublishDate] = useState<Date | undefined>(new Date());
+  const [publishTime, setPublishTime] = useState(format(new Date(), 'HH:mm'));
+  const [status, setStatus] = useState<'Draft' | 'Published'>('Draft');
   const router = useRouter();
 
   const { toast } = useToast();
@@ -90,12 +98,18 @@ export default function WriterForm() {
   const handleCreateArticle = async () => {
     if (!selectedVariant) return;
     const slug = await translateForSlug(selectedVariant.title);
+
+    const finalPublishedAt = publishDate || new Date();
+    const [hours, minutes] = publishTime.split(':').map(Number);
+    finalPublishedAt.setHours(hours, minutes);
     
     const params = new URLSearchParams({
         title: selectedVariant.title,
         content: selectedVariant.content,
         category: selectedVariant.category,
         slug: slug,
+        status: status,
+        publishedAt: finalPublishedAt.toISOString()
     });
     router.push(`/admin/articles/create?${params.toString()}`);
   }
@@ -183,7 +197,7 @@ export default function WriterForm() {
                         {selectedVariant && <Badge variant="secondary">{selectedVariant.category}</Badge>}
                     </CardTitle>
                     <CardDescription>
-                        AI আপনার জন্য কয়েকটি সংস্করণ তৈরি করেছে। আপনার পছন্দেরটি বেছে নিন।
+                        AI আপনার জন্য কয়েকটি সংস্করণ তৈরি করেছে। আপনার পছন্দেরটি বেছে নিন এবং প্রকাশের জন্য স্ট্যাটাস ও সময় নির্ধারণ করুন।
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -209,11 +223,53 @@ export default function WriterForm() {
                              </TabsContent>
                          ))}
                     </Tabs>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+                        <div className="grid gap-2">
+                           <Label>স্ট্যাটাস</Label>
+                            <Select value={status} onValueChange={(value) => setStatus(value as any)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="স্ট্যাটাস নির্বাচন করুন" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Draft">Draft</SelectItem>
+                                    <SelectItem value="Published">Published</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                         <div className="grid gap-2">
+                            <Label>প্রকাশের তারিখ</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                        {publishDate ? format(publishDate, 'PPP', { locale: bn }) : <span>একটি তারিখ নির্বাচন করুন</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={publishDate}
+                                        onSelect={setPublishDate}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                         <div className="grid gap-2">
+                            <Label htmlFor="publishTime">প্রকাশের সময়</Label>
+                            <Input
+                                id="publishTime"
+                                type="time"
+                                value={publishTime}
+                                onChange={(e) => setPublishTime(e.target.value)}
+                            />
+                        </div>
+                    </div>
                 </CardContent>
                 <CardFooter>
                     <Button onClick={handleCreateArticle} disabled={!selectedVariant}>
                         <FileEdit className="mr-2 h-4 w-4" />
-                        এই ভ্যারিয়েন্টটি ব্যবহার করুন
+                        এই ভ্যারিয়েন্টটি ব্যবহার করে আর্টিকেল তৈরি করুন
                     </Button>
                 </CardFooter>
             </Card>
@@ -221,4 +277,3 @@ export default function WriterForm() {
     </div>
   );
 }
-

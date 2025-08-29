@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Image from 'next/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { format, isFuture } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { getAllUsers } from '@/lib/api';
 import { useAuthorization } from '@/hooks/use-authorization';
@@ -167,7 +167,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
     const tagArray = data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [];
     const keywordsArray = data.focusKeywords?.split(',').map(kw => kw.trim()).filter(Boolean) || [];
 
-    const status = publishedDate > new Date() && data.status === 'Published' ? 'Scheduled' : data.status;
+    const status = isFuture(publishedDate) && data.status === 'Published' ? 'Scheduled' : data.status;
 
     const selectedAuthor = users.find(u => u.id === data.authorId);
 

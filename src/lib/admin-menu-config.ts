@@ -1,5 +1,4 @@
 
-
 import {
   LayoutGrid,
   Newspaper,
@@ -65,7 +64,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
   },
    {
     path: '/admin/ai-writer',
-    label: 'Bulk Post',
+    label: 'AI Writer',
     icon: BrainCircuit,
     roles: ['admin', 'editor', 'reporter'],
   },
