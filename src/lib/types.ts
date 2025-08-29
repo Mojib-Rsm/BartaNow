@@ -8,7 +8,10 @@ export type Permission =
   | 'view_users' | 'create_user' | 'edit_user_profile' | 'delete_user' | 'change_user_role' | 'block_user'
   | 'manage_media' | 'upload_media' | 'delete_media'
   | 'manage_settings' | 'manage_ads' | 'send_notification' | 'manage_newsletter' | 'manage_rss' | 'create_rss' | 'edit_rss' | 'delete_rss'
-  | 'login_as_user';
+  | 'login_as_user'
+  | 'manage_tags' | 'create_tag' | 'edit_tag' | 'delete_tag'
+  | 'view_reports' | 'view_contact_messages' | 'delete_contact_message';
+
 
 export interface Role {
   name: string;
@@ -71,6 +74,12 @@ export interface Category {
   entityType?: 'CATEGORY';
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+  slug: string;
+  entityType?: 'TAG';
+}
 
 export interface Article {
   id: string;
@@ -92,7 +101,7 @@ export interface Article {
   sponsored?: boolean;
   factCheck?: FactCheck;
   location?: string; // e.g., 'ঢাকা', 'চট্টগ্রাম'
-  tags?: string[];
+  tags?: string[]; // Array of tag names or tag IDs
   englishTitle?: string;
   focusKeywords?: string[];
   status: 'Published' | 'Draft' | 'Pending Review' | 'Scheduled';
@@ -161,6 +170,18 @@ export interface Subscriber {
   subscribedAt: string; // ISO date string
   entityType?: 'SUBSCRIBER';
 }
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  isRead: boolean;
+  receivedAt: string; // ISO date string
+  entityType?: 'CONTACT_MESSAGE';
+}
+
 
 export interface MenuItem {
   id: string;

@@ -2,7 +2,7 @@
 
 'use server';
 
-import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed, Category } from './types';
+import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad } from './types';
 import admin from 'firebase-admin';
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
@@ -389,6 +389,18 @@ async function deleteMockCategory(categoryId: string): Promise<void> {
     if (index > -1) mockDb.categories.splice(index, 1);
 }
 
+async function getMockAllTags(): Promise<Tag[]> {
+    return [...mockDb.tags];
+}
+
+async function getMockAllContactMessages(): Promise<ContactMessage[]> {
+    return [...mockDb.contactMessages].sort((a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime());
+}
+
+async function getMockAllAds(): Promise<Ad[]> {
+    return [...mockDb.ads];
+}
+
 // --- FIRESTORE IMPLEMENTATIONS ---
 
 async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date, location }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
@@ -766,7 +778,6 @@ async function deleteFirestoreCategory(categoryId: string): Promise<void> {
     await db.collection('categories').doc(categoryId).delete();
 }
 
-
 // --- PUBLIC API ---
 
 export async function getArticles(options: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
@@ -988,6 +999,14 @@ export async function deleteCategory(categoryId: string): Promise<void> {
 
 // --- NON-CRUD APIs ---
 
+export async function getAllTags(): Promise<Tag[]> {
+    // For now, tags are derived from articles and not a separate collection
+    if (!useFirestore || !db) return getMockAllTags();
+    // Firestore implementation would be more complex, maybe using an aggregation query or a separate collection
+    return getMockAllTags();
+}
+
+
 export async function getMemeNews(): Promise<MemeNews[]> {
   return mockDb.memeNews;
 }
@@ -1020,4 +1039,16 @@ export async function updateComment(commentId: string, data: Partial<Comment>): 
 export async function deleteComment(commentId: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockComment(commentId);
     return deleteFirestoreComment(commentId);
+}
+
+export async function getAllContactMessages(): Promise<ContactMessage[]> {
+    if (!useFirestore || !db) return getMockAllContactMessages();
+    // Firestore implementation would be similar to others
+    return getMockAllContactMessages();
+}
+
+export async function getAllAds(): Promise<Ad[]> {
+    if (!useFirestore || !db) return getMockAllAds();
+     // Firestore implementation would be similar to others
+    return getMockAllAds();
 }

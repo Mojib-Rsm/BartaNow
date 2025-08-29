@@ -1,4 +1,5 @@
 
+
 import {
   LayoutGrid,
   Newspaper,
@@ -47,7 +48,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
   },
   {
     label: 'Category',
-    icon: Tags,
+    icon: FolderOpen,
     roles: ['admin', 'editor', 'reporter'],
     children: [
         { path: '/admin/articles/categories', label: 'All Categories' },

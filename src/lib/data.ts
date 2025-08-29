@@ -1,6 +1,6 @@
 
 
-import type { Article, Author, Poll, MemeNews, User, Comment, Media, Notification, Page, MenuItem, Subscriber, RssFeed, Category } from './types';
+import type { Article, Author, Poll, MemeNews, User, Comment, Media, Notification, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad } from './types';
 
 // Helper to generate a non-AI slug from a title for mock data
 const generateNonAiSlug = (title: string) => {
@@ -94,6 +94,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     badge: 'জনপ্রিয়',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     location: 'চট্টগ্রাম',
+    tags: ['ক্রিকেট', 'বাংলাদেশ', 'এশিয়া কাপ'],
   },
   {
     id: '2',
@@ -114,6 +115,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     editorsPick: true,
     sponsored: true,
     location: 'ঢাকা',
+    tags: ['5G', 'প্রযুক্তি', 'ইন্টারনেট'],
   },
   {
     id: '3',
@@ -131,6 +133,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     publishedAt: '2024-07-20T09:00:00Z',
     aiSummary: 'ডলারের দাম বৃদ্ধিতে আমদানি খরচ বেড়েছে, যা সাধারণ মানুষের জীবনযাত্রায় প্রভাব ফেলছে। পরিস্থিতি নিয়ন্ত্রণে পদক্ষেপ নেওয়া হচ্ছে।',
     badge: 'জনপ্রিয়',
+    tags: ['ডলার', 'অর্থনীতি', 'বাজার'],
   },
   {
     id: '4',
@@ -150,6 +153,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     badge: 'জনপ্রিয়',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     location: 'ঢাকা',
+    tags: ['বিএনপি', 'রাজনীতি', 'আন্দোলন'],
   },
   {
     id: '5',
@@ -166,7 +170,8 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-18T22:00:00Z',
     aiSummary: 'ঈদে দর্শকদের জন্য পাঁচটি নতুন বাংলা চলচ্চিত্র মুক্তি পাচ্ছে, যেগুলোতে বিভিন্ন ঘরানার গল্প ও জনপ্রিয় তারকারা রয়েছেন।',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    tags: ['ঈদ', 'সিনেমা', 'বিনোদন'],
   },
   {
     id: '6',
@@ -184,6 +189,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     publishedAt: '2024-07-17T18:00:00Z',
     aiSummary: 'নাসা একটি উন্নত স্পেস টেলিস্কোপ উৎক্ষেপণ করেছে যা মহাবিশ্বের রহস্য উন্মোচন করতে এবং দূরবর্তী গ্যালাক্সির ছবি তুলতে সাহায্য করবে।',
     badge: 'জনপ্রিয়',
+    tags: ['নাসা', 'মহাকাশ', 'বিজ্ঞান'],
   },
   {
     id: '7',
@@ -202,6 +208,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     aiSummary: 'ঢাকার যানজট নিরসনে সরকারি উদ্যোগের পাশাপাশি নাগরিকদের সচেতনতা, যেমন ব্যক্তিগত গাড়ির ব্যবহার কমানো এবং ট্রাফিক আইন মেনে চলা জরুরি।',
     editorsPick: true,
     location: 'ঢাকা',
+    tags: ['যানজট', 'ঢাকা', 'মতামত'],
   },
   {
     id: '8',
@@ -220,6 +227,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     aiSummary: 'ডেঙ্গু প্রতিরোধে এডিস মশার বংশবিস্তার রোধ করতে চারপাশ পরিষ্কার রাখা এবং জ্বর হলে দ্রুত চিকিৎসকের পরামর্শ নেওয়া প্রয়োজন।',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     location: 'ঢাকা',
+    tags: ['ডেঙ্গু', 'স্বাস্থ্য', 'সচেতনতা'],
   },
    {
     id: '9',
@@ -236,6 +244,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
     publishedAt: '2024-07-21T09:15:00Z',
     aiSummary: 'নতুন শিক্ষানীতিতে মুখস্থবিদ্যার পরিবর্তে বিশ্লেষণধর্মী শিক্ষার উপর জোর দেওয়া হচ্ছে, যা শিক্ষার্থীদের ভবিষ্যতের জন্য প্রস্তুত করবে।',
+    tags: ['শিক্ষা', 'শিক্ষানীতি', 'সরকার'],
   },
   {
     id: '10',
@@ -255,6 +264,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     editorsPick: true,
     location: 'খুলনা',
+    tags: ['বাঘ', 'সুন্দরবন', 'পরিবেশ'],
   },
   {
     id: '11',
@@ -273,6 +283,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     aiSummary: 'জাতীয় নির্বাচন ২০২৪ ঘিরে রাজনৈতিক দলগুলো প্রস্তুতি নিচ্ছে এবং নির্বাচন কমিশন একটি সুষ্ঠু নির্বাচনের আশ্বাস দিচ্ছে।',
     badge: 'জনপ্রিয়',
     editorsPick: true,
+    tags: ['নির্বাচন', 'রাজনীতি', 'বিশেষ'],
   },
   {
     id: '12',
@@ -288,7 +299,8 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     authorName: 'রহিম শেখ',
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-24T10:00:00Z',
-    aiSummary: 'নতুন ওয়েব সিরিজ \'রহস্যের জাল\'-এ অনবদ্য অভিনয় করে প্রশংসা কুড়াচ্ছেন সাবিলা নূর, সিরিজটি মুক্তির পরই ব্যাপক জনপ্রিয়তা পেয়েছে।'
+    aiSummary: 'নতুন ওয়েব সিরিজ \'রহস্যের জাল\'-এ অনবদ্য অভিনয় করে প্রশংসা কুড়াচ্ছেন সাবিলা নূর, সিরিজটি মুক্তির পরই ব্যাপক জনপ্রিয়তা পেয়েছে।',
+    tags: ['ওয়েব সিরিজ', 'বিনোদন', 'অভিনেত্রী'],
   },
   {
     id: '13',
@@ -306,6 +318,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     publishedAt: '2024-07-24T18:00:00Z',
     aiSummary: 'বাংলাদেশ প্রিমিয়ার লিগের উত্তেজনাপূর্ণ ম্যাচে আবাহনী ২-১ গোলে মোহামেডানকে হারিয়ে পয়েন্ট টেবিলের শীর্ষে উঠে এসেছে।',
     location: 'ঢাকা',
+    tags: ['ফুটবল', 'আবাহনী', 'বিপিএল'],
   },
   {
     id: '14',
@@ -323,6 +336,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     publishedAt: '2024-07-25T11:00:00Z',
     aiSummary: 'ঢাকা উত্তর সিটি কর্পোরেশনের উপ-নির্বাচনের তফসিল ঘোষণা করা হয়েছে, যা আগামী মাসে অনুষ্ঠিত হবে। দলগুলো প্রার্থী চূড়ান্ত করতে ব্যস্ত।',
     location: 'ঢাকা',
+    tags: ['নির্বাচন', 'সিটি কর্পোরেশন', 'ঢাকা'],
   },
   {
     id: '15',
@@ -338,7 +352,8 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     authorName: 'রহিম শেখ',
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-25T15:00:00Z',
-    aiSummary: 'সাকিব আল হাসান ১০,০০০ রান ও ৫০০ উইকেটের ডাবল অর্জনের দ্বারপ্রান্তে, যা তাকে আন্তর্জাতিক ক্রিকেটে এক বিরল সম্মান এনে দেবে।'
+    aiSummary: 'সাকিব আল হাসান ১০,০০০ রান ও ৫০০ উইকেটের ডাবল অর্জনের দ্বারপ্রান্তে, যা তাকে আন্তর্জাতিক ক্রিকেটে এক বিরল সম্মান এনে দেবে।',
+    tags: ['সাকিব আল হাসান', 'ক্রিকেট', 'রেকর্ড'],
   },
   {
     id: '16',
@@ -354,7 +369,8 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     authorName: 'রহিম শেখ',
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-2',
     publishedAt: '2024-07-26T12:00:00Z',
-    aiSummary: 'শাকিব খানের নতুন অ্যাকশন-থ্রিলার সিনেমা \'অগ্নিপথ\'-এর শুটিং শুরু হয়েছে, যা পরিচালনা করছেন রায়হান রাফি এবং আগামী বছর মুক্তি পাবে।'
+    aiSummary: 'শাকিব খানের নতুন অ্যাকশন-থ্রিলার সিনেমা \'অগ্নিপথ\'-এর শুটিং শুরু হয়েছে, যা পরিচালনা করছেন রায়হান রাফি এবং আগামী বছর মুক্তি পাবে।',
+    tags: ['শাকিব খান', 'সিনেমা', 'ঢালিউড'],
   },
   {
     id: '17',
@@ -370,7 +386,8 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     authorName: 'জান্নাতুল ফেরদৌস',
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-1',
     publishedAt: '2024-07-26T17:30:00Z',
-    aiSummary: 'জাতীয় সংসদের বাজেট অধিবেশন শুরু হয়েছে, যেখানে গুরুত্বপূর্ণ বিল উত্থাপন এবং বিরোধী দলের সমালোচনার মধ্য দিয়ে কার্যক্রম চলছে।'
+    aiSummary: 'জাতীয় সংসদের বাজেট অধিবেশন শুরু হয়েছে, যেখানে গুরুত্বপূর্ণ বিল উত্থাপন এবং বিরোধী দলের সমালোচনার মধ্য দিয়ে কার্যক্রম চলছে।',
+    tags: ['সংসদ', 'বাজেট', 'রাজনীতি'],
   },
   {
     id: '18',
@@ -388,6 +405,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     publishedAt: '2024-07-27T09:00:00Z',
     aiSummary: 'সরকার \'এক শিক্ষার্থী, এক ল্যাপটপ\' প্রকল্পের দ্বিতীয় পর্যায় শুরু করেছে, যার মাধ্যমে মেধাবী বিশ্ববিদ্যালয় শিক্ষার্থীদের বিনামূল্যে ল্যাপটপ দেওয়া হবে।',
     sponsored: true,
+    tags: ['ল্যাপটপ', 'শিক্ষা', 'সরকার'],
   },
   {
     id: '19',
@@ -409,7 +427,8 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
       statement: "পদ্মা সেতুর ফলে জিডিপি প্রবৃদ্ধি ১.২৩% বৃদ্ধি পেয়েছে।",
       verdict: 'সত্য',
       source: { name: "অর্থনীতি গবেষণা কেন্দ্র", url: "#" }
-    }
+    },
+    tags: ['পদ্মা সেতু', 'উন্নয়ন', 'জাতীয়'],
   },
   {
     id: '20',
@@ -428,6 +447,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     aiSummary: 'ঢাকার যানজট কমাতে মেট্রোরেলের জনপ্রিয়তা বাড়ছে। এটি সময় ও অর্থ সাশ্রয়ী হওয়ায় জনগণ এর ব্যবহারে cada vez más আগ্রহী হচ্ছে।',
     badge: 'জনপ্রিয়',
     location: 'ঢাকা',
+    tags: ['মেট্রোরেল', 'যানজট', 'ঢাকা'],
   },
   {
     id: '21',
@@ -443,7 +463,8 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     authorName: 'আলিয়া চৌধুরী',
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-3',
     publishedAt: '2025-03-01T10:00:00Z',
-    aiSummary: 'রমজান মাস মুসলিমদের জন্য আত্মশুদ্ধি, ধৈর্য ও সংযমের মাস। এই মাসে ইবাদতের মাধ্যমে আধ্যাত্মিক উন্নতি লাভ করা হয়।'
+    aiSummary: 'রমজান মাস মুসলিমদের জন্য আত্মশুদ্ধি, ধৈর্য ও সংযমের মাস। এই মাসে ইবাদতের মাধ্যমে আধ্যাত্মিক উন্নতি লাভ করা হয়।',
+    tags: ['রমজান', 'ইসলাম', 'ইবাদত'],
   },
   {
     id: '22',
@@ -459,7 +480,8 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     authorName: 'আলিয়া চৌধুরী',
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=author-3',
     publishedAt: '2025-03-10T12:00:00Z',
-    aiSummary: 'যাকাত ইসলামের একটি গুরুত্বপূর্ণ স্তম্ভ যা সমাজে অর্থনৈতিক ভারসাম্য রক্ষা করে এবং দারিদ্র্য বিমোচনে সহায়তা করে।'
+    aiSummary: 'যাকাত ইসলামের একটি গুরুত্বপূর্ণ স্তম্ভ যা সমাজে অর্থনৈতিক ভারসাম্য রক্ষা করে এবং দারিদ্র্য বিমোচনে সহায়তা করে।',
+    tags: ['যাকাত', 'ইসলাম', 'অর্থনীতি'],
   },
   {
     id: '23',
@@ -480,7 +502,8 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
       statement: "একজন বাংলাদেশী নাগরিক চাঁদে এক একর জমি কিনেছেন।",
       verdict: 'ভুয়া',
       source: { name: "আন্তর্জাতিক মহাকাশ আইন", url: "#" }
-    }
+    },
+    tags: ['তথ্য যাচাই', 'গুজব', 'চাঁদ'],
   },
   {
     id: '24',
@@ -501,7 +524,8 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
       statement: "আনারসের সাথে দুধ খেলে বিষক্রিয়া হয়ে মানুষের মৃত্যু হয়।",
       verdict: 'ভুয়া',
       source: { name: "পুষ্টি ও খাদ্যবিজ্ঞান ইনস্টিটিউট", url: "#" }
-    }
+    },
+    tags: ['তথ্য যাচাই', 'গুজব', 'স্বাস্থ্য'],
   }
 ];
 
@@ -519,6 +543,14 @@ const categories: Category[] = [
     name: name,
     slug: generateNonAiSlug(name),
     description: `${name} বিষয়ক সর্বশেষ খবর এবং আপডেট।`
+}));
+
+const tags: Tag[] = [
+    ...new Set(articles.flatMap(a => a.tags || []))
+].map((name, index) => ({
+    id: `tag-${index + 1}`,
+    name: name,
+    slug: generateNonAiSlug(name),
 }));
 
 
@@ -719,6 +751,58 @@ const menuItems: MenuItem[] = [
 
 const subscribers: Subscriber[] = [];
 
+const contactMessages: ContactMessage[] = [
+    {
+        id: 'msg-1',
+        name: 'সোহেল রানা',
+        email: 'sohel@example.com',
+        subject: 'বিজ্ঞাপন বিষয়ে',
+        message: 'আমি আপনাদের ওয়েবসাইটে বিজ্ঞাপন দিতে আগ্রহী। বিস্তারিত জানতে চাই।',
+        isRead: false,
+        receivedAt: '2024-07-29T11:00:00Z',
+    },
+    {
+        id: 'msg-2',
+        name: 'ফারজানা হক',
+        email: 'farzana@example.com',
+        subject: 'একটি খবরের ভুল সংশোধন',
+        message: 'আপনাদের প্রকাশিত একটি খবরের তথ্যে কিছুটা গরমিল রয়েছে। আশা করি দ্রুত সংশোধন করবেন।',
+        isRead: true,
+        receivedAt: '2024-07-28T15:30:00Z',
+    }
+];
+
+const ads: Ad[] = [
+    {
+        id: 'ad-1',
+        name: 'Header Banner Ad',
+        type: 'banner',
+        imageUrl: 'https://picsum.photos/seed/ad1/728/90',
+        targetUrl: '#',
+        placement: 'header',
+        isActive: true,
+    },
+    {
+        id: 'ad-2',
+        name: 'Sidebar Ad',
+        type: 'sidebar',
+        imageUrl: 'https://picsum.photos/seed/ad2/300/250',
+        targetUrl: '#',
+        placement: 'sidebar_top',
+        isActive: true,
+    },
+    {
+        id: 'ad-3',
+        name: 'In-Article Ad',
+        type: 'in-article',
+        imageUrl: 'https://picsum.photos/seed/ad3/300/250',
+        targetUrl: '#',
+        placement: 'after_3rd_paragraph',
+        isActive: true,
+    }
+];
+
+
 const rssFeeds: RssFeed[] = [
   {
     id: 'prothom-alo',
@@ -760,6 +844,7 @@ export const mockDb = {
   authors,
   articles,
   categories,
+  tags,
   pages,
   polls,
   memeNews,
@@ -768,5 +853,7 @@ export const mockDb = {
   notifications,
   menuItems,
   subscribers,
+  contactMessages,
+  ads,
   rssFeeds,
 };
