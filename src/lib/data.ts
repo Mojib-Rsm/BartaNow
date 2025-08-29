@@ -749,7 +749,11 @@ const menuItems: MenuItem[] = [
     { id: '11', name: 'মিম নিউজ', href: '/category/মিম-নিউজ', order: 11, children: [] },
 ];
 
-const subscribers: Subscriber[] = [];
+const subscribers: Subscriber[] = [
+    { id: 'sub-1', email: 'subscriber1@example.com', isSubscribed: true, subscribedAt: '2024-07-01T00:00:00Z' },
+    { id: 'sub-2', email: 'subscriber2@example.com', isSubscribed: true, subscribedAt: '2024-07-05T00:00:00Z' },
+    { id: 'sub-3', email: 'subscriber3@example.com', isSubscribed: false, subscribedAt: '2024-07-10T00:00:00Z' },
+];
 
 const contactMessages: ContactMessage[] = [
     {
