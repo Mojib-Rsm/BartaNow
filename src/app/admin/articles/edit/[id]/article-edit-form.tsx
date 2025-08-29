@@ -1,12 +1,12 @@
 
 'use client';
 
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Article } from '@/lib/types';
+import type { Article, User } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,6 +22,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
+import { getAllUsers } from '@/lib/api';
+import { useAuthorization } from '@/hooks/use-authorization';
 
 const formSchema = z.object({
   id: z.string(),
@@ -34,6 +36,8 @@ const formSchema = z.object({
   publishTime: z.string().optional(),
   slug: z.string().min(3, "Slug কমপক্ষে ৩ অক্ষরের হতে হবে।"),
   tags: z.string().optional(),
+  authorId: z.string(),
+  status: z.enum(['Draft', 'Pending Review', 'Published', 'Scheduled']),
 });
 
 
@@ -46,8 +50,20 @@ type ArticleEditFormProps = {
 export default function ArticleEditForm({ article }: ArticleEditFormProps) {
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(article.imageUrl);
+  const [users, setUsers] = useState<User[]>([]);
   const router = useRouter();
   const { toast } = useToast();
+  const { hasPermission } = useAuthorization();
+  
+  useEffect(() => {
+    async function fetchUsers() {
+        if(hasPermission('edit_article')) { // Assuming only users who can edit can change author
+            const allUsers = await getAllUsers();
+            setUsers(allUsers.filter(u => u.role === 'admin' || u.role === 'editor' || u.role === 'reporter'));
+        }
+    }
+    fetchUsers();
+  }, [hasPermission]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -62,6 +78,8 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
       publishTime: article.publishedAt ? format(new Date(article.publishedAt), 'HH:mm') : format(new Date(), 'HH:mm'),
       slug: article.slug || '',
       tags: article.tags?.join(', ') || '',
+      authorId: article.authorId,
+      status: article.status,
     },
   });
 
@@ -87,9 +105,20 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
 
     const tagArray = data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [];
 
-    const finalData = { ...data, tags: tagArray, publishedAt: publishedDate.toISOString() };
+    const status = publishedDate > new Date() && data.status === 'Published' ? 'Scheduled' : data.status;
 
-    const result = await updateArticleAction(finalData);
+    const selectedAuthor = users.find(u => u.id === data.authorId);
+
+    const finalData: Partial<Article> = { 
+        ...data, 
+        tags: tagArray, 
+        publishedAt: publishedDate.toISOString(),
+        status,
+        authorName: selectedAuthor?.name,
+        authorAvatarUrl: selectedAuthor?.avatarUrl
+    };
+
+    const result = await updateArticleAction(finalData as any);
     setLoading(false);
 
     if (result.success) {
@@ -113,7 +142,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
       <CardHeader>
         <CardTitle className="text-2xl font-headline">আর্টিকেল এডিট করুন</CardTitle>
         <CardDescription>
-          আর্টিকেলের তথ্য পরিবর্তন করুন। লেখকের তথ্য পরিবর্তন করা যাবে না।
+          আর্টিকেলের তথ্য পরিবর্তন করুন।
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -191,16 +220,60 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
               )}
             </div>
           </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
-            <Input id="tags" {...form.register('tags')} placeholder="যেমন: নির্বাচন, বাংলাদেশ, ক্রিকেট" />
+            
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div className="grid gap-2">
+                <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
+                <Input id="tags" {...form.register('tags')} placeholder="যেমন: নির্বাচন, বাংলাদেশ, ক্রিকেট" />
+             </div>
+             <div className="grid gap-2">
+                <Label htmlFor="status">স্ট্যাটাস</Label>
+                 <Controller
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!hasPermission('publish_article')}>
+                            <SelectTrigger id="status">
+                                <SelectValue placeholder="স্ট্যাটাস নির্বাচন করুন" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Draft">Draft</SelectItem>
+                                <SelectItem value="Pending Review">Pending Review</SelectItem>
+                                <SelectItem value="Published">Published</SelectItem>
+                                <SelectItem value="Scheduled">Scheduled</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
+                />
+            </div>
           </div>
+          
+           {hasPermission('edit_article') && users.length > 0 && (
+             <div className="grid gap-2">
+                <Label htmlFor="authorId">লেখক</Label>
+                 <Controller
+                    control={form.control}
+                    name="authorId"
+                    render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <SelectTrigger id="authorId">
+                                <SelectValue placeholder="লেখক নির্বাচন করুন" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {users.map(user => (
+                                    <SelectItem key={user.id} value={user.id}>{user.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
+                />
+            </div>
+          )}
           
            <Card className="bg-muted/30">
                 <CardHeader>
                     <CardTitle className="text-base">পোস্ট শিডিউল</CardTitle>
-                    <CardDescription>পোস্টটি কখন প্রকাশিত হবে তা নির্ধারণ করুন।</CardDescription>
+                    <CardDescription>পোস্টটি কখন প্রকাশিত হবে তা নির্ধারণ করুন। Published স্ট্যাটাস সিলেক্ট করলে এই সময়ে পোস্টটি লাইভ হবে।</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="grid gap-2">

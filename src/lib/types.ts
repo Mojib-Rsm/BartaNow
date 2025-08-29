@@ -84,6 +84,8 @@ export interface Article {
   factCheck?: FactCheck;
   location?: string; // e.g., 'ঢাকা', 'চট্টগ্রাম'
   tags?: string[];
+  englishTitle?: string;
+  status: 'Published' | 'Draft' | 'Pending Review' | 'Scheduled';
 }
 
 export interface Page {

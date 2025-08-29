@@ -33,6 +33,7 @@ import { useRouter } from "next/navigation"
 import { useAuthorization } from "@/hooks/use-authorization"
 import { format } from "date-fns"
 import { bn } from "date-fns/locale"
+import { cn } from "@/lib/utils"
 
 const DeleteConfirmationDialog = ({ article, onDeleted }: { article: Article, onDeleted: () => void }) => {
     const [isOpen, setIsOpen] = useState(false)
@@ -100,6 +101,21 @@ const DeleteConfirmationDialog = ({ article, onDeleted }: { article: Article, on
     )
 }
 
+const statusVariantMap: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
+  Published: 'default',
+  Draft: 'secondary',
+  'Pending Review': 'outline',
+  Scheduled: 'outline',
+};
+
+const statusColorMap: { [key: string]: string } = {
+    Published: 'bg-green-600 hover:bg-green-700',
+    Draft: 'bg-gray-500 hover:bg-gray-600',
+    'Pending Review': 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500',
+    Scheduled: 'bg-blue-500 hover:bg-blue-600 border-blue-500',
+};
+
+
 export const columns: ColumnDef<Article>[] = [
   {
     id: "select",
@@ -137,7 +153,7 @@ export const columns: ColumnDef<Article>[] = [
       )
     },
     cell: ({ row }) => {
-        const isScheduled = new Date(row.original.publishedAt) > new Date();
+        const isScheduled = row.original.status === 'Scheduled';
         return (
             <div className="font-medium line-clamp-2">
                 {row.getValue("title")}
@@ -148,6 +164,21 @@ export const columns: ColumnDef<Article>[] = [
                     </Badge>
                 )}
             </div>
+        )
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "স্ট্যাটাস",
+    cell: ({ row }) => {
+        const status = row.getValue("status") as string;
+        return (
+            <Badge 
+                variant={statusVariantMap[status] || 'outline'}
+                className={cn(statusColorMap[status], 'text-white')}
+            >
+                {status}
+            </Badge>
         )
     },
   },

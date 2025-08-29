@@ -26,6 +26,7 @@ import { generateArticleAction } from '@/app/actions';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { useDebouncedCallback } from 'use-debounce';
+import type { Article } from '@/lib/types';
 
 const formSchema = z.object({
   title: z.string().min(10, "শিরোনাম কমপক্ষে ১০ অক্ষরের হতে হবে।"),
@@ -37,6 +38,7 @@ const formSchema = z.object({
   publishTime: z.string().optional(),
   slug: z.string().min(3, "Slug কমপক্ষে ৩ অক্ষরের হতে হবে।"),
   tags: z.string().optional(),
+  status: z.enum(['Draft', 'Pending Review', 'Published']),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -65,6 +67,7 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
       publishTime: format(new Date(), 'HH:mm'),
       slug: '',
       tags: '',
+      status: 'Draft',
     },
   });
 
@@ -147,8 +150,10 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
     publishedDate.setHours(hours, minutes);
 
     const tagArray = data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [];
+    
+    const status = publishedDate > new Date() && data.status === 'Published' ? 'Scheduled' : data.status;
 
-    const finalData = { ...data, tags: tagArray, publishedAt: publishedDate.toISOString() };
+    const finalData = { ...data, tags: tagArray, publishedAt: publishedDate.toISOString(), status };
 
     const result = await createArticleAction({ ...finalData, userId });
     setLoading(false);
@@ -282,16 +287,37 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
                     )}
                 </div>
             </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
-              <Input id="tags" {...form.register('tags')} placeholder="যেমন: নির্বাচন, বাংলাদেশ, ক্রিকেট" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
+                  <Input id="tags" {...form.register('tags')} placeholder="যেমন: নির্বাচন, বাংলাদেশ, ক্রিকেট" />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="status">স্ট্যাটাস</Label>
+                    <Controller
+                        control={form.control}
+                        name="status"
+                        render={({ field }) => (
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <SelectTrigger id="status">
+                                    <SelectValue placeholder="স্ট্যাটাস নির্বাচন করুন" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Draft">Draft</SelectItem>
+                                    <SelectItem value="Pending Review">Pending Review</SelectItem>
+                                    <SelectItem value="Published">Published</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        )}
+                    />
+                </div>
             </div>
             
             <Card className="bg-muted/30">
                 <CardHeader>
                     <CardTitle className="text-base">পোস্ট শিডিউল</CardTitle>
-                    <CardDescription>পোস্টটি কখন প্রকাশিত হবে তা নির্ধারণ করুন।</CardDescription>
+                    <CardDescription>পোস্টটি কখন প্রকাশিত হবে তা নির্ধারণ করুন। Published স্ট্যাটাস সিলেক্ট করলে এই সময়ে পোস্টটি লাইভ হবে।</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="grid gap-2">
