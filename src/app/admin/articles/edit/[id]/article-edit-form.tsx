@@ -17,7 +17,6 @@ import { rankHeadlineAction, updateArticleAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
-import RichTextEditor from '@/components/rich-text-editor';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -25,6 +24,7 @@ import { bn } from 'date-fns/locale';
 import { getAllUsers } from '@/lib/api';
 import { useAuthorization } from '@/hooks/use-authorization';
 import { Progress } from '@/components/ui/progress';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
   id: z.string(),
@@ -246,9 +246,11 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
               name="content"
               control={form.control}
               render={({ field }) => (
-                <RichTextEditor
-                  value={field.value}
-                  onEditorChange={field.onChange}
+                <Textarea
+                    id="content"
+                    {...field}
+                    className="min-h-[400px]"
+                    placeholder="আপনার আর্টিকেলের কনটেন্ট এখানে লিখুন..."
                 />
               )}
             />
