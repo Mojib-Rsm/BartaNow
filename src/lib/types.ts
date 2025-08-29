@@ -83,6 +83,7 @@ export interface Article {
   sponsored?: boolean;
   factCheck?: FactCheck;
   location?: string; // e.g., 'ঢাকা', 'চট্টগ্রাম'
+  tags?: string[];
 }
 
 export interface Page {

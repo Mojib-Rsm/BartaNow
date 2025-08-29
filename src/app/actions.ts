@@ -187,6 +187,8 @@ const articleSchema = z.object({
   category: z.enum(['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ']),
   imageUrl: z.string().optional().or(z.literal('')),
   publishedAt: z.string().optional(),
+  slug: z.string().min(3, "Slug কমপক্ষে ৩ অক্ষরের হতে হবে।"),
+  tags: z.array(z.string()).optional(),
 });
 
 
@@ -206,6 +208,8 @@ export async function updateArticleAction(data: z.infer<typeof articleSchema>) {
             content: data.content,
             category: data.category,
             publishedAt: data.publishedAt || new Date().toISOString(),
+            slug: data.slug,
+            tags: data.tags,
         };
 
         if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
@@ -258,8 +262,9 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             finalImageUrl = await uploadImage(data.imageUrl, `article-${Date.now()}.png`);
         }
         
-        const newArticleData: Omit<Article, 'id' | 'slug' | 'aiSummary'> = {
+        const newArticleData: Omit<Article, 'id' | 'aiSummary'> = {
             title: data.title,
+            slug: data.slug,
             content: data.content,
             category: data.category,
             imageUrl: finalImageUrl,
@@ -267,6 +272,7 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             authorName: author.name,
             authorAvatarUrl: author.avatarUrl || '',
             publishedAt: data.publishedAt || new Date().toISOString(),
+            tags: data.tags,
         };
 
         const newArticle = await createArticle(newArticleData);
@@ -805,8 +811,9 @@ export async function importWordPressAction(xmlContent: string) {
             }
 
 
-            const newArticleData: Omit<Article, 'id' | 'slug' | 'aiSummary'> = {
+            const newArticleData: Omit<Article, 'id' | 'aiSummary'> = {
                 title: post.title,
+                slug: slug,
                 content: contentText,
                 category: postCategory,
                 imageUrl: imageUrl,

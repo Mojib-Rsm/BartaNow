@@ -167,11 +167,10 @@ async function updateMockUser(userId: string, data: Partial<User>): Promise<User
     return updatedUser;
 }
 
-async function createMockArticle(data: Omit<Article, 'id' | 'aiSummary' | 'slug'>): Promise<Article> {
+async function createMockArticle(data: Omit<Article, 'id' | 'aiSummary'>): Promise<Article> {
      const newArticle: Article = {
         id: `article-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        slug: await translateForSlug(data.title),
-        aiSummary: data.content.join('\n\n').substring(0, 150) + '...', // Basic summary
+        aiSummary: data.content.substring(0, 150) + '...', // Basic summary
         ...data,
     };
     mockDb.articles.unshift(newArticle);
@@ -179,9 +178,6 @@ async function createMockArticle(data: Omit<Article, 'id' | 'aiSummary' | 'slug'
 }
 
 async function updateMockArticle(articleId: string, data: Partial<Article>): Promise<Article | undefined> {
-     if (data.title && !data.slug) {
-        data.slug = await translateForSlug(data.title);
-    }
     const articleIndex = mockDb.articles.findIndex(a => a.id === articleId);
     if (articleIndex === -1) return undefined;
     const updatedArticle = { ...mockDb.articles[articleIndex], ...data };
@@ -501,12 +497,10 @@ async function updateFirestoreUser(userId: string, data: Partial<User>): Promise
     return updatedDoc.data() as User | undefined;
 }
 
-async function createFirestoreArticle(data: Omit<Article, 'id' | 'aiSummary' | 'slug'>): Promise<Article> {
-    const slug = await translateForSlug(data.title);
+async function createFirestoreArticle(data: Omit<Article, 'id' | 'aiSummary'>): Promise<Article> {
     const newArticle: Article = {
         id: `article-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        slug: slug,
-        aiSummary: data.content.join('\n\n').substring(0, 150) + '...', // Basic summary
+        aiSummary: data.content.substring(0, 150) + '...', // Basic summary
         ...data,
     };
     await db.collection('articles').doc(newArticle.id).set(newArticle);
@@ -514,9 +508,6 @@ async function createFirestoreArticle(data: Omit<Article, 'id' | 'aiSummary' | '
 }
 
 async function updateFirestoreArticle(articleId: string, data: Partial<Article>): Promise<Article | undefined> {
-    if (data.title && !data.slug) {
-        data.slug = await translateForSlug(data.title);
-    }
     const articleRef = db.collection('articles').doc(articleId);
     await articleRef.update(data);
     const updatedDoc = await articleRef.get();
@@ -781,11 +772,11 @@ export async function updateUser(userId: string, data: Partial<User>): Promise<U
     return updateFirestoreUser(userId, data);
 }
 
-export async function createArticle(data: Omit<Article, 'id' | 'aiSummary' | 'slug'>): Promise<Article> {
+export async function createArticle(data: Omit<Article, 'id' | 'aiSummary'>): Promise<Article> {
     const newArticle = (!useFirestore || !db) ? await createMockArticle(data) : await createFirestoreArticle(data);
 
     // AI Summary generation can be slow, so we do it after creating the article
-    summarizeArticle({ articleContent: data.content.join('\n\n') })
+    summarizeArticle({ articleContent: data.content })
         .then(({ summary }) => {
             updateArticle(newArticle.id, { aiSummary: summary });
         })

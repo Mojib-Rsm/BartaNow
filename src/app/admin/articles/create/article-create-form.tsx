@@ -23,6 +23,8 @@ import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
 import { generateArticleAction } from '@/app/actions';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { translateForSlug } from '@/ai/flows/translate-for-slug';
+import { useDebouncedCallback } from 'use-debounce';
 
 const formSchema = z.object({
   title: z.string().min(10, "শিরোনাম কমপক্ষে ১০ অক্ষরের হতে হবে।"),
@@ -31,6 +33,8 @@ const formSchema = z.object({
   imageUrl: z.string().optional().or(z.literal('')),
   publishedAt: z.date().optional(),
   publishTime: z.string().optional(),
+  slug: z.string().min(3, "Slug কমপক্ষে ৩ অক্ষরের হতে হবে।"),
+  tags: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -56,8 +60,31 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
       imageUrl: '',
       publishedAt: new Date(),
       publishTime: format(new Date(), 'HH:mm'),
+      slug: '',
+      tags: '',
     },
   });
+
+  const debouncedSlugGeneration = useDebouncedCallback(async (title: string) => {
+    if (title && !form.formState.dirtyFields.slug) {
+        try {
+            const generatedSlug = await translateForSlug(title);
+            form.setValue('slug', generatedSlug);
+        } catch (e) {
+            console.error("Slug generation failed", e);
+        }
+    }
+  }, 500);
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'title') {
+        debouncedSlugGeneration(value.title || '');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch, debouncedSlugGeneration, form]);
+
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -116,7 +143,9 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
     const [hours, minutes] = data.publishTime?.split(':').map(Number) || [0, 0];
     publishedDate.setHours(hours, minutes);
 
-    const finalData = { ...data, publishedAt: publishedDate.toISOString() };
+    const tagArray = data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [];
+
+    const finalData = { ...data, tags: tagArray, publishedAt: publishedDate.toISOString() };
 
     const result = await createArticleAction({ ...finalData, userId });
     setLoading(false);
@@ -202,10 +231,18 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
           </div>
 
           <div className="grid gap-2">
+            <Label htmlFor="slug">লিংক (URL Slug)</Label>
+            <Input id="slug" {...form.register('slug')} />
+            {form.formState.errors.slug && (
+              <p className="text-xs text-destructive">{form.formState.errors.slug.message}</p>
+            )}
+          </div>
+
+          <div className="grid gap-2">
             <Label htmlFor="content">কনটেন্ট</Label>
             <RichTextEditor
                 value={form.watch('content')}
-                onChange={(content) => form.setValue('content', content)}
+                onChange={(content) => form.setValue('content', content, { shouldValidate: true, shouldDirty: true })}
              />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>
@@ -236,6 +273,11 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
                     <p className="text-xs text-destructive">{form.formState.errors.imageUrl.message}</p>
                     )}
                 </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
+              <Input id="tags" {...form.register('tags')} placeholder="যেমন: নির্বাচন, বাংলাদেশ, ক্রিকেট" />
             </div>
             
             <Card className="bg-muted/30">

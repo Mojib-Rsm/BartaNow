@@ -160,6 +160,19 @@ export const columns: ColumnDef<Article>[] = [
     accessorKey: "authorName",
     header: "লেখক",
   },
+   {
+    accessorKey: "tags",
+    header: "ট্যাগ",
+    cell: ({ row }) => {
+        const tags = row.original.tags;
+        if (!tags || tags.length === 0) return null;
+        return (
+            <div className="flex flex-wrap gap-1">
+                {tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+            </div>
+        )
+    }
+  },
   {
     accessorKey: "publishedAt",
     header: ({ column }) => {

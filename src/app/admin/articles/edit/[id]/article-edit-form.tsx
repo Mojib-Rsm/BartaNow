@@ -30,6 +30,8 @@ const formSchema = z.object({
   imageUrl: z.string().optional().or(z.literal('')),
   publishedAt: z.date().optional(),
   publishTime: z.string().optional(),
+  slug: z.string().min(3, "Slug কমপক্ষে ৩ অক্ষরের হতে হবে।"),
+  tags: z.string().optional(),
 });
 
 
@@ -55,6 +57,8 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
       imageUrl: article.imageUrl || '',
       publishedAt: article.publishedAt ? new Date(article.publishedAt) : new Date(),
       publishTime: article.publishedAt ? format(new Date(article.publishedAt), 'HH:mm') : format(new Date(), 'HH:mm'),
+      slug: article.slug || '',
+      tags: article.tags?.join(', ') || '',
     },
   });
 
@@ -78,7 +82,9 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
     const [hours, minutes] = data.publishTime?.split(':').map(Number) || [0, 0];
     publishedDate.setHours(hours, minutes);
 
-    const finalData = { ...data, publishedAt: publishedDate.toISOString() };
+    const tagArray = data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [];
+
+    const finalData = { ...data, tags: tagArray, publishedAt: publishedDate.toISOString() };
 
     const result = await updateArticleAction(finalData);
     setLoading(false);
@@ -134,10 +140,18 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
           </div>
 
           <div className="grid gap-2">
+            <Label htmlFor="slug">লিংক (URL Slug)</Label>
+            <Input id="slug" {...form.register('slug')} />
+            {form.formState.errors.slug && (
+              <p className="text-xs text-destructive">{form.formState.errors.slug.message}</p>
+            )}
+          </div>
+
+          <div className="grid gap-2">
             <Label htmlFor="content">কনটেন্ট</Label>
             <RichTextEditor
                 value={form.watch('content')}
-                onChange={(content) => form.setValue('content', content)}
+                onChange={(content) => form.setValue('content', content, { shouldValidate: true, shouldDirty: true })}
             />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>
@@ -168,6 +182,11 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
                 <p className="text-xs text-destructive">{form.formState.errors.imageUrl.message}</p>
               )}
             </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
+            <Input id="tags" {...form.register('tags')} placeholder="যেমন: নির্বাচন, বাংলাদেশ, ক্রিকেট" />
           </div>
           
            <Card className="bg-muted/30">
