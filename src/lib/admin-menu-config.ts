@@ -28,6 +28,9 @@ import {
   Image,
   Edit,
   FileUp,
+  FileCheck2,
+  FileClock,
+  FileWarning,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -101,7 +104,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin', 'editor'],
   },
   {
-    path: '#seo-report',
+    path: '/admin/seo-report',
     label: 'SEO Report',
     icon: LineChart,
     roles: ['admin'],
