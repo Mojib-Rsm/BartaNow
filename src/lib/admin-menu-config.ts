@@ -18,13 +18,12 @@ import {
   PlusCircle,
   FileSignature,
   LineChart,
-  Link,
+  Link as LinkIcon,
   MapPin,
-  Home,
+  HomeIcon,
   Megaphone,
   BarChart,
   Contact,
-  HomeIcon
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -87,7 +86,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     ],
   },
    {
-    path: '#', // Placeholder
+    path: '#roles-permissions',
     label: 'Roles & Permissions',
     icon: ShieldCheck,
     roles: ['admin'],
@@ -114,7 +113,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin', 'editor'],
   },
   {
-    path: '#', // Placeholder
+    path: '#seo-report',
     label: 'SEO Report',
     icon: LineChart,
     roles: ['admin'],
@@ -138,19 +137,19 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin'],
   },
    {
-    path: '#', // Placeholder
+    path: '#report',
     label: 'Report',
     icon: BarChart,
     roles: ['admin'],
   },
    {
-    path: '#', // Placeholder
+    path: '#social',
     label: 'Social',
-    icon: Link,
+    icon: LinkIcon,
     roles: ['admin'],
   },
    {
-    path: '#', // Placeholder
+    path: '#location',
     label: 'Location',
     icon: MapPin,
     roles: ['admin'],
