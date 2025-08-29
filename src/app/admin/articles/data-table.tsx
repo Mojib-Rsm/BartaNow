@@ -105,8 +105,8 @@ const DeleteBulkConfirmationDialog = ({
 };
 
 const bulkEditSchema = z.object({
-  status: z.enum(['Published', 'Draft', '']).optional(),
-  category: z.string().optional().or(z.literal('')),
+  status: z.enum(['Published', 'Draft', '__no_change__']).optional(),
+  category: z.string().optional(),
   tags: z.string().optional(),
 });
 
@@ -129,8 +129,8 @@ const BulkEditDialog = ({
     const form = useForm<BulkEditFormValues>({
         resolver: zodResolver(bulkEditSchema),
         defaultValues: {
-            status: '',
-            category: '',
+            status: '__no_change__',
+            category: '__no_change__',
             tags: '',
         }
     });
@@ -140,13 +140,19 @@ const BulkEditDialog = ({
     }, []);
 
     const handleSave = async (data: BulkEditFormValues) => {
-        if (!data.status && !data.category && !data.tags) {
+        const finalData = {
+            status: data.status === '__no_change__' ? undefined : data.status,
+            category: data.category === '__no_change__' ? undefined : data.category,
+            tags: data.tags
+        };
+        
+        if (!finalData.status && !finalData.category && !finalData.tags) {
             toast({ variant: 'destructive', title: 'কিছুই পরিবর্তন করা হয়নি', description: 'অনুগ্রহ করে কমপক্ষে একটি ফিল্ড পরিবর্তন করুন।' });
             return;
         }
 
         setIsSaving(true);
-        const result = await updateMultipleArticlesAction(articleIds, data);
+        const result = await updateMultipleArticlesAction(articleIds, finalData as any);
         if (result.success) {
             toast({ title: 'সফল', description: result.message });
             onEdited();
@@ -168,12 +174,12 @@ const BulkEditDialog = ({
                 <form onSubmit={form.handleSubmit(handleSave)} className="py-4 space-y-4">
                     <div className="grid gap-2">
                         <Label htmlFor="status">স্ট্যাটাস</Label>
-                        <Select onValueChange={(value) => form.setValue('status', value as any)} defaultValue="">
+                        <Select onValueChange={(value) => form.setValue('status', value as any)} defaultValue="__no_change__">
                             <SelectTrigger id="status">
                                 <SelectValue placeholder="স্ট্যাটাস পরিবর্তন করুন" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">-- পরিবর্তন করবেন না --</SelectItem>
+                                <SelectItem value="__no_change__">-- পরিবর্তন করবেন না --</SelectItem>
                                 <SelectItem value="Published">Published</SelectItem>
                                 <SelectItem value="Draft">Draft</SelectItem>
                             </SelectContent>
@@ -181,12 +187,12 @@ const BulkEditDialog = ({
                     </div>
                      <div className="grid gap-2">
                         <Label htmlFor="category">ক্যাটাগরি</Label>
-                        <Select onValueChange={(value) => form.setValue('category', value)} defaultValue="">
+                        <Select onValueChange={(value) => form.setValue('category', value)} defaultValue="__no_change__">
                             <SelectTrigger id="category">
                                 <SelectValue placeholder="ক্যাটাগরি পরিবর্তন করুন" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">-- পরিবর্তন করবেন না --</SelectItem>
+                                <SelectItem value="__no_change__">-- পরিবর্তন করবেন না --</SelectItem>
                                 {categories.map(cat => (
                                     <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                                 ))}
