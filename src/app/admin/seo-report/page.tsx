@@ -40,7 +40,7 @@ export default async function SeoReportPage() {
         else issues.push("ফিচার্ড ইমেজ নেই");
         
         // Content length check
-        const wordCount = article.content ? article.content.split(/\s+/).length : 0;
+        const wordCount = article.content ? String(article.content).split(/\s+/).length : 0;
         if (wordCount > 300) score += 15; // Roughly 300 words
         else issues.push("কনটেন্ট খুব ছোট");
         
