@@ -27,6 +27,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 const formSchema = z.object({
   prompt: z.string().min(5, { message: 'বিষয়টি কমপক্ষে ৫ অক্ষরের হতে হবে।' }),
+  language: z.enum(['Bengali', 'English']).default('Bengali'),
+  wordCount: z.enum(['Short', 'Medium', 'Long']).default('Medium'),
+  tone: z.enum(['Formal', 'News', 'Casual', 'Creative']).default('News'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -48,6 +51,9 @@ export default function WriterForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       prompt: '',
+      language: 'Bengali',
+      wordCount: 'Medium',
+      tone: 'News',
     },
   });
   
@@ -119,7 +125,7 @@ export default function WriterForm() {
     setGeneratedVariants(null);
     setSelectedVariant(null);
     try {
-        const result = await generateArticleAction(data.prompt);
+        const result = await generateArticleAction(data);
         if (result.success && result.article?.variants.length) {
             setGeneratedVariants(result.article.variants);
             setSelectedVariant(result.article.variants[0]); // Select the first variant by default
@@ -160,6 +166,43 @@ export default function WriterForm() {
                     <p className="text-xs text-destructive">{form.formState.errors.prompt.message}</p>
                     )}
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="language">ভাষা</Label>
+                        <Select onValueChange={(value) => form.setValue('language', value as any)} defaultValue={form.getValues('language')}>
+                            <SelectTrigger id="language"><SelectValue placeholder="ভাষা নির্বাচন করুন" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Bengali">বাংলা</SelectItem>
+                                <SelectItem value="English">ইংরেজি</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="wordCount">শব্দ সংখ্যা</Label>
+                        <Select onValueChange={(value) => form.setValue('wordCount', value as any)} defaultValue={form.getValues('wordCount')}>
+                            <SelectTrigger id="wordCount"><SelectValue placeholder="দৈর্ঘ্য নির্বাচন করুন" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Short">ছোট (~১৫০ শব্দ)</SelectItem>
+                                <SelectItem value="Medium">মাঝারি (~৩০০ শব্দ)</SelectItem>
+                                <SelectItem value="Long">বড় (~৫০০ শব্দ)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="tone">আর্টিকেলের ধরণ</Label>
+                         <Select onValueChange={(value) => form.setValue('tone', value as any)} defaultValue={form.getValues('tone')}>
+                            <SelectTrigger id="tone"><SelectValue placeholder="ধরণ নির্বাচন করুন" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="News">সংবাদ</SelectItem>
+                                <SelectItem value="Formal">ফরমাল</SelectItem>
+                                <SelectItem value="Casual">সাধারণ</SelectItem>
+                                <SelectItem value="Creative">সৃষ্টিশীল</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
                 {isSuggesting && <p className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> শিরোনামের জন্য আইডিয়া খোঁজা হচ্ছে...</p>}
                 {topicSuggestions.length > 0 && (
                     <div className="p-4 border rounded-lg bg-muted/50">
