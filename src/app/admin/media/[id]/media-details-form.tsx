@@ -13,14 +13,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Link as LinkIcon, Copy, FileText, Image as ImageIcon, Video, Music, Pencil } from 'lucide-react';
-import { updateMediaAction, getArticlesByMediaUrlAction } from '@/app/actions';
+import { Loader2, Link as LinkIcon, Copy, FileText, Image as ImageIcon, Video, Music, Pencil, Sparkles } from 'lucide-react';
+import { updateMediaAction, getArticlesByMediaUrlAction, analyzeImageAction } from '@/app/actions';
 import { getAllCategories } from '@/lib/api';
 import Link from 'next/link';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   id: z.string(),
@@ -46,8 +47,10 @@ const FileIcon = ({ mimeType, className }: { mimeType: string; className?: strin
 
 export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsFormProps) {
     const [loading, setLoading] = useState(false);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [usedInArticles, setUsedInArticles] = useState<Article[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const router = useRouter();
     const { toast } = useToast();
 
     const form = useForm<FormValues>({
@@ -73,6 +76,34 @@ export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsForm
         fetchUsage();
         fetchCategories();
     }, [media.url]);
+
+    const handleAnalyzeImage = async () => {
+        setIsAnalyzing(true);
+        const result = await analyzeImageAction(media.id, media.url);
+        setIsAnalyzing(false);
+
+        if (result.success && result.updatedMedia) {
+            form.reset({
+                id: result.updatedMedia.id,
+                altText: result.updatedMedia.altText || '',
+                caption: result.updatedMedia.caption || '',
+                description: result.updatedMedia.description || '',
+                category: result.updatedMedia.category || '__none__',
+            });
+            toast({
+                title: 'AI বিশ্লেষণ সফল',
+                description: 'খালি ফিল্ডগুলো AI দ্বারা পূরণ করা হয়েছে।',
+            });
+             router.refresh();
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'AI বিশ্লেষণ ব্যর্থ',
+                description: result.message,
+            });
+        }
+    };
+
 
     const onSubmit = async (data: FormValues) => {
         setLoading(true);
@@ -110,8 +141,22 @@ export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsForm
             <div className="lg:col-span-2">
                  <Card>
                     <CardHeader>
-                        <CardTitle className="text-2xl font-headline">মিডিয়া বিবরণ</CardTitle>
-                        <CardDescription>ফাইলের বিস্তারিত তথ্য এবং সম্পাদনার অপশন।</CardDescription>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <CardTitle className="text-2xl font-headline">মিডিয়া বিবরণ</CardTitle>
+                                <CardDescription>ফাইলের বিস্তারিত তথ্য এবং সম্পাদনার অপশন।</CardDescription>
+                            </div>
+                            {media.mimeType.startsWith('image/') && (
+                                <Button onClick={handleAnalyzeImage} disabled={isAnalyzing} variant="outline" size="sm">
+                                    {isAnalyzing ? (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Sparkles className="mr-2 h-4 w-4" />
+                                    )}
+                                    AI দিয়ে তথ্য পূরণ করুন
+                                </Button>
+                            )}
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -130,7 +175,7 @@ export default function MediaDetailsForm({ media, uploadedBy }: MediaDetailsForm
                                         name="category"
                                         control={form.control}
                                         render={({ field }) => (
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select onValueChange={field.onChange} value={field.value}>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
                                                 </SelectTrigger>

@@ -4,7 +4,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -18,6 +18,7 @@ import { generateArticle } from '@/ai/flows/generate-article';
 import { suggestTrendingTopics } from '@/ai/flows/suggest-trending-topics';
 import { rankHeadline } from '@/ai/flows/rank-headline';
 import { suggestTagsForArticle } from '@/ai/flows/suggest-tags';
+import { analyzeImage } from '@/ai/flows/analyze-image';
 
 
 export async function seedAction() {
@@ -1213,5 +1214,33 @@ export async function deleteContactMessageAction(messageId: string) {
     } catch (error) {
         console.error("Delete Contact Message Error:", error);
         return { success: false, message: 'বার্তা ডিলিট করতে সমস্যা হয়েছে।' };
+    }
+}
+
+
+export async function analyzeImageAction(mediaId: string, imageUrl: string) {
+    try {
+        const existingMedia = await getMediaById(mediaId);
+        if (!existingMedia) {
+            return { success: false, message: 'মিডিয়া খুঁজে পাওয়া যায়নি।' };
+        }
+
+        const analysis = await analyzeImage({ imageUrl });
+
+        const updateData: Partial<Media> = {};
+        if (!existingMedia.altText) updateData.altText = analysis.altText;
+        if (!existingMedia.caption) updateData.caption = analysis.caption;
+        if (!existingMedia.description) updateData.description = analysis.description;
+
+        if (Object.keys(updateData).length > 0) {
+            const updatedMedia = await updateMedia(mediaId, updateData);
+            return { success: true, message: 'AI দিয়ে তথ্য আপডেট করা হয়েছে।', updatedMedia };
+        }
+
+        return { success: true, message: 'কোনো খালি ফিল্ড পাওয়া যায়নি, তাই কিছু পরিবর্তন করা হয়নি।', updatedMedia: existingMedia };
+    } catch (error) {
+        console.error("Analyze Image Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'ছবি বিশ্লেষণ করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
     }
 }
