@@ -22,8 +22,8 @@ type TranslateOutput = z.infer<typeof TranslateOutputSchema>;
 
 export async function translateForSlug(text: string): Promise<TranslateOutput> {
     try {
-        const { englishTitle, slug } = await translateFlow({ text });
-        return { englishTitle, slug };
+        const { output } = await translateFlow({ text });
+        return output!;
     } catch (error) {
         console.error("AI slug generation failed, falling back to basic slug.", error);
         // Fallback to a simple non-AI slug generator if the flow fails

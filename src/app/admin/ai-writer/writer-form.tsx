@@ -103,7 +103,7 @@ export default function WriterForm() {
   
   const handleCreateArticle = async () => {
     if (!selectedVariant) return;
-    const slug = await translateForSlug(selectedVariant.title);
+    const { slug } = await translateForSlug(selectedVariant.title);
 
     const finalPublishedAt = publishDate || new Date();
     const [hours, minutes] = publishTime.split(':').map(Number);
