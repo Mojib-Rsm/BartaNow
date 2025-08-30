@@ -76,15 +76,16 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
   });
 
   const debouncedSlugGeneration = useDebouncedCallback(async (title: string) => {
-    if (title && !form.formState.dirtyFields.slug) {
+    if (title && !form.formState.dirtyFields.slug && !form.formState.dirtyFields.englishTitle) {
         try {
-            const generatedSlug = await translateForSlug(title);
-            form.setValue('slug', generatedSlug);
+            const { slug, englishTitle } = await translateForSlug(title);
+            if (slug) form.setValue('slug', slug, { shouldValidate: true });
+            if (englishTitle) form.setValue('englishTitle', englishTitle);
         } catch (e) {
             console.error("Slug generation failed", e);
         }
     }
-  }, 500);
+  }, 1000);
 
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
@@ -120,7 +121,8 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
       const result = await suggestTagsAction(content);
       if (result.success && result.tags) {
         form.setValue('tags', result.tags.join(', '));
-        toast({ title: "সফল", description: "AI আপনার জন্য ট্যাগ তৈরি করেছে।" });
+        form.setValue('focusKeywords', result.tags.slice(0, 2).join(', '));
+        toast({ title: "সফল", description: "AI আপনার জন্য ট্যাগ ও ফোকাস কিওয়ার্ড তৈরি করেছে।" });
       } else {
         toast({ variant: "destructive", title: "ব্যর্থ", description: result.message });
       }
@@ -309,7 +311,7 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
                       <Label htmlFor="tags">ট্যাগ (কমা দিয়ে আলাদা করুন)</Label>
                        <Button type="button" size="sm" variant="ghost" className="text-xs" onClick={handleGenerateTags} disabled={isSuggestingTags}>
                           <Sparkles className="mr-2 h-3 w-3" />
-                          {isSuggestingTags ? 'জেনারেট হচ্ছে...' : 'AI দিয়ে ট্যাগ তৈরি করুন'}
+                          {isSuggestingTags ? 'জেনারেট হচ্ছে...' : 'AI দিয়ে ট্যাগ ও কিওয়ার্ড তৈরি'}
                        </Button>
                     </div>
                   <Input id="tags" {...form.register('tags')} placeholder="যেমন: নির্বাচন, বাংলাদেশ, ক্রিকেট" />

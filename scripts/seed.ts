@@ -59,8 +59,8 @@ export async function seedDatabase() {
 
   const articlePromises = mockDb.articles.map(async (article, index) => {
     try {
-      const slug = await translateForSlug(article.title);
-      const articleWithSlug = { ...article, slug };
+      const { slug, englishTitle } = await translateForSlug(article.title);
+      const articleWithSlug = { ...article, slug, englishTitle };
       console.log(`[${index + 1}/${mockDb.articles.length}] Generated slug: "${slug}" for title: "${article.title}"`);
       return articlesCollection.doc(article.id).set(articleWithSlug);
     } catch (e) {
