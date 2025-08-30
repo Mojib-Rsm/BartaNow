@@ -14,7 +14,7 @@ import { sendMail } from '@/lib/mailer';
 import { getWelcomeEmailHtml } from '@/lib/email-templates/welcome-email.js';
 import { getNewsletterHtml } from '@/lib/email-templates/newsletter-email.js';
 import { parseStringPromise } from 'xml2js';
-import { generateArticle } from '@/ai/flows/generate-article';
+import { generateArticle, type GenerateArticleInput } from '@/ai/flows/generate-article';
 import { suggestTrendingTopics } from '@/ai/flows/suggest-trending-topics';
 import { rankHeadline } from '@/ai/flows/rank-headline';
 import { suggestTagsForArticle } from '@/ai/flows/suggest-tags';
@@ -112,9 +112,9 @@ export async function getArticleAudioAction(articleId: string) {
     return media;
 }
 
-export async function generateArticleAction(prompt: string) {
+export async function generateArticleAction(input: GenerateArticleInput) {
     try {
-        const result = await generateArticle({ prompt });
+        const result = await generateArticle(input);
         return { success: true, article: result };
     } catch (error) {
         console.error("Generate Article Error:", error);
@@ -1245,3 +1245,5 @@ export async function analyzeImageAction(mediaId: string, imageUrl: string) {
     }
 }
 
+
+    
