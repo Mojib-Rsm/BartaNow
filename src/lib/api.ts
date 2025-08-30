@@ -1378,3 +1378,4 @@ export async function getAllAds(): Promise<Ad[]> {
      // Firestore implementation would be similar to others
     return getMockAllAds();
 }
+
