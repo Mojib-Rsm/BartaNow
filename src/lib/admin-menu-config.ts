@@ -30,6 +30,7 @@ import {
   FileCheck2,
   FileClock,
   FileWarning,
+  Plug,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -151,6 +152,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     path: '#tools',
     children: [
         { path: '/admin/import', label: 'Import' },
+        { path: '/admin/plugins', label: 'Plugins' },
     ],
   },
   {
