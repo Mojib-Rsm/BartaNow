@@ -134,13 +134,13 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin'],
   },
    {
-    path: '#social',
+    path: '/admin/social',
     label: 'Social',
     icon: LinkIcon,
     roles: ['admin'],
   },
    {
-    path: '#location',
+    path: '/admin/location',
     label: 'Location',
     icon: MapPin,
     roles: ['admin'],
