@@ -109,7 +109,6 @@ function AdminLayoutContent({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const logoUrl = "https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/refs/heads/main/public/log-heado.png";
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -153,7 +152,7 @@ function AdminLayoutContent({
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-16 items-center border-b border-sidebar-border px-6">
             <Link href="/admin" className="flex items-center gap-2 font-semibold">
-               <span className="text-xl font-bold text-white">MAAN NEWS</span>
+               <span className="text-xl font-bold text-white">BartaNow</span>
             </Link>
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -179,7 +178,7 @@ function AdminLayoutContent({
             <SheetContent side="left" className="flex flex-col bg-sidebar text-white p-0">
                 <div className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-6">
                      <Link href="/admin" className="text-xl font-bold text-white">
-                       MAAN NEWS
+                       BartaNow
                     </Link>
                 </div>
                 <nav className="flex-1 overflow-auto p-4">
@@ -209,8 +208,10 @@ function AdminLayoutContent({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
+          <Button variant="ghost" size="icon" asChild>
+              <Link href="/admin/notifications">
+                <Bell className="h-5 w-5" />
+              </Link>
           </Button>
           
            <DropdownMenu>
