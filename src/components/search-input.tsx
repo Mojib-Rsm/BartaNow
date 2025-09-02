@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDebouncedCallback } from 'use-debounce';
 import { Input } from '@/components/ui/input';
@@ -8,14 +9,14 @@ import { Search, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 
-export default function SearchInput() {
+function SearchInputContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isFocused, setIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState(searchParams.get('q') || '');
 
   const handleSearch = useDebouncedCallback((term: string) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     if (term) {
       params.set('q', term);
     } else {
@@ -59,4 +60,12 @@ export default function SearchInput() {
        )}
     </div>
   );
+}
+
+export default function SearchInput() {
+    return (
+        <Suspense fallback={<div className="h-10 w-full max-w-xs rounded-md bg-muted" />}>
+            <SearchInputContent />
+        </Suspense>
+    )
 }
