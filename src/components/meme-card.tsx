@@ -4,6 +4,7 @@ import type { Article, MemeNews } from '@/lib/types';
 import { mockDb } from '@/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
+import { generateNonAiSlug } from '@/lib/utils';
 
 type MemeCardProps = {
   meme: MemeNews;
@@ -18,7 +19,8 @@ export default function MemeCard({ meme }: MemeCardProps) {
     return null;
   }
   
-  const articleUrl = `/${article.slug}`;
+  const categorySlug = generateNonAiSlug(article.category || "BartaNow-Unnamed");
+  const articleUrl = `/${categorySlug}/${article.slug}`;
 
   return (
     <Link href={articleUrl} className="block group">

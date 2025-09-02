@@ -8,6 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { generateNonAiSlug } from '@/lib/utils';
 
 const TranslateInputSchema = z.object({
   text: z.string().describe('The Bengali text to be translated and slugified.'),
@@ -23,17 +24,19 @@ type TranslateOutput = z.infer<typeof TranslateOutputSchema>;
 export async function translateForSlug(text: string): Promise<TranslateOutput> {
     try {
         const { output } = await translateFlow({ text });
-        return output!;
-    } catch (error) {
-        console.error("AI slug generation failed, falling back to basic slug.", error);
-        // Fallback to a simple non-AI slug generator if the flow fails
-        const fallbackSlug = text
-            .toLowerCase()
+        // Further clean the AI-generated slug to ensure it's URL-safe
+        const cleanedSlug = output?.slug.toLowerCase()
             .replace(/\s+/g, '-')
-            .replace(/[^\p{L}\p{N}-]/gu, '')
+            .replace(/[^\w-]+/g, '')
             .replace(/--+/g, '-')
             .replace(/^-+/, '')
             .replace(/-+$/, '');
+
+        return { englishTitle: output!.englishTitle, slug: cleanedSlug || generateNonAiSlug(text) };
+    } catch (error) {
+        console.error("AI slug generation failed, falling back to basic slug.", error);
+        // Fallback to a simple non-AI slug generator if the flow fails
+        const fallbackSlug = generateNonAiSlug(text);
         return { englishTitle: '', slug: fallbackSlug };
     }
 }

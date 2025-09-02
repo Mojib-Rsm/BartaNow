@@ -19,6 +19,7 @@ import type { Article, MemeNews } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import Autoplay from "embla-carousel-autoplay";
 import SocialFollow from './social-follow';
+import { generateNonAiSlug } from '@/lib/utils';
 
 const SectionHeader = ({ title, categorySlug }: { title: string, categorySlug: string }) => (
   <div className="flex items-center justify-between border-b-2 border-primary mb-4 pb-2">
@@ -167,18 +168,22 @@ export default function HomePageClient({
               className="w-full overflow-hidden"
             >
               <CarouselContent>
-                {trendingArticles.map((article) => (
-                  <CarouselItem key={article.id} className="basis-auto">
-                     <Link href={`/${article.slug}`} className="group">
-                        <div className="flex items-center gap-2">
-                            {article.badge && <Badge variant="default">{article.badge}</Badge>}
-                            <p className="font-semibold group-hover:text-primary whitespace-nowrap text-sm">
-                            {article.title}
-                            </p>
-                        </div>
-                    </Link>
-                  </CarouselItem>
-                ))}
+                {trendingArticles.map((article) => {
+                    const categorySlug = generateNonAiSlug(article.category || "BartaNow-Unnamed");
+                    const articleUrl = `/${categorySlug}/${article.slug}`;
+                    return (
+                        <CarouselItem key={article.id} className="basis-auto">
+                            <Link href={articleUrl} className="group">
+                                <div className="flex items-center gap-2">
+                                    {article.badge && <Badge variant="default">{article.badge}</Badge>}
+                                    <p className="font-semibold group-hover:text-primary whitespace-nowrap text-sm">
+                                    {article.title}
+                                    </p>
+                                </div>
+                            </Link>
+                        </CarouselItem>
+                    )
+                })}
               </CarouselContent>
             </Carousel>
           </div>
@@ -193,14 +198,18 @@ export default function HomePageClient({
             ))}
         </div>
         <div className="md:col-span-1 space-y-4">
-          {heroSideArticles.map(article => (
-            <Link key={article.id} href={`/${article.slug}`} className="block group border-b pb-4 last:border-b-0">
-                <h3 className="font-headline text-lg font-bold leading-snug group-hover:text-primary transition-colors">
-                  {article.title}
-                </h3>
-                <p className="text-muted-foreground text-sm line-clamp-2 mt-1">{article.aiSummary}</p>
-            </Link>
-          ))}
+          {heroSideArticles.map(article => {
+              const categorySlug = generateNonAiSlug(article.category || "BartaNow-Unnamed");
+              const articleUrl = `/${categorySlug}/${article.slug}`;
+              return (
+                <Link key={article.id} href={articleUrl} className="block group border-b pb-4 last:border-b-0">
+                    <h3 className="font-headline text-lg font-bold leading-snug group-hover:text-primary transition-colors">
+                    {article.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm line-clamp-2 mt-1">{article.aiSummary}</p>
+                </Link>
+              )
+          })}
         </div>
       </section>
 
@@ -223,8 +232,11 @@ export default function HomePageClient({
                 <h2 className="text-2xl font-bold font-headline mt-2">{videoArticles[0].title}</h2>
             </div>
             <div className="md:col-span-1 space-y-4">
-                {videoArticles.slice(1).map(video => (
-                    <Link key={video.id} href={`/${video.slug}`} className="flex items-center gap-4 group">
+                {videoArticles.slice(1).map(video => {
+                    const categorySlug = generateNonAiSlug(video.category || "BartaNow-Unnamed");
+                    const articleUrl = `/${categorySlug}/${video.slug}`;
+                    return (
+                    <Link key={video.id} href={articleUrl} className="flex items-center gap-4 group">
                         <div className="relative w-24 h-16 shrink-0 rounded-md overflow-hidden">
                             <Image 
                                 src={video.imageUrl}
@@ -239,7 +251,8 @@ export default function HomePageClient({
                         </div>
                         <h3 className="font-semibold text-sm group-hover:text-primary">{video.title}</h3>
                     </Link>
-                ))}
+                    )
+                })}
             </div>
           </div>
         </section>
@@ -269,27 +282,31 @@ export default function HomePageClient({
                     <ArticleCard article={nationalArticles[0]} />
                 </div>
                 <div className="md:col-span-1 space-y-4">
-                    {nationalArticles.slice(1).map((article) => (
-                         <Card key={article.id} className="flex items-center group overflow-hidden">
-                            <Link href={`/${article.slug}`} className='flex w-full'>
-                                <div className="relative w-1/3 aspect-square">
-                                    <Image
-                                        src={article.imageUrl}
-                                        alt={article.title}
-                                        fill
-                                        className="object-cover group-hover:scale-105 transition-transform"
-                                        data-ai-hint={article.imageHint}
-                                    />
-                                </div>
-                                <div className="p-4 w-2/3">
-                                    <h3 className="font-semibold text-base line-clamp-2 group-hover:text-primary">
-                                        {article.title}
-                                    </h3>
-                                     <p className="text-muted-foreground line-clamp-2 text-sm mt-1">{article.aiSummary}</p>
-                                </div>
-                            </Link>
-                        </Card>
-                    ))}
+                    {nationalArticles.slice(1).map((article) => {
+                        const categorySlug = generateNonAiSlug(article.category || "BartaNow-Unnamed");
+                        const articleUrl = `/${categorySlug}/${article.slug}`;
+                         return (
+                            <Card key={article.id} className="flex items-center group overflow-hidden">
+                                <Link href={articleUrl} className='flex w-full'>
+                                    <div className="relative w-1/3 aspect-square">
+                                        <Image
+                                            src={article.imageUrl}
+                                            alt={article.title}
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform"
+                                            data-ai-hint={article.imageHint}
+                                        />
+                                    </div>
+                                    <div className="p-4 w-2/3">
+                                        <h3 className="font-semibold text-base line-clamp-2 group-hover:text-primary">
+                                            {article.title}
+                                        </h3>
+                                        <p className="text-muted-foreground line-clamp-2 text-sm mt-1">{article.aiSummary}</p>
+                                    </div>
+                                </Link>
+                            </Card>
+                         )
+                    })}
                 </div>
             </div>
         </section>
@@ -300,20 +317,24 @@ export default function HomePageClient({
         <section>
           <SectionHeader title="খেলা" categorySlug="খেলা" />
            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-            {sportsArticles.map((article) => (
-              <Link key={article.id} href={`/${article.slug}`} className="flex items-center gap-4 group">
-                  <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden">
-                      <Image 
-                          src={article.imageUrl}
-                          alt={article.title}
-                          fill
-                          className="object-cover"
-                          data-ai-hint={article.imageHint}
-                      />
-                  </div>
-                  <h3 className="font-semibold text-base group-hover:text-primary">{article.title}</h3>
-              </Link>
-            ))}
+            {sportsArticles.map((article) => {
+                const categorySlug = generateNonAiSlug(article.category || "BartaNow-Unnamed");
+                const articleUrl = `/${categorySlug}/${article.slug}`;
+                return (
+                    <Link key={article.id} href={articleUrl} className="flex items-center gap-4 group">
+                        <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden">
+                            <Image 
+                                src={article.imageUrl}
+                                alt={article.title}
+                                fill
+                                className="object-cover"
+                                data-ai-hint={article.imageHint}
+                            />
+                        </div>
+                        <h3 className="font-semibold text-base group-hover:text-primary">{article.title}</h3>
+                    </Link>
+                )
+            })}
           </div>
         </section>
       )}
@@ -323,25 +344,29 @@ export default function HomePageClient({
         <section>
           <SectionHeader title="বিনোদন" categorySlug="বিনোদন" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {entertainmentArticles.map((article) => (
-              <Link key={article.id} href={`/${article.slug}`} className="block group">
-                  <Card className="overflow-hidden">
-                      <div className="relative aspect-square w-full">
-                          <Image
-                              src={article.imageUrl}
-                              alt={article.title}
-                              fill
-                              className="object-cover group-hover:scale-105 transition-transform"
-                              data-ai-hint={article.imageHint}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                          <h3 className="font-headline text-lg text-white absolute bottom-4 left-4 right-4 group-hover:text-primary/90">
-                              {article.title}
-                          </h3>
-                      </div>
-                  </Card>
-              </Link>
-            ))}
+            {entertainmentArticles.map((article) => {
+                const categorySlug = generateNonAiSlug(article.category || "BartaNow-Unnamed");
+                const articleUrl = `/${categorySlug}/${article.slug}`;
+                return (
+                    <Link key={article.id} href={articleUrl} className="block group">
+                        <Card className="overflow-hidden">
+                            <div className="relative aspect-square w-full">
+                                <Image
+                                    src={article.imageUrl}
+                                    alt={article.title}
+                                    fill
+                                    className="object-cover group-hover:scale-105 transition-transform"
+                                    data-ai-hint={article.imageHint}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                                <h3 className="font-headline text-lg text-white absolute bottom-4 left-4 right-4 group-hover:text-primary/90">
+                                    {article.title}
+                                </h3>
+                            </div>
+                        </Card>
+                    </Link>
+                )
+            })}
           </div>
         </section>
       )}

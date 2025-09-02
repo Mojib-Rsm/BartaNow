@@ -1,6 +1,5 @@
 
-import { getArticles, getAllPages, getAllAuthors } from '@/lib/api';
-import { mockDb } from '@/lib/data'; // For categories
+import { getArticles, getAllPages, getAllAuthors, getAllCategories } from '@/lib/api';
 
 const URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002';
 
@@ -28,10 +27,11 @@ function generateSiteMap(
      
      <!-- Article pages -->
      ${articles
-       .map(({ slug, publishedAt }) => {
+       .map(({ category, slug, publishedAt }) => {
+         const categorySlug = category?.replace(/\s+/g, '-') || 'BartaNow-Unnamed';
          return `
        <url>
-           <loc>${`${URL}/${slug}`}</loc>
+           <loc>${`${URL}/${encodeURIComponent(categorySlug)}/${slug}`}</loc>
            <lastmod>${publishedAt}</lastmod>
            <changefreq>weekly</changefreq>
            <priority>0.8</priority>
@@ -59,7 +59,7 @@ function generateSiteMap(
         .map((category) => {
             return `
         <url>
-            <loc>${`${URL}/category/${encodeURIComponent(category)}`}</loc>
+            <loc>${`${URL}/category/${encodeURIComponent(category.slug)}`}</loc>
             <lastmod>${new Date().toISOString()}</lastmod>
             <changefreq>daily</changefreq>
             <priority>0.9</priority>
@@ -89,8 +89,7 @@ export async function GET() {
   const { articles } = await getArticles({ limit: 1000 }); // Fetch all articles
   const pages = await getAllPages();
   const authors = await getAllAuthors();
-  const categories = [...new Set(mockDb.articles.map(a => a.category))];
-
+  const categories = await getAllCategories();
 
   const body = generateSiteMap(articles, pages, authors, categories);
 

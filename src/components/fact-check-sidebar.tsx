@@ -1,10 +1,11 @@
+
 'use client';
 
 import type { Article } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { CheckCircle2, XCircle, AlertTriangle, ShieldQuestion } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, generateNonAiSlug } from '@/lib/utils';
 
 type FactCheckSidebarProps = {
     articles: Article[];
@@ -33,11 +34,13 @@ export default function FactCheckSidebar({ articles }: FactCheckSidebarProps) {
           {articles.map((article) => {
             const verdictInfo = article.factCheck?.verdict ? verdictMap[article.factCheck.verdict] : null;
             const Icon = verdictInfo?.icon || ShieldQuestion;
+            const categorySlug = generateNonAiSlug(article.category || "BartaNow-Unnamed");
+            const articleUrl = `/${categorySlug}/${article.slug}`;
 
             return (
                  <li key={article.id} className="flex items-start gap-3">
                     {verdictInfo && <Icon className={cn("h-5 w-5 mt-1 shrink-0", verdictInfo.color)} />}
-                    <Link href={`/${article.slug}`} className="group">
+                    <Link href={articleUrl} className="group">
                         <h3 className="font-semibold text-sm leading-snug group-hover:text-primary transition-colors">
                             {article.title}
                         </h3>

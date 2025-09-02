@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { Badge } from './ui/badge';
+import { generateNonAiSlug } from '@/lib/utils';
 
 type ArticleCardProps = {
   article: Article;
@@ -12,7 +13,8 @@ type ArticleCardProps = {
 
 export default function ArticleCard({ article }: ArticleCardProps) {
   const formattedDate = format(new Date(article.publishedAt), "d MMMM, yyyy", { locale: bn });
-  const articleUrl = `/${article.slug}`;
+  const categorySlug = generateNonAiSlug(article.category || "BartaNow-Unnamed");
+  const articleUrl = `/${categorySlug}/${article.slug}`;
 
   return (
     <Card className="flex flex-col overflow-hidden bg-card rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 group border">

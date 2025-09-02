@@ -9,6 +9,7 @@ import { summarizeArticle } from '@/ai/flows/summarize-article';
 import { sendMail } from './mailer';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { getNewCommentEmailHtml } from './email-templates/new-comment-email';
+import { generateNonAiSlug } from './utils';
 
 const useFirestore = process.env.DATABASE_TYPE === 'firestore';
 
@@ -35,17 +36,6 @@ if (useFirestore) {
     console.log("Using mock data (simulating local database).");
 }
 
-
-// Helper to generate a slug from a title
-const generateNonAiSlug = (title: string) => {
-    return title
-        .toLowerCase()
-        .replace(/\s+/g, '-') // Replace spaces with -
-        .replace(/[^\p{L}\p{N}-]/gu, '') // Remove all non-alphanumeric characters except dashes
-        .replace(/--+/g, '-') // Replace multiple - with single -
-        .replace(/^-+/, '') // Trim - from start of text
-        .replace(/-+$/, ''); // Trim - from end of text
-};
 
 export async function generateSummariesForMockData() {
     if (mockDb.articles.every(a => a.aiSummary)) {
@@ -90,7 +80,7 @@ async function getMockArticles({ page = 1, limit = 6, category, authorId, exclud
     if (excludeId) filteredArticles = filteredArticles.filter(a => a.id !== excludeId);
     if (query) {
         const q = query.toLowerCase();
-        filteredArticles = filteredArticles.filter(a => a.title.toLowerCase().includes(q) || a.content.toLowerCase().includes(q));
+        filteredArticles = filteredArticles.filter(a => a.title.toLowerCase().includes(q) || (a.content && a.content.toLowerCase().includes(q)));
     }
     if (hasVideo) filteredArticles = filteredArticles.filter(a => !!a.videoUrl);
     if (editorsPick) filteredArticles = filteredArticles.filter(a => a.editorsPick);
@@ -112,7 +102,8 @@ async function getMockArticleById(id: string) {
 }
 
 async function getMockArticleBySlug(slug: string): Promise<Article | undefined> {
-    const article = mockDb.articles.find((article) => article.slug === slug);
+    const normalizedSlug = slug.toLowerCase().replace(/^-+|-+$/g, '');
+    const article = mockDb.articles.find((article) => article.slug.toLowerCase().replace(/^-+|-+$/g, '') === normalizedSlug);
     if(article) return article;
     return undefined;
 }
@@ -585,7 +576,8 @@ async function getFirestoreArticleById(id: string): Promise<Article | undefined>
 }
 
 async function getFirestoreArticleBySlug(slug: string): Promise<Article | undefined> {
-    const snapshot = await db.collection('articles').where('slug', '==', slug).limit(1).get();
+    const normalizedSlug = slug.toLowerCase().replace(/^-+|-+$/g, '');
+    const snapshot = await db.collection('articles').where('slug', '==', normalizedSlug).limit(1).get();
     if (snapshot.empty) return undefined;
     return snapshot.docs[0].data() as Article;
 }
@@ -981,7 +973,7 @@ async function createFirestoreCategory(data: Omit<Category, 'id'>): Promise<Cate
     const newCategory: Category = {
         id: `cat-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         ...data,
-        slug: slug,
+        slug: slug.slug,
     };
     await db.collection('categories').doc(newCategory.id).set(newCategory);
     return newCategory;
@@ -1378,4 +1370,3 @@ export async function getAllAds(): Promise<Ad[]> {
      // Firestore implementation would be similar to others
     return getMockAllAds();
 }
-

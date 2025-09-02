@@ -6,6 +6,7 @@ import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
+import { generateNonAiSlug } from '@/lib/utils';
 
 type FactCheckCardProps = {
   article: Article;
@@ -23,7 +24,9 @@ export default function FactCheckCard({ article }: FactCheckCardProps) {
   const verdictInfo = verdictMap[article.factCheck.verdict];
   const Icon = verdictInfo.icon;
   const formattedDate = format(new Date(article.publishedAt), "d MMMM, yyyy", { locale: bn });
-  const articleUrl = `/${article.slug}`;
+  const categorySlug = generateNonAiSlug(article.category || "BartaNow-Unnamed");
+  const articleUrl = `/${categorySlug}/${article.slug}`;
+
 
   return (
     <Card className={cn(
