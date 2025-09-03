@@ -21,11 +21,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format, isFuture } from 'date-fns';
 import { bn } from 'date-fns/locale';
-import { Textarea } from '@/components/ui/textarea';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { useDebouncedCallback } from 'use-debounce';
 import type { Article } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
+import { Editor } from '@tinymce/tinymce-react';
 
 
 const formSchema = z.object({
@@ -268,10 +268,30 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
 
           <div className="grid gap-2">
             <Label htmlFor="content">কনটেন্ট</Label>
-            <Textarea
-                id="content"
-                rows={15}
-                {...form.register('content')}
+            <Controller
+                name="content"
+                control={form.control}
+                render={({ field }) => (
+                     <Editor
+                        apiKey="YOUR_TINYMCE_API_KEY" // Replace with your TinyMCE API key
+                        value={field.value}
+                        onEditorChange={field.onChange}
+                        init={{
+                            height: 500,
+                            menubar: true,
+                            plugins: [
+                                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                            ],
+                            toolbar: 'undo redo | blocks | ' +
+                                'bold italic forecolor | alignleft aligncenter ' +
+                                'alignright alignjustify | bullist numlist outdent indent | ' +
+                                'removeformat | help',
+                            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                        }}
+                    />
+                )}
             />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>

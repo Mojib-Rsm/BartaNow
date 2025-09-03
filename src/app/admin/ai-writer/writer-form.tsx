@@ -24,6 +24,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Editor } from '@tinymce/tinymce-react';
 
 const formSchema = z.object({
   prompt: z.string().min(5, { message: 'বিষয়টি কমপক্ষে ৫ অক্ষরের হতে হবে।' }),
@@ -259,10 +260,18 @@ export default function WriterForm() {
                                 </div>
                                 <div>
                                     <Label>কনটেন্ট</Label>
-                                    <div
-                                        className="prose dark:prose-invert max-w-none border rounded-md p-4 h-96 overflow-y-auto bg-background"
-                                        dangerouslySetInnerHTML={{ __html: variant.content }}
-                                    />
+                                    <Editor
+                                        apiKey="YOUR_TINYMCE_API_KEY" // Replace with your TinyMCE API key
+                                        value={variant.content}
+                                        init={{
+                                            height: 500,
+                                            menubar: false,
+                                            plugins: 'lists link image code wordcount',
+                                            toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link image | code',
+                                            readonly: true,
+                                            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                                        }}
+                                     />
                                 </div>
                              </TabsContent>
                          ))}

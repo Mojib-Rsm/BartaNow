@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -13,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { createPageAction } from '@/app/actions';
 import Link from 'next/link';
-import { Textarea } from '@/components/ui/textarea';
+import { Editor } from '@tinymce/tinymce-react';
 
 const formSchema = z.object({
   title: z.string().min(3, "শিরোনাম কমপক্ষে ৩ অক্ষরের হতে হবে।"),
@@ -79,10 +80,30 @@ export default function PageCreateForm() {
 
           <div className="grid gap-2">
             <Label htmlFor="content">কনটেন্ট</Label>
-            <Textarea
-                id="content"
-                rows={15}
-                {...form.register('content')}
+             <Controller
+                name="content"
+                control={form.control}
+                render={({ field }) => (
+                     <Editor
+                        apiKey="YOUR_TINYMCE_API_KEY" // Replace with your TinyMCE API key
+                        value={field.value}
+                        onEditorChange={field.onChange}
+                        init={{
+                            height: 500,
+                            menubar: true,
+                            plugins: [
+                                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                            ],
+                            toolbar: 'undo redo | blocks | ' +
+                                'bold italic forecolor | alignleft aligncenter ' +
+                                'alignright alignjustify | bullist numlist outdent indent | ' +
+                                'removeformat | help',
+                            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                        }}
+                    />
+                )}
             />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>
