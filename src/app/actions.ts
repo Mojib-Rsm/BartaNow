@@ -1110,18 +1110,6 @@ export async function deleteRssFeedAction(feedId: string) {
     }
 }
 
-// Action for TinyMCE image uploads
-export async function uploadInArticleImageAction(base64Image: string, fileName: string): Promise<{ location: string } | { error: { message: string } }> {
-    try {
-        const imageUrl = await uploadImage(base64Image, fileName);
-        return { location: imageUrl };
-    } catch (error) {
-        console.error("In-article image upload error:", error);
-        const message = error instanceof Error ? error.message : 'Image upload failed';
-        return { error: { message } };
-    }
-}
-
 export async function getArticlesByMediaUrlAction(url: string) {
     return getArticlesByMediaUrl(url);
 }

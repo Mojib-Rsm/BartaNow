@@ -24,7 +24,7 @@ import { bn } from 'date-fns/locale';
 import { getAllUsers } from '@/lib/api';
 import { useAuthorization } from '@/hooks/use-authorization';
 import { Progress } from '@/components/ui/progress';
-import RichTextEditor from '@/components/rich-text-editor';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
   id: z.string(),
@@ -264,15 +264,10 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
 
           <div className="grid gap-2">
             <Label htmlFor="content">কনটেন্ট</Label>
-             <Controller
-                name="content"
-                control={form.control}
-                render={({ field }) => (
-                    <RichTextEditor
-                        value={field.value}
-                        onChange={field.onChange}
-                    />
-                )}
+            <Textarea
+                id="content"
+                rows={15}
+                {...form.register('content')}
             />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>

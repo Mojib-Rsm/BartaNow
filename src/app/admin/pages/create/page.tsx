@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { createPageAction } from '@/app/actions';
 import Link from 'next/link';
-import RichTextEditor from '@/components/rich-text-editor';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
   title: z.string().min(3, "শিরোনাম কমপক্ষে ৩ অক্ষরের হতে হবে।"),
@@ -79,15 +79,10 @@ export default function PageCreateForm() {
 
           <div className="grid gap-2">
             <Label htmlFor="content">কনটেন্ট</Label>
-            <Controller
-                name="content"
-                control={form.control}
-                render={({ field }) => (
-                    <RichTextEditor
-                        value={field.value}
-                        onChange={field.onChange}
-                    />
-                )}
+            <Textarea
+                id="content"
+                rows={15}
+                {...form.register('content')}
             />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>

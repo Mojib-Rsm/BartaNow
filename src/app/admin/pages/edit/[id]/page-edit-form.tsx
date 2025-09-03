@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { updatePageAction } from '@/app/actions';
 import Link from 'next/link';
-import RichTextEditor from '@/components/rich-text-editor';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
   id: z.string(),
@@ -84,15 +84,10 @@ export default function PageEditForm({ page }: PageEditFormProps) {
 
           <div className="grid gap-2">
             <Label htmlFor="content">কনটেন্ট</Label>
-            <Controller
-                name="content"
-                control={form.control}
-                render={({ field }) => (
-                    <RichTextEditor
-                        value={field.value}
-                        onChange={field.onChange}
-                    />
-                )}
+            <Textarea
+                id="content"
+                rows={15}
+                {...form.register('content')}
             />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>

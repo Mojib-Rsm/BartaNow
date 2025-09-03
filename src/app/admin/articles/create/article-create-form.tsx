@@ -25,7 +25,6 @@ import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { useDebouncedCallback } from 'use-debounce';
 import type { Article } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
-import RichTextEditor from '@/components/rich-text-editor';
 
 
 const formSchema = z.object({
@@ -266,15 +265,10 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
 
           <div className="grid gap-2">
             <Label htmlFor="content">কনটেন্ট</Label>
-            <Controller
-                name="content"
-                control={form.control}
-                render={({ field }) => (
-                    <RichTextEditor
-                        value={field.value}
-                        onChange={field.onChange}
-                    />
-                )}
+            <Textarea
+                id="content"
+                rows={15}
+                {...form.register('content')}
             />
              {form.formState.errors.content && (
               <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>
