@@ -80,7 +80,7 @@ const articleGenerationPrompt = ai.definePrompt({
 
 **Your Task:**
 1.  **Generate a Title:** Create a compelling, SEO-friendly headline based on the keyword.
-2.  **Generate Content:** Write a well-structured news article with an introduction, body (multiple paragraphs), and conclusion. Format the content using HTML paragraphs (e.g., <p>paragraph one.</p><p>paragraph two.</p>). Do not use any other HTML tags.
+2.  **Generate Content:** Write a well-structured news article with an introduction, body (multiple paragraphs), and conclusion. Format the content using HTML paragraphs (e.g., <p>paragraph one.</p><p>paragraph two.</p>). Do not use any other HTML tags. Do not invent facts or figures; write based on general knowledge.
 3.  **Generate Summary:** Write a concise, engaging summary of the article (under 160 characters) suitable for a meta description.
 4.  **Generate Tags & Keywords:**
     -   Suggest 3-5 relevant, general tags.
