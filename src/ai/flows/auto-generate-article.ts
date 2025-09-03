@@ -12,8 +12,8 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { generateNonAiSlug } from '@/lib/utils';
 import { uploadImage } from '@/lib/imagekit';
+import { generateNonAiSlug } from '@/lib/utils';
 
 const AutoGenerateArticleInputSchema = z.object({
   keyword: z.string().describe('The keyword or topic for the news article.'),
@@ -54,7 +54,7 @@ export async function autoGenerateArticle(input: AutoGenerateArticleInput): Prom
   if (!imageDataUri) {
     throw new Error('Failed to generate an image for the article.');
   }
-
+  
   // 3. Upload the generated image to ImageKit
   const uploadedImageUrl = await uploadImage(imageDataUri, `${articleData.slug}-featured-image.png`);
 
