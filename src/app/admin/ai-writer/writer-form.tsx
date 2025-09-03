@@ -320,5 +320,3 @@ export default function WriterForm() {
     </div>
   );
 }
-
-    
