@@ -63,6 +63,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
         { path: '/admin/articles/create', label: 'Add New' },
         { path: '/admin/pages', label: 'Pages' },
         { path: '/admin/articles/categories', label: 'Categories' },
+        { path: '/admin/articles/tags', label: 'Tags' },
     ],
   },
    {

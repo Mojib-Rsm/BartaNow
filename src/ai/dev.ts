@@ -12,3 +12,4 @@ import '@/ai/flows/rank-headline.ts';
 import '@/ai/flows/suggest-tags.ts';
 import '@/ai/flows/analyze-image.ts';
 import '@/ai/flows/auto-generate-article.ts';
+import '@/ai/flows/suggest-related-articles.ts';

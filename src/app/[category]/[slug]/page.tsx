@@ -1,6 +1,6 @@
 
 
-import { getArticleBySlug, getArticles } from '@/lib/api';
+import { getArticleBySlug, getArticles, getArticleById } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,6 +16,7 @@ import TrendingSidebar from '@/components/trending-sidebar';
 import AudioPlayer from '@/components/audio-player';
 import FactCheckMeter from '@/components/fact-check-meter';
 import BookmarkButton from '@/components/bookmark-button';
+import { suggestRelatedArticles } from '@/ai/flows/suggest-related-articles';
  
 type Props = {
   params: { slug: string, category: string }
@@ -69,14 +70,12 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
   }
 
   // Fetch related and trending articles
-  const [related, trending] = await Promise.all([
-    getArticles({ 
-      category: article.category, 
-      limit: 4, 
-      excludeId: article.id 
-    }),
+  const [relatedArticleIds, trending] = await Promise.all([
+    suggestRelatedArticles({ articleId: article.id, articleTitle: article.title, articleContent: article.content }),
     getArticles({ limit: 5 }) // Assuming most recent are "trending" for the sidebar
   ]);
+
+  const relatedArticles = (await Promise.all(relatedArticleIds.map(id => getArticleById(id)))).filter(Boolean);
 
   const authorInitials = article.authorName
     .split(' ')
@@ -175,7 +174,7 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
                 </div>
             </article>
             
-            <RelatedArticles articles={related.articles} />
+            <RelatedArticles articles={relatedArticles} />
             
             <CommentsSection articleId={article.id} />
         </div>
