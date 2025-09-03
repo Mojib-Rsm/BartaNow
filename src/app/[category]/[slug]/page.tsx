@@ -17,6 +17,7 @@ import AudioPlayer from '@/components/audio-player';
 import FactCheckMeter from '@/components/fact-check-meter';
 import BookmarkButton from '@/components/bookmark-button';
 import { suggestRelatedArticles } from '@/ai/flows/suggest-related-articles';
+import { generateNonAiSlug } from '@/lib/utils';
  
 type Props = {
   params: { slug: string, category: string }
@@ -26,28 +27,35 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const article = await getArticleBySlug(decodeURIComponent(params.slug))
+  const article = await getArticleBySlug(decodeURIComponent(params.slug));
  
   if (!article) {
     return {
         title: 'Article not found'
     }
   }
+
+  const siteName = 'বার্তা নাও';
+  const seoTitle = `${article.title} | ${siteName}`;
+  const description = article.aiSummary || article.content.substring(0, 160);
+  const keywords = [...(article.tags || []), ...(article.focusKeywords || [])];
  
   const openGraphImages = article.imageUrl ? [{
         url: article.imageUrl,
-        width: 800,
-        height: 600,
+        width: 1200,
+        height: 630,
         alt: article.title,
     }] : [];
 
   return {
-    title: article.title,
-    description: article.aiSummary,
-    keywords: article.focusKeywords,
+    title: seoTitle,
+    description: description,
+    keywords: keywords,
     openGraph: {
-        title: article.title,
-        description: article.aiSummary,
+        title: seoTitle,
+        description: description,
+        url: `/${generateNonAiSlug(article.category)}/${article.slug}`,
+        siteName: siteName,
         type: 'article',
         publishedTime: article.publishedAt,
         authors: [article.authorName],
@@ -55,9 +63,10 @@ export async function generateMetadata(
     },
     twitter: {
         card: 'summary_large_image',
-        title: article.title,
-        description: article.aiSummary,
+        title: seoTitle,
+        description: description,
         images: article.imageUrl ? [article.imageUrl] : [],
+        creator: '@BartaNow', // Replace with actual Twitter handle
     },
   }
 }
@@ -75,7 +84,7 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
     getArticles({ limit: 5 }) // Assuming most recent are "trending" for the sidebar
   ]);
 
-  const relatedArticles = (await Promise.all(relatedArticleIds.map(id => getArticleById(id)))).filter(Boolean);
+  const relatedArticles = (await Promise.all(relatedArticleIds.map(id => getArticleById(id)))).filter(Boolean).map(a => a as Article);
 
   const authorInitials = article.authorName
     .split(' ')
@@ -92,7 +101,7 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     headline: article.title,
-    image: [article.imageUrl],
+    image: article.imageUrl ? [article.imageUrl] : [],
     datePublished: article.publishedAt,
     dateModified: article.publishedAt, // Or a last updated field if you have one
     author: [{
@@ -100,8 +109,16 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
         name: article.authorName,
         url: `/authors/${article.authorId}`,
     }],
+    publisher: {
+        '@type': 'Organization',
+        name: 'বার্তা নাও',
+        logo: {
+            '@type': 'ImageObject',
+            url: 'https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/refs/heads/main/public/log-heado.png', // Replace with your actual logo URL
+        },
+    },
     description: article.aiSummary,
-    articleBody: article.content,
+    articleBody: article.content.replace(/<[^>]*>?/gm, ''), // Stripped HTML for articleBody
   };
 
   return (

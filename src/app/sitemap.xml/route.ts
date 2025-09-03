@@ -1,5 +1,7 @@
 
+
 import { getArticles, getAllPages, getAllAuthors, getAllCategories } from '@/lib/api';
+import { generateNonAiSlug } from '@/lib/utils';
 
 const URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002';
 
@@ -28,7 +30,7 @@ function generateSiteMap(
      <!-- Article pages -->
      ${articles
        .map(({ category, slug, publishedAt }) => {
-         const categorySlug = category?.replace(/\s+/g, '-') || 'BartaNow-Unnamed';
+         const categorySlug = generateNonAiSlug(category || "BartaNow-Unnamed");
          return `
        <url>
            <loc>${`${URL}/${encodeURIComponent(categorySlug)}/${slug}`}</loc>
