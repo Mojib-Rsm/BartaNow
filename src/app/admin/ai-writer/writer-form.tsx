@@ -115,7 +115,8 @@ export default function WriterForm() {
         category: selectedVariant.category,
         slug: slug,
         status: status,
-        publishedAt: finalPublishedAt.toISOString()
+        publishedAt: finalPublishedAt.toISOString(),
+        isAiGenerated: 'true',
     });
     router.push(`/admin/articles/create?${params.toString()}`);
   }

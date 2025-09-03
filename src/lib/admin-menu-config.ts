@@ -31,6 +31,7 @@ import {
   FileClock,
   FileWarning,
   Plug,
+  History,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -64,10 +65,14 @@ export const adminMenuConfig: AdminMenuItem[] = [
     ],
   },
    {
-    path: '/admin/ai-writer',
+    path: '#ai-writer',
     label: 'AI Writer',
     icon: BrainCircuit,
     roles: ['admin', 'editor', 'reporter'],
+    children: [
+        { path: '/admin/ai-writer', label: 'Generate New' },
+        { path: '/admin/ai-writer/history', label: 'History' },
+    ],
   },
   {
     path: '#staff-manages',

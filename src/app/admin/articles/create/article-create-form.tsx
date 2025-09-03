@@ -40,6 +40,7 @@ const formSchema = z.object({
   tags: z.string().optional(),
   focusKeywords: z.string().optional(),
   status: z.enum(['Draft', 'Pending Review', 'Published']),
+  isAiGenerated: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -72,6 +73,7 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
       tags: '',
       focusKeywords: '',
       status: (searchParams.get('status') as FormValues['status']) || 'Draft',
+      isAiGenerated: searchParams.get('isAiGenerated') === 'true',
     },
   });
 

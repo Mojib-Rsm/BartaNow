@@ -105,6 +105,7 @@ export interface Article {
   englishTitle?: string;
   focusKeywords?: string[];
   status: 'Published' | 'Draft' | 'Pending Review' | 'Scheduled';
+  isAiGenerated?: boolean;
 }
 
 export interface Page {

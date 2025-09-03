@@ -281,7 +281,8 @@ export async function updateArticleAction(data: z.infer<typeof articleSchema>) {
 }
 
 const createArticleSchema = articleSchema.omit({ id: true }).extend({
-    userId: z.string()
+    userId: z.string(),
+    isAiGenerated: z.boolean().optional(),
 });
 type CreateArticleFormValues = z.infer<typeof createArticleSchema>;
 
@@ -332,6 +333,7 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             tags: data.tags,
             englishTitle: data.englishTitle,
             focusKeywords: data.focusKeywords,
+            isAiGenerated: data.isAiGenerated || false,
         };
 
         const newArticle = await createArticle(newArticleData);
