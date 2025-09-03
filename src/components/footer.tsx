@@ -12,7 +12,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
           <div className="md:col-span-1">
-            <h3 className="font-bold text-lg text-primary font-headline mb-2">বার্তা নাও</h3>
+            <h3 className="font-bold text-lg text-primary font-headline mb-2">BartaNow | বার্তা নাও</h3>
             <p className="text-muted-foreground text-sm">
               সর্বশেষ এবং নির্ভরযোগ্য সংবাদের জন্য আপনার বিশ্বস্ত উৎস।
             </p>
@@ -54,7 +54,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t mt-8 pt-4 text-center text-muted-foreground text-sm">
-          <p>&copy; {yearInBangla} বার্তা নাও। সর্বসত্ত্ব সংরক্ষিত।</p>
+          <p>&copy; {yearInBangla} BartaNow | বার্তা নাও। সর্বসত্ত্ব সংরক্ষিত।</p>
         </div>
       </div>
     </footer>

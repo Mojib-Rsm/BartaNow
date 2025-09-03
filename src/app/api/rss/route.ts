@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   const feed = new RSS({
-    title: 'বার্তা নাও | সর্বশেষ সংবাদ',
+    title: 'BartaNow | বার্তা নাও - সর্বশেষ সংবাদ',
     description: 'বার্তা নাও থেকে সর্বশেষ এবং নির্ভরযোগ্য সংবাদের জন্য আপনার বিশ্বস্ত উৎস।',
     feed_url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/rss`,
     site_url: `${process.env.NEXT_PUBLIC_SITE_URL}`,

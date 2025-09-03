@@ -35,7 +35,7 @@ export async function generateMetadata(
     }
   }
 
-  const siteName = 'বার্তা নাও';
+  const siteName = 'BartaNow | বার্তা নাও';
   const seoTitle = `${article.title} | ${siteName}`;
   const description = article.aiSummary || article.content.substring(0, 160);
   const keywords = [...(article.tags || []), ...(article.focusKeywords || [])];
@@ -111,7 +111,7 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
     }],
     publisher: {
         '@type': 'Organization',
-        name: 'বার্তা নাও',
+        name: 'BartaNow | বার্তা নাও',
         logo: {
             '@type': 'ImageObject',
             url: 'https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/refs/heads/main/public/log-heado.png', // Replace with your actual logo URL
