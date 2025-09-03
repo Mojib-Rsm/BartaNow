@@ -6,7 +6,6 @@ import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import './globals.css';
-import PushNotificationManager from '@/components/push-notification-manager';
 import { ThemeProvider } from '@/components/theme-provider';
 import GoogleAnalytics from '@/components/google-analytics';
 import { usePathname } from 'next/navigation';
@@ -79,7 +78,6 @@ export default function RootLayout({
           
           <RootContent>{children}</RootContent>
 
-          <PushNotificationManager />
           <Toaster />
         </ThemeProvider>
       </body>
