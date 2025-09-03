@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, ChangeEvent, useEffect } from 'react';
@@ -11,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, BrainCircuit, Lightbulb, Sparkles } from 'lucide-react';
+import { Loader2, Upload, BrainCircuit, Lightbulb, Sparkles, Badge as BadgeIcon } from 'lucide-react';
 import { createArticleAction, rankHeadlineAction, suggestTagsAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -40,6 +41,7 @@ const formSchema = z.object({
   focusKeywords: z.string().optional(),
   status: z.enum(['Draft', 'Pending Review', 'Published']),
   isAiGenerated: z.boolean().optional(),
+  badge: z.enum(['নতুন', 'জনপ্রিয়', '__none__']).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -73,6 +75,7 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
       focusKeywords: '',
       status: (searchParams.get('status') as FormValues['status']) || 'Draft',
       isAiGenerated: searchParams.get('isAiGenerated') === 'true',
+      badge: '__none__',
     },
   });
 
@@ -332,6 +335,25 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
                                     <SelectItem value="Draft">Draft</SelectItem>
                                     <SelectItem value="Pending Review">Pending Review</SelectItem>
                                     <SelectItem value="Published">Published</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        )}
+                    />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="badge">ব্যাজ (ঐচ্ছিক)</Label>
+                     <Controller
+                        control={form.control}
+                        name="badge"
+                        render={({ field }) => (
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <SelectTrigger id="badge">
+                                    <SelectValue placeholder="ব্যাজ নির্বাচন করুন" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="__none__">কোনোটিই নয়</SelectItem>
+                                    <SelectItem value="নতুন">নতুন</SelectItem>
+                                    <SelectItem value="জনপ্রিয়">জনপ্রিয়</SelectItem>
                                 </SelectContent>
                             </Select>
                         )}

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, ChangeEvent, useEffect } from 'react';
@@ -12,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, Sparkles, BrainCircuit } from 'lucide-react';
+import { Loader2, Upload, Sparkles, BrainCircuit, Badge as BadgeIcon } from 'lucide-react';
 import { rankHeadlineAction, suggestTagsAction, updateArticleAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -40,6 +41,7 @@ const formSchema = z.object({
   focusKeywords: z.string().optional(),
   authorId: z.string(),
   status: z.enum(['Draft', 'Pending Review', 'Published', 'Scheduled']),
+  badge: z.enum(['নতুন', 'জনপ্রিয়', '__none__']).optional(),
 });
 
 
@@ -86,6 +88,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
       focusKeywords: article.focusKeywords?.join(', ') || '',
       authorId: article.authorId,
       status: article.status,
+      badge: article.badge || '__none__',
     },
   });
   
@@ -332,6 +335,25 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
                                 <SelectItem value="Pending Review">Pending Review</SelectItem>
                                 <SelectItem value="Published">Published</SelectItem>
                                 <SelectItem value="Scheduled">Scheduled</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
+                />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="badge">ব্যাজ (ঐচ্ছিক)</Label>
+                    <Controller
+                    control={form.control}
+                    name="badge"
+                    render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <SelectTrigger id="badge">
+                                <SelectValue placeholder="ব্যাজ নির্বাচন করুন" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="__none__">কোনোটিই নয়</SelectItem>
+                                <SelectItem value="নতুন">নতুন</SelectItem>
+                                <SelectItem value="জনপ্রিয়">জনপ্রিয়</SelectItem>
                             </SelectContent>
                         </Select>
                     )}

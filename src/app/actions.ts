@@ -228,6 +228,7 @@ const articleSchema = z.object({
   tags: z.array(z.string()).optional(),
   englishTitle: z.string().optional(),
   focusKeywords: z.array(z.string()).optional(),
+  badge: z.enum(['নতুন', 'জনপ্রিয়', '__none__']).optional(),
 });
 
 
@@ -251,6 +252,7 @@ export async function updateArticleAction(data: z.infer<typeof articleSchema>) {
             tags: data.tags,
             englishTitle: data.englishTitle,
             focusKeywords: data.focusKeywords,
+            badge: data.badge === '__none__' ? undefined : data.badge,
         };
 
         if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
@@ -334,6 +336,7 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             englishTitle: data.englishTitle,
             focusKeywords: data.focusKeywords,
             isAiGenerated: data.isAiGenerated || false,
+            badge: data.badge === '__none__' ? undefined : data.badge,
         };
 
         const newArticle = await createArticle(newArticleData);
@@ -1181,7 +1184,7 @@ export async function createContactMessageAction(data: z.infer<typeof contactMes
         return { success: true, message: 'আপনার বার্তা সফলভাবে পাঠানো হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।' };
     } catch (error) {
         console.error("Create Contact Message Error:", error);
-        return { success: false, message: 'বার্তা পাঠাতে একটি সমস্যা হয়েছে।' };
+        return { success: false, message: errorMessage };
     }
 }
 
