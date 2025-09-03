@@ -61,10 +61,15 @@ export const adminMenuConfig: AdminMenuItem[] = [
     children: [
         { path: '/admin/articles', label: 'All Posts' },
         { path: '/admin/articles/create', label: 'Add New' },
-        { path: '/admin/pages', label: 'Pages' },
         { path: '/admin/articles/categories', label: 'Categories' },
         { path: '/admin/articles/tags', label: 'Tags' },
     ],
+  },
+  {
+    path: '/admin/pages',
+    label: 'Pages',
+    icon: FileText,
+    roles: ['admin', 'editor'],
   },
    {
     path: '#ai-writer',

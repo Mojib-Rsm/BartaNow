@@ -189,7 +189,7 @@ function AdminLayoutContent({
             </SheetContent>
           </Sheet>
           
-          <Button variant="outline">
+          <Button variant="outline" asChild>
               <Link href="/">View Website</Link>
           </Button>
 

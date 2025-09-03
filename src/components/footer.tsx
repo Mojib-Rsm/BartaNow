@@ -21,10 +21,10 @@ export default function Footer() {
             <h3 className="font-bold text-lg text-primary font-headline mb-2">গুরুত্বপূর্ণ লিংক</h3>
             <ul className="space-y-2 text-sm">
               <li><Link href="/archive" className="text-muted-foreground hover:text-primary">আর্কাইভ</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">আমাদের সম্পর্কে</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">যোগাযোগ করুন</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">গোপনীয়তা নীতি</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">ব্যবহারের শর্তাবলী</Link></li>
+              <li><Link href="/p/about-us" className="text-muted-foreground hover:text-primary">আমাদের সম্পর্কে</Link></li>
+              <li><Link href="/contact" className="text-muted-foreground hover:text-primary">যোগাযোগ করুন</Link></li>
+              <li><Link href="/p/privacy-policy" className="text-muted-foreground hover:text-primary">গোপনীয়তা নীতি</Link></li>
+              <li><Link href="/p/terms-of-use" className="text-muted-foreground hover:text-primary">ব্যবহারের শর্তাবলী</Link></li>
             </ul>
           </div>
           <div>
