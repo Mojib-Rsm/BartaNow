@@ -229,6 +229,8 @@ const articleSchema = z.object({
   englishTitle: z.string().optional(),
   focusKeywords: z.array(z.string()).optional(),
   badge: z.enum(['নতুন', 'জনপ্রিয়', '__none__']).optional(),
+  authorId: z.string().optional(),
+  status: z.enum(['Draft', 'Pending Review', 'Published', 'Scheduled']).optional(),
 });
 
 
@@ -253,6 +255,8 @@ export async function updateArticleAction(data: z.infer<typeof articleSchema>) {
             englishTitle: data.englishTitle,
             focusKeywords: data.focusKeywords,
             badge: data.badge === '__none__' ? undefined : data.badge,
+            authorId: data.authorId,
+            status: data.status,
         };
 
         if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
@@ -337,6 +341,7 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             focusKeywords: data.focusKeywords,
             isAiGenerated: data.isAiGenerated || false,
             badge: data.badge === '__none__' ? undefined : data.badge,
+            status: data.status || 'Draft',
         };
 
         const newArticle = await createArticle(newArticleData);
@@ -965,6 +970,7 @@ export async function importWordPressAction(xmlContent: string) {
                 authorName: author.name,
                 authorAvatarUrl: author.avatarUrl || '',
                 publishedAt: new Date(post.pubDate).toISOString(), // Use original date
+                status: 'Published'
             };
 
             await createArticle(newArticleData);
@@ -1184,6 +1190,7 @@ export async function createContactMessageAction(data: z.infer<typeof contactMes
         return { success: true, message: 'আপনার বার্তা সফলভাবে পাঠানো হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।' };
     } catch (error) {
         console.error("Create Contact Message Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.';
         return { success: false, message: errorMessage };
     }
 }
