@@ -1,15 +1,31 @@
+
+import { getArticles } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { format, isFuture } from "date-fns";
+import { bn } from "date-fns/locale";
+import { Clock } from "lucide-react";
 
-const historyLogs = [
-  { id: 'log-1', title: 'স্মার্টফোন বাজারে নতুন বিপ্লব', status: 'Published', publishedAt: '2024-08-01 10:30 AM', generatedBy: 'AI' },
-  { id: 'log-2', title: 'বিশ্বকাপ ক্রিকেটে বাংলাদেশের প্রস্তুতি', status: 'Published', publishedAt: '2024-08-01 10:00 AM', generatedBy: 'AI' },
-  { id: 'log-3', title: 'শেয়ার বাজারে অস্থিরতা', status: 'Skipped', publishedAt: '2024-07-31 05:00 PM', generatedBy: 'Admin' },
-  { id: 'log-4', title: 'মহাকাশে নতুন অভিযান', status: 'Published', publishedAt: '2024-07-31 04:30 PM', generatedBy: 'AI' },
-];
+const statusVariantMap: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
+  Published: 'default',
+  Draft: 'secondary',
+  'Pending Review': 'outline',
+  Scheduled: 'outline',
+};
 
-export function HistoryTab() {
+const statusColorMap: { [key: string]: string } = {
+    Published: 'bg-green-600 hover:bg-green-700',
+    Draft: 'bg-gray-500 hover:bg-gray-600',
+    'Pending Review': 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500 text-black',
+    Scheduled: 'bg-amber-500 hover:bg-amber-600 border-amber-500',
+};
+
+
+export async function HistoryTab() {
+  const { articles: historyLogs } = await getArticles({ isAiGenerated: true, limit: 100 });
+
   return (
     <Card>
       <CardHeader>
@@ -25,22 +41,39 @@ export function HistoryTab() {
               <TableHead>শিরোনাম</TableHead>
               <TableHead>স্ট্যাটাস</TableHead>
               <TableHead>প্রকাশের সময়</TableHead>
-              <TableHead>দ্বারা</TableHead>
+              <TableHead>লেখক</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {historyLogs.map((log) => (
-              <TableRow key={log.id}>
-                <TableCell className="font-medium">{log.title}</TableCell>
-                <TableCell>
-                    <Badge variant={log.status === 'Published' ? 'default' : 'secondary'}>
-                        {log.status}
-                    </Badge>
-                </TableCell>
-                <TableCell>{log.publishedAt}</TableCell>
-                <TableCell>{log.generatedBy}</TableCell>
-              </TableRow>
-            ))}
+            {historyLogs.length > 0 ? historyLogs.map((log) => {
+              const isScheduled = log.status === 'Scheduled' && isFuture(new Date(log.publishedAt));
+              const displayStatus = isScheduled ? 'Scheduled' : log.status;
+              return (
+                <TableRow key={log.id}>
+                    <TableCell className="font-medium">
+                        <Link href={`/admin/articles/edit/${log.id}`} className="hover:underline">
+                            {log.title}
+                        </Link>
+                    </TableCell>
+                    <TableCell>
+                        <Badge 
+                            variant={statusVariantMap[displayStatus] || 'outline'}
+                            className={`${statusColorMap[displayStatus]} text-white`}
+                        >
+                            {isScheduled && <Clock className="mr-1 h-3 w-3" />}
+                            {displayStatus}
+                        </Badge>
+                    </TableCell>
+                    <TableCell>{format(new Date(log.publishedAt), 'd MMM, yyyy h:mm a', { locale: bn })}</TableCell>
+                    <TableCell>{log.authorName}</TableCell>
+                </TableRow>
+            )}) : (
+                 <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                        No history found.
+                    </TableCell>
+                </TableRow>
+            )}
           </TableBody>
         </Table>
       </CardContent>

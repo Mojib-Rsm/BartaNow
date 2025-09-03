@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -19,7 +20,7 @@ export function SettingsTab() {
       autoPostEnabled: true,
       frequency: '30',
       categories: ['রাজনীতি', 'খেলা'],
-      postLength: 'Medium',
+      postLength: '1000',
       language: 'Bangla',
       maxPostsPerDay: 50,
     }
@@ -130,9 +131,10 @@ export function SettingsTab() {
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <SelectTrigger><SelectValue placeholder="দৈর্ঘ্য নির্বাচন করুন" /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Short">ছোট (~১৫০ শব্দ)</SelectItem>
-                            <SelectItem value="Medium">মাঝারি (~৩০০ শব্দ)</SelectItem>
-                            <SelectItem value="Long">বড় (~৫০০ শব্দ)</SelectItem>
+                            <SelectItem value="500">~৫০০ শব্দ</SelectItem>
+                            <SelectItem value="1000">~১০০০ শব্দ</SelectItem>
+                            <SelectItem value="1500">~১৫০০ শব্দ</SelectItem>
+                            <SelectItem value="2000">~২০০০ শব্দ</SelectItem>
                         </SelectContent>
                     </Select>
                 )}

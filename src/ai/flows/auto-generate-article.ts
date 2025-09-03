@@ -18,7 +18,7 @@ import { uploadImage } from '@/lib/imagekit';
 const AutoGenerateArticleInputSchema = z.object({
   keyword: z.string().describe('The keyword or topic for the news article.'),
   language: z.enum(['Bengali', 'English']).default('Bengali'),
-  wordCount: z.enum(['Short', 'Medium', 'Long']).default('Medium'),
+  wordCount: z.enum(['500', '1000', '1500', '2000']).default('1000'),
   category: z.string().default('সর্বশেষ'),
 });
 export type AutoGenerateArticleInput = z.infer<typeof AutoGenerateArticleInputSchema>;
@@ -75,7 +75,7 @@ const articleGenerationPrompt = ai.definePrompt({
 **Instructions:**
 - **Topic Keyword:** {{{keyword}}}
 - **Language:** Generate the article in {{{language}}}. All text output MUST be in this language.
-- **Word Count:** The article should be of {{{wordCount}}} length. (Short: ~150 words, Medium: ~300 words, Long: ~500 words).
+- **Word Count:** The article should be approximately {{{wordCount}}} words long.
 - **Category:** The designated category is "{{{category}}}". Ensure the content is relevant to this category.
 
 **Your Task:**
