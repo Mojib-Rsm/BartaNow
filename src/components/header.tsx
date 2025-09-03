@@ -152,7 +152,6 @@ export default function Header() {
                               </ul>
                           </nav>
                           <div className="p-4 border-t">
-                              <Button variant="outline" className="w-full mb-2">ই-পেপার</Button>
                                <Button asChild className="w-full">
                                 <Link href="/login">লগইন করুন</Link>
                               </Button>
@@ -182,7 +181,6 @@ export default function Header() {
             <div className="flex items-center gap-2">
                 <SearchInput />
                 <ThemeToggle />
-                <Button variant="outline" size="sm" className="hidden md:inline-flex">ই-পেপার</Button>
                  {user ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
