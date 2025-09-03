@@ -32,6 +32,7 @@ import {
   FileWarning,
   Plug,
   History,
+  Bot,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -73,6 +74,12 @@ export const adminMenuConfig: AdminMenuItem[] = [
         { path: '/admin/ai-writer', label: 'Generate New' },
         { path: '/admin/ai-writer/history', label: 'History' },
     ],
+  },
+  {
+    path: '/admin/auto-post',
+    label: 'Auto Post',
+    icon: Bot,
+    roles: ['admin'],
   },
   {
     path: '#staff-manages',
