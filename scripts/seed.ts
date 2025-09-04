@@ -7,33 +7,29 @@ import { translateForSlug } from '@/ai/flows/translate-for-slug';
 // Load environment variables from .env file at the root of the project
 config({ path: '.env' });
 
-// Initialize Firebase Admin SDK
-try {
-  const serviceAccountJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
-  if (!serviceAccountJson) {
-    throw new Error("GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable not set. Please provide your Firebase service account key.");
-  }
-  const serviceAccount = JSON.parse(serviceAccountJson);
-  
-  if (admin.apps.length === 0) {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      });
-  }
-} catch (error) {
-    console.error("Error initializing Firebase Admin SDK:", error);
-    process.exit(1);
+function initializeFirebaseAdmin() {
+    // Initialize Firebase Admin SDK only if not already initialized
+    if (admin.apps.length === 0) {
+        try {
+            const serviceAccountJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+            if (!serviceAccountJson) {
+                throw new Error("GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable not set. Please provide your Firebase service account key.");
+            }
+            const serviceAccount = JSON.parse(serviceAccountJson);
+        
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+            });
+            console.log("Firebase Admin SDK initialized successfully for seeding.");
+        } catch (error) {
+            console.error("Fatal Error: Could not initialize Firebase Admin SDK for seeding.", error);
+            process.exit(1); // Exit if initialization fails, as seeding is not possible.
+        }
+    }
+    return admin.firestore();
 }
 
-const db = admin.firestore();
-
-const articlesCollection = db.collection('articles');
-const usersCollection = db.collection('users');
-const authorsCollection = db.collection('authors');
-const commentsCollection = db.collection('comments');
-const mediaCollection = db.collection('media');
-
-async function seedCollection(name: string, collection: admin.firestore.CollectionReference, data: any[]) {
+async function seedCollection(db: admin.firestore.Firestore, name: string, collection: admin.firestore.CollectionReference, data: any[]) {
     console.log(`Seeding ${data.length} ${name}...`);
     const batch = db.batch();
     data.forEach(item => {
@@ -46,12 +42,21 @@ async function seedCollection(name: string, collection: admin.firestore.Collecti
 
 export async function seedDatabase() {
   console.log('Starting to seed Firestore database...');
+  
+  const db = initializeFirebaseAdmin();
+  
+  const articlesCollection = db.collection('articles');
+  const usersCollection = db.collection('users');
+  const authorsCollection = db.collection('authors');
+  const commentsCollection = db.collection('comments');
+  const mediaCollection = db.collection('media');
+
 
   // Seed Authors, Users, Comments, Media first
-  await seedCollection('authors', authorsCollection, mockDb.authors);
-  await seedCollection('users', usersCollection, mockDb.users);
-  await seedCollection('comments', commentsCollection, mockDb.comments);
-  await seedCollection('media', mediaCollection, mockDb.media);
+  await seedCollection(db, 'authors', authorsCollection, mockDb.authors);
+  await seedCollection(db, 'users', usersCollection, mockDb.users);
+  await seedCollection(db, 'comments', commentsCollection, mockDb.comments);
+  await seedCollection(db, 'media', mediaCollection, mockDb.media);
   
   // Seed Articles with AI-generated slugs
   console.log(`Generating slugs and seeding ${mockDb.articles.length} articles...`);
