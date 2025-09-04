@@ -4,8 +4,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { seedDatabase } from '../../scripts/seed.ts';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById } from '@/lib/api';
-import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem } from '@/lib/api';
+import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -1242,5 +1242,65 @@ export async function analyzeImageAction(mediaId: string, imageUrl: string) {
         console.error("Analyze Image Error:", error);
         const errorMessage = error instanceof Error ? error.message : 'ছবি বিশ্লেষণ করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
+    }
+}
+
+// --- MENU ACTIONS ---
+const menuItemSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "Menu item name must be at least 2 characters."),
+  href: z.string().min(1, "Link is required."),
+});
+
+export async function createMenuItemAction(data: Omit<MenuItem, 'id' | 'order' | 'children' | 'slug'>) {
+    const validation = menuItemSchema.omit({id: true}).safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'Invalid data', errors: validation.error.flatten().fieldErrors };
+    }
+    
+    try {
+        const newItem = await createMenuItem(data);
+        revalidatePath('/admin/appearance/menu');
+        return { success: true, message: 'Menu item created successfully.', item: newItem };
+    } catch (e: any) {
+        return { success: false, message: e.message };
+    }
+}
+
+export async function updateMenuItemAction(id: string, data: Partial<Omit<MenuItem, 'id' | 'order' | 'children'>>) {
+    const validation = menuItemSchema.omit({id: true}).partial().safeParse(data);
+     if (!validation.success) {
+        return { success: false, message: 'Invalid data', errors: validation.error.flatten().fieldErrors };
+    }
+
+    try {
+        const updatedItem = await updateMenuItem(id, data);
+        revalidatePath('/admin/appearance/menu');
+        return { success: true, message: 'Menu item updated successfully.', item: updatedItem };
+    } catch (e: any) {
+        return { success: false, message: e.message };
+    }
+}
+
+export async function deleteMenuItemAction(id: string) {
+    try {
+        await deleteMenuItem(id);
+        revalidatePath('/admin/appearance/menu');
+        return { success: true, message: 'Menu item deleted successfully.' };
+    } catch (e: any) {
+        return { success: false, message: e.message };
+    }
+}
+
+export async function updateMenuOrderAction(items: MenuItem[]) {
+    try {
+        const updates = items.map((item, index) => 
+            updateMenuItem(item.id, { order: index, parentId: item.parentId || null })
+        );
+        await Promise.all(updates);
+        revalidatePath('/admin/appearance/menu');
+        return { success: true, message: 'Menu order updated successfully.' };
+    } catch (e: any) {
+        return { success: false, message: e.message };
     }
 }

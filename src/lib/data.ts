@@ -31,7 +31,7 @@ const users: User[] = [
     { 
         id: 'user-2', 
         name: 'Regular User', 
-        email: 'user@bartanow.com', 
+        email: 'user@bartanow.com', _slug
         password: 'password123',         
         role: 'user',
         avatarUrl: 'https://i.pravatar.cc/150?u=regular-user',
@@ -737,17 +737,17 @@ const polls: Poll[] = [
 ];
 
 const menuItems: MenuItem[] = [
-    { id: '1', name: 'সর্বশেষ', href: '/category/সর্বশেষ', order: 1, children: [] },
-    { id: '2', name: 'জাতীয়', href: '/category/জাতীয়', order: 2, children: [] },
-    { id: '3', name: 'রাজনীতি', href: '/category/রাজনীতি', order: 3, children: [] },
-    { id: '4', name: 'খেলা', href: '/category/খেলা', order: 4, children: [] },
-    { id: '5', name: 'বিনোদন', href: '/category/বিনোদন', order: 5, children: [] },
-    { id: '6', name: 'প্রযুক্তি', href: '/category/প্রযুক্তি', order: 6, children: [] },
-    { id: '7', name: 'আন্তর্জাতিক', href: '/category/আন্তর্জাতিক', order: 7, children: [] },
-    { id: '8', name: 'ইসলামী জীবন', href: '/category/ইসলামী-জীবন', order: 8, children: [] },
-    { id: '9', name: 'বিশেষ কভারেজ', href: '/special-coverage', order: 9, children: [] },
-    { id: '10', name: 'ভিডিও', href: '/category/videos', order: 10, children: [] },
-    { id: '11', name: 'মিম নিউজ', href: '/category/মিম-নিউজ', order: 11, children: [] },
+    { id: '1', name: 'সর্বশেষ', slug: 'latest', href: '/category/সর্বশেষ', order: 1, children: [] },
+    { id: '2', name: 'জাতীয়', slug: 'national', href: '/category/জাতীয়', order: 2, children: [] },
+    { id: '3', name: 'রাজনীতি', slug: 'politics', href: '/category/রাজনীতি', order: 3, children: [] },
+    { id: '4', name: 'খেলা', slug: 'sports', href: '/category/খেলা', order: 4, children: [] },
+    { id: '5', name: 'বিনোদন', slug: 'entertainment', href: '/category/বিনোদন', order: 5, children: [] },
+    { id: '6', name: 'প্রযুক্তি', slug: 'technology', href: '/category/প্রযুক্তি', order: 6, children: [] },
+    { id: '7', name: 'আন্তর্জাতিক', slug: 'international', href: '/category/আন্তর্জাতিক', order: 7, children: [] },
+    { id: '8', name: 'ইসলামী জীবন', slug: 'islamic-life', href: '/category/ইসলামী-জীবন', order: 8, children: [] },
+    { id: '9', name: 'বিশেষ কভারেজ', slug: 'special-coverage', href: '/special-coverage', order: 9, children: [] },
+    { id: '10', name: 'ভিডিও', slug: 'videos', href: '/category/videos', order: 10, children: [] },
+    { id: '11', name: 'মিম নিউজ', slug: 'meme-news', href: '/category/মিম-নিউজ', order: 11, children: [] },
 ];
 
 const subscribers: Subscriber[] = [

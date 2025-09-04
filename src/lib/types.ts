@@ -196,6 +196,7 @@ export interface ContactMessage {
 export interface MenuItem {
   id: string;
   name: string;
+  slug: string;
   href: string;
   order: number;
   parentId?: string | null;
