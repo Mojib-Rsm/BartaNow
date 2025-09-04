@@ -18,7 +18,7 @@ import { suggestTrendingTopics } from '@/ai/flows/suggest-trending-topics';
 import { rankHeadline } from '@/ai/flows/rank-headline';
 import { suggestTagsForArticle } from '@/ai/flows/suggest-tags';
 import { analyzeImage } from '@/ai/flows/analyze-image';
-import { seedDatabase } from '../../../scripts/seed.ts';
+import { seedDatabase } from '../../scripts/seed.ts';
 
 export async function seedAction() {
     return seedDatabase();
