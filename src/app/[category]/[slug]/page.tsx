@@ -18,6 +18,7 @@ import FactCheckMeter from '@/components/fact-check-meter';
 import BookmarkButton from '@/components/bookmark-button';
 import { suggestRelatedArticles } from '@/ai/flows/suggest-related-articles';
 import { generateNonAiSlug } from '@/lib/utils';
+import type { Article } from '@/lib/types';
  
 type Props = {
   params: { slug: string, category: string }
@@ -36,6 +37,7 @@ export async function generateMetadata(
   }
 
   const siteName = 'BartaNow | বার্তা নাও';
+  const articleUrl = `/${generateNonAiSlug(article.category)}/${article.slug}`;
   const seoTitle = `${article.title} | ${siteName}`;
   const description = article.aiSummary || article.content.substring(0, 160);
   const keywords = [...(article.tags || []), ...(article.focusKeywords || [])];
@@ -51,13 +53,17 @@ export async function generateMetadata(
     title: seoTitle,
     description: description,
     keywords: keywords,
+    alternates: {
+        canonical: articleUrl,
+    },
     openGraph: {
         title: seoTitle,
         description: description,
-        url: `/${generateNonAiSlug(article.category)}/${article.slug}`,
+        url: articleUrl,
         siteName: siteName,
         type: 'article',
         publishedTime: article.publishedAt,
+        modifiedTime: article.publishedAt, // Using publishedAt as modifiedTime for this starter
         authors: [article.authorName],
         images: openGraphImages,
     },
@@ -118,7 +124,10 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
         },
     },
     description: article.aiSummary,
-    articleBody: article.content.replace(/<[^>]*>?/gm, ''), // Stripped HTML for articleBody
+    mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `${process.env.NEXT_PUBLIC_SITE_URL}/${generateNonAiSlug(article.category)}/${article.slug}`
+    }
   };
 
   return (

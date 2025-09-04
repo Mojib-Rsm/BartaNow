@@ -30,7 +30,7 @@ function generateSiteMap(
      <!-- Article pages -->
      ${articles
        .map(({ category, slug, publishedAt }) => {
-         const categorySlug = generateNonAiSlug(category || "BartaNow-Unnamed");
+         const categorySlug = generateNonAiSlug(category || "unnamed");
          return `
        <url>
            <loc>${`${URL}/${encodeURIComponent(categorySlug)}/${slug}`}</loc>
@@ -59,9 +59,10 @@ function generateSiteMap(
     <!-- Category pages -->
     ${categories
         .map((category) => {
+            const categorySlug = generateNonAiSlug(category.slug || category.name);
             return `
         <url>
-            <loc>${`${URL}/category/${encodeURIComponent(category.slug)}`}</loc>
+            <loc>${`${URL}/category/${encodeURIComponent(categorySlug)}`}</loc>
             <lastmod>${new Date().toISOString()}</lastmod>
             <changefreq>daily</changefreq>
             <priority>0.9</priority>
