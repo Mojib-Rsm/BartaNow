@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -19,6 +20,8 @@ export default function SeedButton() {
           title: 'Success',
           description: result.message,
         });
+        // Optionally, refresh the page to show the new data
+        window.location.reload();
       } else {
         toast({
           variant: 'destructive',
@@ -44,3 +47,5 @@ export default function SeedButton() {
     </Button>
   );
 }
+
+    

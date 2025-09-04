@@ -18,6 +18,11 @@ import { suggestTrendingTopics } from '@/ai/flows/suggest-trending-topics';
 import { rankHeadline } from '@/ai/flows/rank-headline';
 import { suggestTagsForArticle } from '@/ai/flows/suggest-tags';
 import { analyzeImage } from '@/ai/flows/analyze-image';
+import { seedDatabase } from '../../../scripts/seed.ts';
+
+export async function seedAction() {
+    return seedDatabase();
+}
 
 export async function loginAction(credentials: { email?: string, password?: string }) {
     if (!credentials.email || !credentials.password) {
@@ -1292,3 +1297,5 @@ export async function updateMenuOrderAction(items: MenuItem[]) {
         return { success: false, message: e.message };
     }
 }
+
+    

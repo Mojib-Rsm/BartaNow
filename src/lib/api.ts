@@ -68,9 +68,11 @@ type GetArticlesOptions = {
     editorsPick?: boolean;
     date?: string;
     location?: string;
+    isAiGenerated?: boolean;
+    status?: Article['status'];
 };
 
-async function getMockArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date, location }: GetArticlesOptions) {
+async function getMockArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date, location, isAiGenerated, status }: GetArticlesOptions) {
     await generateSummariesForMockData();
     
     let filteredArticles = [...mockDb.articles];
@@ -86,6 +88,9 @@ async function getMockArticles({ page = 1, limit = 6, category, authorId, exclud
     if (editorsPick) filteredArticles = filteredArticles.filter(a => a.editorsPick);
     if (date) filteredArticles = filteredArticles.filter(a => a.publishedAt.startsWith(date));
     if (location) filteredArticles = filteredArticles.filter(a => a.location === location);
+    if (isAiGenerated !== undefined) filteredArticles = filteredArticles.filter(a => a.isAiGenerated === isAiGenerated);
+    if (status) filteredArticles = filteredArticles.filter(a => a.status === status);
+
 
     const sortedArticles = filteredArticles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
     
@@ -384,10 +389,6 @@ async function deleteMockPoll(pollId: string): Promise<void> {
     if (index > -1) mockDb.polls.splice(index, 1);
 }
 
-async function getMockMenuItems(): Promise<MenuItem[]> {
-    return [...mockDb.menuItems];
-}
-
 async function getMockAllSubscribers(): Promise<Subscriber[]> {
     return [...mockDb.subscribers];
 }
@@ -507,9 +508,45 @@ async function getMockAllAds(): Promise<Ad[]> {
     return [...mockDb.ads];
 }
 
+async function getMockMenuItems(): Promise<MenuItem[]> {
+    // Sort by order before returning
+    return [...mockDb.menuItems].sort((a, b) => a.order - b.order);
+}
+
+async function createMockMenuItem(data: Omit<MenuItem, 'id' | 'order' | 'children' | 'slug'>): Promise<MenuItem> {
+    const highestOrder = mockDb.menuItems.reduce((max, item) => Math.max(max, item.order), -1);
+    const newItem: MenuItem = {
+        id: `menu-${Date.now()}`,
+        slug: generateNonAiSlug(data.name),
+        order: highestOrder + 1,
+        children: [],
+        ...data,
+    };
+    mockDb.menuItems.push(newItem);
+    return newItem;
+}
+
+async function updateMockMenuItem(id: string, data: Partial<Omit<MenuItem, 'id' | 'children' | 'slug'>>): Promise<MenuItem | undefined> {
+    const itemIndex = mockDb.menuItems.findIndex(item => item.id === id);
+    if (itemIndex === -1) return undefined;
+    
+    const updatedItem = { ...mockDb.menuItems[itemIndex], ...data };
+    if (data.name) {
+        updatedItem.slug = generateNonAiSlug(data.name);
+    }
+    
+    mockDb.menuItems[itemIndex] = updatedItem;
+    return updatedItem;
+}
+
+async function deleteMockMenuItem(id: string): Promise<void> {
+    mockDb.menuItems = mockDb.menuItems.filter(item => item.id !== id);
+}
+
+
 // --- FIRESTORE IMPLEMENTATIONS ---
 
-async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date, location }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
+async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, excludeId, query, hasVideo, editorsPick, date, location, isAiGenerated, status }: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
      try {
         let queryRef: admin.firestore.Query = db.collection('articles');
         let countQueryRef: admin.firestore.Query = db.collection('articles');
@@ -538,6 +575,14 @@ async function getFirestoreArticles({ page = 1, limit = 6, category, authorId, e
         if (location) {
             queryRef = queryRef.where('location', '==', location);
             countQueryRef = countQueryRef.where('location', '==', location);
+        }
+        if (isAiGenerated !== undefined) {
+            queryRef = queryRef.where('isAiGenerated', '==', isAiGenerated);
+            countQueryRef = countQueryRef.where('isAiGenerated', '==', isAiGenerated);
+        }
+        if (status) {
+            queryRef = queryRef.where('status', '==', status);
+            countQueryRef = countQueryRef.where('status', '==', status);
         }
         
         if (query) {
@@ -889,15 +934,6 @@ async function deleteFirestorePoll(pollId: string): Promise<void> {
     await db.collection('polls').doc(pollId).delete();
 }
 
-async function getFirestoreMenuItems(): Promise<MenuItem[]> {
-    const doc = await db.collection('settings').doc('mainMenu').get();
-    if (doc.exists) {
-        return (doc.data()?.items as MenuItem[]) || [];
-    }
-    // Fallback to mock data if not found in Firestore
-    return getMockMenuItems();
-}
-
 async function getFirestoreAllSubscribers(): Promise<Subscriber[]> {
     const snapshot = await db.collection('subscribers').where('isSubscribed', '==', true).get();
     return snapshot.docs.map(doc => doc.data() as Subscriber);
@@ -1016,6 +1052,43 @@ async function updateFirestoreContactMessage(id: string, data: Partial<ContactMe
 
 async function deleteFirestoreContactMessage(id: string): Promise<void> {
     await db.collection('contactMessages').doc(id).delete();
+}
+
+async function getFirestoreMenuItems(): Promise<MenuItem[]> {
+    const snapshot = await db.collection('menuItems').orderBy('order').get();
+    return snapshot.docs.map(doc => doc.data() as MenuItem);
+}
+
+async function createFirestoreMenuItem(data: Omit<MenuItem, 'id' | 'order' | 'children' | 'slug'>): Promise<MenuItem> {
+    const collectionRef = db.collection('menuItems');
+    const snapshot = await collectionRef.orderBy('order', 'desc').limit(1).get();
+    const highestOrder = snapshot.empty ? -1 : snapshot.docs[0].data().order;
+
+    const newItem: MenuItem = {
+        id: `menu-${Date.now()}`,
+        slug: generateNonAiSlug(data.name),
+        order: highestOrder + 1,
+        children: [],
+        entityType: 'MENU_ITEM',
+        ...data,
+    };
+    await collectionRef.doc(newItem.id).set(newItem);
+    return newItem;
+}
+
+async function updateFirestoreMenuItem(id: string, data: Partial<Omit<MenuItem, 'id' | 'children' | 'slug'>>): Promise<MenuItem | undefined> {
+    const itemRef = db.collection('menuItems').doc(id);
+    const updateData: Partial<MenuItem> = { ...data };
+    if (data.name) {
+        updateData.slug = generateNonAiSlug(data.name);
+    }
+    await itemRef.update(updateData);
+    const updatedDoc = await itemRef.get();
+    return updatedDoc.data() as MenuItem;
+}
+
+async function deleteFirestoreMenuItem(id: string): Promise<void> {
+    await db.collection('menuItems').doc(id).delete();
 }
 
 // --- PUBLIC API ---
@@ -1181,6 +1254,21 @@ export async function deletePoll(pollId: string): Promise<void> {
 export async function getMenuItems(): Promise<MenuItem[]> {
     if (!useFirestore || !db) return getMockMenuItems();
     return getFirestoreMenuItems();
+}
+
+export async function createMenuItem(data: Omit<MenuItem, 'id' | 'order' | 'children' | 'slug'>): Promise<MenuItem> {
+    if (!useFirestore || !db) return createMockMenuItem(data);
+    return createFirestoreMenuItem(data);
+}
+
+export async function updateMenuItem(id: string, data: Partial<Omit<MenuItem, 'id' | 'children' | 'slug'>>): Promise<MenuItem | undefined> {
+    if (!useFirestore || !db) return updateMockMenuItem(id, data);
+    return updateFirestoreMenuItem(id, data);
+}
+
+export async function deleteMenuItem(id: string): Promise<void> {
+    if (!useFirestore || !db) return deleteMockMenuItem(id);
+    return deleteFirestoreMenuItem(id);
 }
 
 export async function getAllSubscribers(): Promise<Subscriber[]> {
