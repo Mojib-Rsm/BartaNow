@@ -1,4 +1,5 @@
 
+
 import { getPageBySlug } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import type { Metadata, ResolvingMetadata } from 'next'
@@ -51,23 +52,47 @@ export default async function StaticPage({ params }: { params: { slug:string } }
     day: 'numeric',
   });
 
-  return (
-    <div className="max-w-4xl mx-auto">
-        <article className="bg-card p-6 sm:p-8 rounded-lg shadow-lg">
-            <header className="mb-8 text-center border-b pb-4">
-                <h1 className="text-3xl md:text-5xl font-bold font-headline text-primary mb-4">
-                {page.title}
-                </h1>
-                 <p className="text-sm text-muted-foreground">
-                    সর্বশেষ আপডেট: {new Date(page.lastUpdatedAt).toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' })}
-                </p>
-            </header>
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: page.title,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL}/p/${page.slug}`,
+    description: page.content.substring(0, 160) || 'বার্তা নাও-এর একটি পেজ',
+    datePublished: page.publishedAt,
+    dateModified: page.lastUpdatedAt,
+     publisher: {
+        '@type': 'Organization',
+        name: 'BartaNow | বার্তা নাও',
+        logo: {
+            '@type': 'ImageObject',
+            url: 'https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/refs/heads/main/public/log-heado.png',
+        },
+    },
+  };
 
-            <div 
-                className="prose prose-lg dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: page.content }}
-            />
-        </article>
-    </div>
+  return (
+    <>
+     <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="max-w-4xl mx-auto">
+          <article className="bg-card p-6 sm:p-8 rounded-lg shadow-lg">
+              <header className="mb-8 text-center border-b pb-4">
+                  <h1 className="text-3xl md:text-5xl font-bold font-headline text-primary mb-4">
+                  {page.title}
+                  </h1>
+                   <p className="text-sm text-muted-foreground">
+                      সর্বশেষ আপডেট: {new Date(page.lastUpdatedAt).toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
+              </header>
+
+              <div 
+                  className="prose prose-lg dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: page.content }}
+              />
+          </article>
+      </div>
+    </>
   );
 }

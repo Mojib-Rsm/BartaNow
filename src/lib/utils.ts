@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 export const generateNonAiSlug = (title: string) => {
     return title
         .toLowerCase()
-        .replace(/[^a-z0-9\u0980-\u09FF\s-]/g, '') // Allow Bengali characters, alphanumeric, spaces, and hyphens
+        .replace(/[^a-z0-9\s-]/g, '') // Allow alphanumeric, spaces, and hyphens
         .trim()
         .replace(/\s+/g, '-') // Replace spaces with -
         .replace(/-+/g, '-'); // Replace multiple - with single -

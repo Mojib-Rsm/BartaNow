@@ -493,4 +493,3 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
     </Card>
   );
 }
-
