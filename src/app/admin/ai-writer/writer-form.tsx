@@ -261,7 +261,7 @@ export default function WriterForm() {
                                 <div>
                                     <Label>কনটেন্ট</Label>
                                     <Editor
-                                        apiKey="YOUR_TINYMCE_API_KEY" // Replace with your TinyMCE API key
+                                        apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
                                         value={variant.content}
                                         init={{
                                             height: 500,

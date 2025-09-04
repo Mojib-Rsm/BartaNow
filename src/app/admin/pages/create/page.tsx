@@ -85,7 +85,7 @@ export default function PageCreateForm() {
                 control={form.control}
                 render={({ field }) => (
                      <Editor
-                        apiKey="YOUR_TINYMCE_API_KEY" // Replace with your TinyMCE API key
+                        apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
                         value={field.value}
                         onEditorChange={field.onChange}
                         init={{
