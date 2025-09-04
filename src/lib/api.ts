@@ -508,6 +508,33 @@ async function getMockAllAds(): Promise<Ad[]> {
     return [...mockDb.ads];
 }
 
+async function getMockAdById(id: string): Promise<Ad | undefined> {
+    return mockDb.ads.find(ad => ad.id === id);
+}
+
+async function createMockAd(data: Omit<Ad, 'id'>): Promise<Ad> {
+    const newAd: Ad = {
+        id: `ad-${Date.now()}`,
+        ...data,
+    };
+    mockDb.ads.unshift(newAd);
+    return newAd;
+}
+
+async function updateMockAd(adId: string, data: Partial<Ad>): Promise<Ad | undefined> {
+    const adIndex = mockDb.ads.findIndex(ad => ad.id === adId);
+    if (adIndex === -1) return undefined;
+    const updatedAd = { ...mockDb.ads[adIndex], ...data };
+    mockDb.ads[adIndex] = updatedAd;
+    return updatedAd;
+}
+
+async function deleteMockAd(adId: string): Promise<void> {
+    const index = mockDb.ads.findIndex(ad => ad.id === adId);
+    if (index > -1) mockDb.ads.splice(index, 1);
+}
+
+
 async function getMockMenuItems(): Promise<MenuItem[]> {
     // Sort by order before returning
     return [...mockDb.menuItems].sort((a, b) => a.order - b.order);
@@ -1091,6 +1118,38 @@ async function deleteFirestoreMenuItem(id: string): Promise<void> {
     await db.collection('menuItems').doc(id).delete();
 }
 
+async function getFirestoreAllAds(): Promise<Ad[]> {
+    const snapshot = await db.collection('ads').orderBy('name').get();
+    return snapshot.docs.map(doc => doc.data() as Ad);
+}
+
+async function getFirestoreAdById(id: string): Promise<Ad | undefined> {
+    const doc = await db.collection('ads').doc(id).get();
+    return doc.exists ? doc.data() as Ad : undefined;
+}
+
+async function createFirestoreAd(data: Omit<Ad, 'id'>): Promise<Ad> {
+    const newAd: Ad = {
+        id: `ad-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        entityType: 'AD',
+        ...data,
+    };
+    await db.collection('ads').doc(newAd.id).set(newAd);
+    return newAd;
+}
+
+async function updateFirestoreAd(adId: string, data: Partial<Ad>): Promise<Ad | undefined> {
+    const adRef = db.collection('ads').doc(adId);
+    await adRef.update(data);
+    const updatedDoc = await adRef.get();
+    return updatedDoc.data() as Ad | undefined;
+}
+
+async function deleteFirestoreAd(adId: string): Promise<void> {
+    await db.collection('ads').doc(adId).delete();
+}
+
+
 // --- PUBLIC API ---
 
 export async function getArticles(options: GetArticlesOptions): Promise<{ articles: Article[], totalPages: number }> {
@@ -1455,6 +1514,25 @@ export async function deleteContactMessage(id: string): Promise<void> {
 
 export async function getAllAds(): Promise<Ad[]> {
     if (!useFirestore || !db) return getMockAllAds();
-     // Firestore implementation would be similar to others
-    return getMockAllAds();
+    return getFirestoreAllAds();
+}
+
+export async function getAdById(id: string): Promise<Ad | undefined> {
+    if (!useFirestore || !db) return getMockAdById(id);
+    return getFirestoreAdById(id);
+}
+
+export async function createAd(data: Omit<Ad, 'id'>): Promise<Ad> {
+    if (!useFirestore || !db) return createMockAd(data);
+    return createFirestoreAd(data);
+}
+
+export async function updateAd(adId: string, data: Partial<Ad>): Promise<Ad | undefined> {
+    if (!useFirestore || !db) return updateMockAd(adId, data);
+    return updateFirestoreAd(adId, data);
+}
+
+export async function deleteAd(adId: string): Promise<void> {
+    if (!useFirestore || !db) return deleteMockAd(adId);
+    return deleteFirestoreAd(adId);
 }
