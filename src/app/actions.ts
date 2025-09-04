@@ -3,8 +3,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem } from '@/lib/api';
-import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem, createAd, updateAd, deleteAd } from '@/lib/api';
+import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem, Ad } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -1298,4 +1298,58 @@ export async function updateMenuOrderAction(items: MenuItem[]) {
     }
 }
 
+
+// --- AD MANAGEMENT ACTIONS ---
+const adSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(3, "বিজ্ঞাপনের নাম কমপক্ষে ৩ অক্ষরের হতে হবে।"),
+  placement: z.string().min(1, "একটি স্থান নির্বাচন করুন।"),
+  imageUrl: z.string().url("অনুগ্রহ করে একটি সঠিক URL অথবা কোড দিন।").or(z.string().min(10)),
+  targetUrl: z.string().url("অনুগ্রহ করে একটি সঠিক URL দিন।").optional().or(z.literal('')),
+  isActive: z.boolean().default(true),
+});
+
+type AdFormValues = z.infer<typeof adSchema>;
+
+
+export async function createAdAction(data: AdFormValues) {
+    const validation = adSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+    try {
+        const newAd = await createAd(data);
+        if (!newAd) throw new Error("Ad creation failed.");
+        revalidatePath('/admin/ads');
+        return { success: true, message: 'বিজ্ঞাপন সফলভাবে তৈরি হয়েছে।', ad: newAd };
+    } catch (e: any) {
+        return { success: false, message: e.message };
+    }
+}
+
+export async function updateAdAction(data: AdFormValues) {
+    if (!data.id) return { success: false, message: 'Ad ID is missing.' };
+    const validation = adSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+    try {
+        const updatedAd = await updateAd(data.id, data);
+        revalidatePath('/admin/ads');
+        revalidatePath(`/admin/ads/edit/${data.id}`);
+        return { success: true, message: 'বিজ্ঞাপন সফলভাবে আপডেট হয়েছে।', ad: updatedAd };
+    } catch (e: any) {
+        return { success: false, message: e.message };
+    }
+}
+
+export async function deleteAdAction(id: string) {
+    try {
+        await deleteAd(id);
+        revalidatePath('/admin/ads');
+        return { success: true, message: 'বিজ্ঞাপন সফলভাবে ডিলিট হয়েছে।' };
+    } catch (e: any) {
+        return { success: false, message: e.message };
+    }
+}
     
