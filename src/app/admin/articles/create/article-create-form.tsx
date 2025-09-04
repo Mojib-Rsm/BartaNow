@@ -91,9 +91,10 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
   const debouncedSlugGeneration = useDebouncedCallback(async (title: string) => {
     if (title && !form.formState.dirtyFields.slug && !form.formState.dirtyFields.englishTitle) {
         try {
-            const { slug, englishTitle } = await translateForSlug(title);
+            const { slug, englishTitle, focusKeywords } = await translateForSlug(title);
             if (slug) form.setValue('slug', slug, { shouldValidate: true });
             if (englishTitle) form.setValue('englishTitle', englishTitle);
+            if (focusKeywords && focusKeywords.length > 0) form.setValue('focusKeywords', focusKeywords.join(', '));
         } catch (e) {
             console.error("Slug generation failed", e);
         }
@@ -134,8 +135,10 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
       const result = await suggestTagsAction(content);
       if (result.success && result.tags) {
         form.setValue('tags', result.tags.join(', '));
-        form.setValue('focusKeywords', result.tags.slice(0, 2).join(', '));
-        toast({ title: "সফল", description: "AI আপনার জন্য ট্যাগ ও ফোকাস কিওয়ার্ড তৈরি করেছে।" });
+        if(!form.getValues('focusKeywords')) { // Only set focus keywords if they are empty
+            form.setValue('focusKeywords', result.tags.slice(0, 2).join(', '));
+        }
+        toast({ title: "সফল", description: "AI আপনার জন্য ট্যাগ তৈরি করেছে।" });
       } else {
         toast({ variant: "destructive", title: "ব্যর্থ", description: result.message });
       }
