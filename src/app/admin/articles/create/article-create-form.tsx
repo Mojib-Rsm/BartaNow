@@ -26,6 +26,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import type { Article } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
 import { Editor } from '@tinymce/tinymce-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 
 const formSchema = z.object({
@@ -56,9 +57,17 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
   const [isSuggestingTags, setIsSuggestingTags] = useState(false);
   const [headlineRanking, setHeadlineRanking] = useState<{ score: number; feedback: string } | null>(null);
   const [isRanking, setIsRanking] = useState(false);
+  const [checklist, setChecklist] = useState({
+      factsVerified: false,
+      imageLicensed: false,
+      sourcesLinked: false,
+      seoOptimized: false,
+  });
   const router = useRouter();
   const { toast } = useToast();
   const searchParams = useSearchParams();
+
+  const isChecklistComplete = Object.values(checklist).every(Boolean);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -212,7 +221,7 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
           আপনি চাইলে <Link href="/admin/ai-writer" className="text-primary hover:underline">AI কনটেন্ট রাইটার</Link> ব্যবহার করে একটি খসড়া তৈরি করতে পারেন।
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
           <div className="flex flex-col items-center gap-4">
@@ -422,12 +431,37 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
                 </CardContent>
             </Card>
 
+           <Card>
+                <CardHeader>
+                    <CardTitle className="text-base">Pre-Publish Checklist</CardTitle>
+                    <CardDescription>প্রকাশ করার আগে এই বিষয়গুলো নিশ্চিত করুন।</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="factsVerified" checked={checklist.factsVerified} onCheckedChange={(checked) => setChecklist(prev => ({...prev, factsVerified: !!checked}))} />
+                        <Label htmlFor="factsVerified" className="cursor-pointer">সত্যতা যাচাই করা হয়েছে (Facts verified)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="imageLicensed" checked={checklist.imageLicensed} onCheckedChange={(checked) => setChecklist(prev => ({...prev, imageLicensed: !!checked}))} />
+                        <Label htmlFor="imageLicensed" className="cursor-pointer">ছবিগুলো লাইসেন্স-যুক্ত এবং সঠিকভাবে attributed (Images licensed)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="sourcesLinked" checked={checklist.sourcesLinked} onCheckedChange={(checked) => setChecklist(prev => ({...prev, sourcesLinked: !!checked}))} />
+                        <Label htmlFor="sourcesLinked" className="cursor-pointer">প্রয়োজনীয় সোর্স লিঙ্ক করা হয়েছে (Sources linked)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="seoOptimized" checked={checklist.seoOptimized} onCheckedChange={(checked) => setChecklist(prev => ({...prev, seoOptimized: !!checked}))} />
+                        <Label htmlFor="seoOptimized" className="cursor-pointer">শিরোনাম এবং মেটা-ডেসক্রিপশন SEO-ফ্রেন্ডলি (SEO-friendly title/meta)</Label>
+                    </div>
+                </CardContent>
+            </Card>
+
 
           <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="ghost" asChild>
                   <Link href="/admin/articles">বাতিল করুন</Link>
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading || !isChecklistComplete}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   তৈরি করুন
               </Button>
@@ -437,3 +471,4 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
     </Card>
   );
 }
+
