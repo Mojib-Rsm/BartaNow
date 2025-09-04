@@ -104,7 +104,7 @@ export default function Header() {
             isScrolled ? 'h-0 border-none opacity-0' : 'opacity-100'
           )}>
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                 <Image src="https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/refs/heads/main/public/log-heado.png" alt="BartaNow Logo" width={180} height={40} className="h-10 w-auto" />
+                 <Image src="https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/main/public/log-heado.png" alt="BartaNow Logo" width={180} height={40} className="h-10 w-auto" />
             </Link>
             <div className="hidden md:flex items-center gap-4 text-sm">
                 {topNavLinks.map((link, index) => (
@@ -118,7 +118,7 @@ export default function Header() {
             </div>
         </div>
 
-        <div className="flex items-center justify-between h-12">
+        <div className="flex items-center justify-between h-16">
           <div className='flex items-center gap-2'>
               <Sheet>
                   <SheetTrigger asChild>
@@ -131,7 +131,7 @@ export default function Header() {
                       <div className="flex flex-col h-full">
                          <div className="p-4 border-b flex items-center justify-between">
                               <Link href="/" className="flex items-center gap-2 text-xl font-bold font-headline text-primary">
-                                  <Image src="https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/refs/heads/main/public/log-heado.png" alt="BartaNow Logo" width={150} height={35} className="h-auto w-auto" />
+                                  <Image src="https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/main/public/log-heado.png" alt="BartaNow Logo" width={150} height={35} className="h-auto w-auto" />
                               </Link>
                               <SheetTrigger asChild>
                                   <Button variant="ghost" size="icon">
@@ -163,7 +163,7 @@ export default function Header() {
                 "flex items-center gap-2 transition-opacity",
                 isScrolled ? 'opacity-100' : 'md:opacity-0'
                 )}>
-                   <Image src="https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/refs/heads/main/public/log-heado.png" alt="BartaNow Logo" width={150} height={35} className="h-8 w-auto" />
+                   <Image src="https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/main/public/log-heado.png" alt="BartaNow Logo" width={150} height={35} className="h-8 w-auto" />
               </Link>
             </div>
             {loadingMenu ? (
