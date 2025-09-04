@@ -9,7 +9,6 @@ import {
   CardDescription
 } from "@/components/ui/card"
 import {
-  BarChart,
   Users,
   Newspaper,
   Eye,
@@ -24,7 +23,10 @@ import {
   CheckSquare,
   Users2,
   Box,
-  FileDown
+  FileDown,
+  LineChart,
+  BookOpen,
+  Radio
 } from 'lucide-react'
 import {
   Bar,
@@ -193,6 +195,9 @@ export default function AdminPage() {
                 <MiniStatCard title="Draft News" value={stats.draftArticles} icon={FileDown} color="#10B981" />
                 <MiniStatCard title="Breaking News" value={stats.breakingArticles} icon={FileText} color="#EF4444" />
                 <MiniStatCard title="Total Blogs" value={stats.totalPages} icon={Box} color="#8B5CF6" />
+                <MiniStatCard title="SEO Score" value="78" icon={BarChartHorizontal} color="#3B82F6" />
+                <MiniStatCard title="Readability Score" value="85" icon={BookOpen} color="#14B8A6" />
+                <MiniStatCard title="Live Show" value="5" icon={Radio} color="#F43F5E" />
             </div>
             <div className="lg:col-span-2">
                  <Card>
