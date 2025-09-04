@@ -1,5 +1,4 @@
 
-
 import type { Article, Author, Poll, MemeNews, User, Comment, Media, Notification, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad } from './types';
 
 // Helper to generate a non-AI slug from a title for mock data
@@ -31,7 +30,7 @@ const users: User[] = [
     { 
         id: 'user-2', 
         name: 'Regular User', 
-        email: 'user@bartanow.com', _slug
+        email: 'user@bartanow.com',
         password: 'password123',         
         role: 'user',
         avatarUrl: 'https://i.pravatar.cc/150?u=regular-user',

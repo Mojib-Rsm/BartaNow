@@ -1,11 +1,12 @@
 
+
 'use client';
 
+import { seedDatabase } from '../../../scripts/seed.ts';
 import { useState } from 'react';
 import { Rocket, CheckCircle, AlertTriangle, User, Key, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { seedAction } from '@/app/actions';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 
@@ -20,7 +21,7 @@ export default function InstallPage() {
     setIsLoading(true);
     setResult(null);
     try {
-      const actionResult = await seedAction();
+      const actionResult = await seedDatabase();
       setResult(actionResult);
 
       if (actionResult.success) {

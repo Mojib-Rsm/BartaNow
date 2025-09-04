@@ -3,7 +3,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { seedDatabase } from '../../scripts/seed.ts';
 import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
@@ -19,17 +18,6 @@ import { suggestTrendingTopics } from '@/ai/flows/suggest-trending-topics';
 import { rankHeadline } from '@/ai/flows/rank-headline';
 import { suggestTagsForArticle } from '@/ai/flows/suggest-tags';
 import { analyzeImage } from '@/ai/flows/analyze-image';
-
-
-export async function seedAction() {
-  const result = await seedDatabase();
-  
-  if (result.success) {
-    revalidatePath('/'); // Revalidate the homepage to show new data
-  }
-  
-  return result;
-}
 
 export async function loginAction(credentials: { email?: string, password?: string }) {
     if (!credentials.email || !credentials.password) {
