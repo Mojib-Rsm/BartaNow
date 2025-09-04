@@ -11,6 +11,9 @@ config({ path: '.env' });
 const useFirestore = process.env.DATABASE_TYPE === 'firestore';
 
 function initializeFirebaseAdmin() {
+    if (!useFirestore) {
+        throw new Error("Cannot initialize Firebase Admin SDK when DATABASE_TYPE is not 'firestore'.");
+    }
     // Initialize Firebase Admin SDK only if not already initialized
     if (admin.apps.length === 0) {
         try {
@@ -45,8 +48,10 @@ async function seedCollection(db: admin.firestore.Firestore, name: string, colle
 
 export async function seedDatabase() {
   if (!useFirestore) {
-      console.log('Skipping database seeding as DATABASE_TYPE is not set to firestore.');
-      return { success: true, message: 'Mock data is already available. No seeding needed for local development.' };
+      console.log('Using mock data. Seeding process is simulated for local development.');
+      // In local dev, the data is already in memory from `data.ts`.
+      // We return a success message to confirm to the user that the action was acknowledged.
+      return { success: true, message: 'ডেমো ডেটা সফলভাবে লোড হয়েছে। সাইট এখন ব্যবহারের জন্য প্রস্তুত।' };
   }
     
   console.log('Starting to seed Firestore database...');
