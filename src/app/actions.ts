@@ -1303,8 +1303,9 @@ export async function updateMenuOrderAction(items: MenuItem[]) {
 const adSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(3, "বিজ্ঞাপনের নাম কমপক্ষে ৩ অক্ষরের হতে হবে।"),
+  type: z.enum(['image', 'script']),
   placement: z.string().min(1, "একটি স্থান নির্বাচন করুন।"),
-  imageUrl: z.string().url("অনুগ্রহ করে একটি সঠিক URL অথবা কোড দিন।").or(z.string().min(10)),
+  content: z.string().min(10, "কনটেন্ট কমপক্ষে ১০ অক্ষরের হতে হবে।"),
   targetUrl: z.string().url("অনুগ্রহ করে একটি সঠিক URL দিন।").optional().or(z.literal('')),
   isActive: z.boolean().default(true),
 });
@@ -1352,4 +1353,3 @@ export async function deleteAdAction(id: string) {
         return { success: false, message: e.message };
     }
 }
-    

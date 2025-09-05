@@ -138,6 +138,7 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
     />
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-12">
         <div className="lg:col-span-2 space-y-8">
+            <AdSpot placement="before_post" className="h-24 mb-8" />
             <article className="bg-card p-6 sm:p-8 rounded-lg shadow-lg">
                 <header className="mb-8">
                     <Badge variant="default" className="mb-4">{article.category}</Badge>
@@ -200,16 +201,18 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
                 </div>
             </article>
             
+            <AdSpot placement="after_post" className="h-64" />
+
             <RelatedArticles articles={relatedArticles} />
             
             <CommentsSection articleId={article.id} />
         </div>
 
         <aside className="lg:col-span-1 space-y-8 mt-8 lg:mt-0">
-             <AdSpot className="h-64" />
+             <AdSpot placement="sidebar_top" className="h-64" />
              <TrendingSidebar articles={trending.articles} />
              <div className="sticky top-24">
-                <AdSpot className="h-96" />
+                <AdSpot placement="sidebar_bottom" className="h-96" />
              </div>
         </aside>
     </div>

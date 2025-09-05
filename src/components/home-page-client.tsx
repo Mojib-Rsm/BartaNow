@@ -259,7 +259,7 @@ export default function HomePageClient({
       )}
 
       {/* Horizontal Ad Spot */}
-      <AdSpot className="h-24" />
+      <AdSpot placement="header" className="h-24" />
 
       {/* Politics Section - Style 1 (Standard Grid) */}
       {politicsArticles.length > 0 && (
@@ -423,7 +423,7 @@ export default function HomePageClient({
             <PollSection />
             {factCheckArticles.length > 0 && <FactCheckSidebar articles={factCheckArticles} />}
             <TrendingSidebar articles={trendingArticles} />
-            <AdSpot className="h-96" />
+            <AdSpot placement="sidebar_bottom" className="h-96" />
         </aside>
       </div>
 

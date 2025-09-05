@@ -18,12 +18,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
+import { Textarea } from '@/components/ui/textarea';
 
 const adSchema = z.object({
   id: z.string(),
   name: z.string().min(3, "বিজ্ঞাপনের নাম কমপক্ষে ৩ অক্ষরের হতে হবে।"),
+  type: z.enum(['image', 'script']),
   placement: z.string().min(1, "একটি স্থান নির্বাচন করুন।"),
-  imageUrl: z.string().url("অনুগ্রহ করে একটি সঠিক URL দিন।"),
+  content: z.string().min(10, "কনটেন্ট কমপক্ষে ১০ অক্ষরের হতে হবে।"),
   targetUrl: z.string().url({ message: "অনুগ্রহ করে একটি সঠিক URL দিন।"}).optional().or(z.literal('')),
   isActive: z.boolean().default(true),
 });
@@ -42,12 +44,15 @@ export default function EditAdPage() {
     resolver: zodResolver(adSchema),
     defaultValues: {
       name: '',
+      type: 'image',
       placement: '',
-      imageUrl: '',
+      content: '',
       targetUrl: '',
       isActive: true,
     }
   });
+
+  const watchAdType = form.watch('type');
 
   useEffect(() => {
       async function fetchAd() {
@@ -57,8 +62,9 @@ export default function EditAdPage() {
               form.reset({
                   id: fetchedAd.id,
                   name: fetchedAd.name,
+                  type: fetchedAd.type,
                   placement: fetchedAd.placement,
-                  imageUrl: fetchedAd.imageUrl,
+                  content: fetchedAd.content,
                   targetUrl: fetchedAd.targetUrl,
                   isActive: fetchedAd.isActive,
               });
@@ -96,42 +102,76 @@ export default function EditAdPage() {
       </CardHeader>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
+           <div className="space-y-2">
             <Label htmlFor="ad-name">বিজ্ঞাপনের নাম</Label>
             <Input id="ad-name" placeholder="যেমন: হেডার ব্যানার" {...form.register('name')} />
              {form.formState.errors.name && <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>}
           </div>
+
+           <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+                <Label htmlFor="ad-type">বিজ্ঞাপনের ধরন</Label>
+                 <Controller
+                    name="type"
+                    control={form.control}
+                    render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger id="ad-type">
+                        <SelectValue placeholder="ধরন নির্বাচন করুন" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        <SelectItem value="image">ছবি</SelectItem>
+                        <SelectItem value="script">কোড/স্ক্রিপ্ট</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    )}
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="ad-placement">বিজ্ঞাপনের স্থান</Label>
+                <Controller
+                    name="placement"
+                    control={form.control}
+                    render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger id="ad-placement">
+                        <SelectValue placeholder="স্থান নির্বাচন করুন" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        <SelectItem value="header">হেডার</SelectItem>
+                        <SelectItem value="sidebar_top">সাইডবার (উপরে)</SelectItem>
+                        <SelectItem value="sidebar_bottom">সাইডবার (নিচে)</SelectItem>
+                         <SelectItem value="before_post">পোস্টের শুরুতে</SelectItem>
+                        <SelectItem value="after_post">পোস্টের শেষে</SelectItem>
+                        <SelectItem value="in_article_1">আর্টিকেলের মধ্যে (১)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    )}
+                />
+                {form.formState.errors.placement && <p className="text-sm text-destructive">{form.formState.errors.placement.message}</p>}
+            </div>
+           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="ad-placement">বিজ্ঞাপনের স্থান</Label>
-             <Controller
-                name="placement"
-                control={form.control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger id="ad-placement">
-                      <SelectValue placeholder="স্থান নির্বাচন করুন" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="header">হেডার</SelectItem>
-                      <SelectItem value="sidebar_top">সাইডবার (উপরে)</SelectItem>
-                      <SelectItem value="sidebar_bottom">সাইডবার (নিচে)</SelectItem>
-                      <SelectItem value="in_article">আর্টিকেলের মধ্যে</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-             />
-              {form.formState.errors.placement && <p className="text-sm text-destructive">{form.formState.errors.placement.message}</p>}
+            <Label htmlFor="ad-content">
+                {watchAdType === 'image' ? 'ছবির URL' : 'বিজ্ঞাপনের কোড'}
+            </Label>
+            {watchAdType === 'image' ? (
+                <Input id="ad-content" placeholder="https://example.com/ad-image.png" {...form.register('content')} />
+            ) : (
+                <Textarea id="ad-content" placeholder="<script>...</script> or <iframe>...</iframe>" {...form.register('content')} rows={6} />
+            )}
+             {form.formState.errors.content && <p className="text-sm text-destructive">{form.formState.errors.content.message}</p>}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="ad-image">বিজ্ঞাপনের ছবি/স্ক্রিপ্ট URL</Label>
-            <Input id="ad-image" placeholder="https://example.com/ad-image.png" {...form.register('imageUrl')} />
-             {form.formState.errors.imageUrl && <p className="text-sm text-destructive">{form.formState.errors.imageUrl.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="ad-target">টার্গেট URL</Label>
-            <Input id="ad-target" placeholder="https://example.com" {...form.register('targetUrl')} />
-             {form.formState.errors.targetUrl && <p className="text-sm text-destructive">{form.formState.errors.targetUrl.message}</p>}
-          </div>
+
+          {watchAdType === 'image' && (
+            <div className="space-y-2">
+                <Label htmlFor="ad-target">টার্গেট URL (ঐচ্ছিক)</Label>
+                <Input id="ad-target" placeholder="https://example.com" {...form.register('targetUrl')} />
+                {form.formState.errors.targetUrl && <p className="text-sm text-destructive">{form.formState.errors.targetUrl.message}</p>}
+            </div>
+          )}
+
           <div className="flex items-center space-x-2">
             <Controller
               name="isActive"

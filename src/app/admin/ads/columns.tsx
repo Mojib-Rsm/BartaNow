@@ -96,6 +96,11 @@ export const columns: ColumnDef<Ad>[] = [
     cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
   },
   {
+    accessorKey: "type",
+    header: "ধরন",
+    cell: ({ row }) => <Badge variant="outline" className="capitalize">{row.getValue("type")}</Badge>
+  },
+  {
     accessorKey: "placement",
     header: "স্থান",
   },

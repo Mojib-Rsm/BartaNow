@@ -210,9 +210,9 @@ export interface MenuItem {
 export interface Ad {
   id: string;
   name: string;
-  type: 'banner' | 'sidebar' | 'in-article';
-  imageUrl: string;
-  targetUrl: string;
+  type: 'image' | 'script';
+  content: string; // Holds image URL or script content
+  targetUrl?: string; // For image ads
   placement: string;
   isActive: boolean;
   startDate?: string;
