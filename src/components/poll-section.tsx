@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -19,32 +20,36 @@ const pollData = {
 
 export default function PollSection() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [voted, setVoted] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const [results, setResults] = useState(pollData.options.map(opt => ({ ...opt, percentage: 0 })));
 
   const totalVotes = results.reduce((sum, option) => sum + option.votes, 0);
 
   useEffect(() => {
-    if (voted) {
+    if (showResults) {
       const newResults = pollData.options.map(option => ({
         ...option,
         percentage: totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0,
       }));
       setResults(newResults);
     }
-  }, [voted, totalVotes]);
+  }, [showResults, totalVotes]);
 
   const handleVote = () => {
     if (selectedOption) {
-      setVoted(true);
       // In a real app, you would submit the vote and then fetch the updated results.
       // For demonstration, we'll just simulate it.
       const selected = results.find(r => r.id === selectedOption);
       if (selected) {
         selected.votes += 1;
       }
+      setShowResults(true);
     }
   };
+
+  const toggleResults = () => {
+    setShowResults(prev => !prev);
+  }
 
   return (
     <Card className="w-full">
@@ -56,7 +61,7 @@ export default function PollSection() {
       </CardHeader>
       <CardContent>
         <p className="font-semibold mb-4">{pollData.question}</p>
-        {voted ? (
+        {showResults ? (
           <div className="space-y-3">
             {results.map(option => (
               <div key={option.id} className="space-y-1">
@@ -80,13 +85,13 @@ export default function PollSection() {
         )}
       </CardContent>
       <CardFooter className="flex-col gap-2 items-stretch">
-        {!voted && (
+        {!showResults && (
           <Button onClick={handleVote} disabled={!selectedOption} className="w-full">
             ভোট দিন
           </Button>
         )}
-        <Button variant="ghost" className="w-full text-primary">
-          ফলাফল দেখুন
+        <Button variant="ghost" className="w-full text-primary" onClick={toggleResults}>
+            {showResults ? 'পুনরায় ভোট দিন' : 'ফলাফল দেখুন'}
         </Button>
       </CardFooter>
     </Card>
