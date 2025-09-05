@@ -35,7 +35,16 @@ function generateSiteMap(
   });
   
   // Add other key static pages not in the DB
-  const staticRoutes = ['/contact', '/archive', '/fact-check', '/category/videos', '/special-coverage', '/subscribe'];
+  const staticRoutes = [
+    '/contact', 
+    '/archive', 
+    '/fact-check', 
+    '/category/videos', 
+    '/special-coverage', 
+    '/subscribe',
+    '/p/privacy-policy',
+    '/p/terms-of-use'
+  ];
   staticRoutes.forEach(route => {
       xml += `
       <url>
