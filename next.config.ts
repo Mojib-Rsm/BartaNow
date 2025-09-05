@@ -46,6 +46,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'barta-now.vercel.app',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'ik.imagekit.io',
         port: '',
         pathname: '/**',
