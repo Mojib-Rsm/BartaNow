@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { Article } from '@/lib/types';
@@ -32,14 +33,15 @@ export default function FactCheckSidebar({ articles }: FactCheckSidebarProps) {
       <CardContent>
         <ul className="space-y-4">
           {articles.map((article) => {
-            const verdictInfo = article.factCheck?.verdict ? verdictMap[article.factCheck.verdict] : null;
+            const verdict = article.factCheck?.verdict;
+            const verdictInfo = verdict ? verdictMap[verdict] : null;
             const Icon = verdictInfo?.icon || ShieldQuestion;
             const categorySlug = generateNonAiSlug(article.category || "BartaNow-Unnamed");
             const articleUrl = `/${categorySlug}/${article.slug}`;
 
             return (
                  <li key={article.id} className="flex items-start gap-3">
-                    {verdictInfo && <Icon className={cn("h-5 w-5 mt-1 shrink-0", verdictInfo.color)} />}
+                    <Icon className={cn("h-5 w-5 mt-1 shrink-0", verdictInfo?.color || 'text-muted-foreground')} />
                     <Link href={articleUrl} className="group">
                         <h3 className="font-semibold text-sm leading-snug group-hover:text-primary transition-colors">
                             {article.title}
