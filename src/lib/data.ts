@@ -796,7 +796,8 @@ const ads: Ad[] = [
         name: 'Sidebar Ad',
         type: 'image',
         content: 'https://picsum.photos/seed/ad2/300/250',
-        targetUrl: 'sidebar_top',
+        targetUrl: '#',
+        placement: 'sidebar_top',
         isActive: true,
     },
     {
@@ -847,10 +848,10 @@ const rssFeeds: RssFeed[] = [
 
 const socialLinks: SocialLinks = {
   id: 'social-links',
-  facebook: 'https://facebook.com',
-  twitter: 'https://twitter.com',
-  youtube: 'https://youtube.com',
-  instagram: 'https://instagram.com',
+  facebook: 'https://facebook.com/example',
+  twitter: 'https://twitter.com/example',
+  youtube: 'https://youtube.com/example',
+  instagram: 'https://instagram.com/example',
 };
 
 

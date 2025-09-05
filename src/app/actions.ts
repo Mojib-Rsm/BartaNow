@@ -1405,9 +1405,10 @@ export async function getSocialLinksAction(): Promise<SocialLinks | null> {
 
 export async function updateSocialLinksAction(data: SocialLinks) {
     try {
-        await updateSocialLinks(data);
+        const updatedLinks = await updateSocialLinks(data);
         revalidatePath('/'); // Revalidate home page to update footer
-        return { success: true, message: "Social links updated successfully." };
+        revalidatePath('/admin/social');
+        return { success: true, message: "Social links updated successfully.", links: updatedLinks };
     } catch (e: any) {
         return { success: false, message: e.message };
     }

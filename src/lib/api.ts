@@ -1193,10 +1193,14 @@ async function deleteFirestoreAd(adId: string): Promise<void> {
 async function getFirestoreSocialLinks(): Promise<SocialLinks | null> {
     const doc = await db.collection('settings').doc('social-links').get();
     if (!doc.exists) {
-        return { facebook: '', twitter: '', youtube: '', instagram: '' };
+        // If it doesn't exist, create it with empty values
+        const defaultLinks: SocialLinks = { facebook: '', twitter: '', youtube: '', instagram: '' };
+        await db.collection('settings').doc('social-links').set(defaultLinks);
+        return defaultLinks;
     }
     return doc.data() as SocialLinks;
 }
+
 
 async function updateFirestoreSocialLinks(data: SocialLinks): Promise<SocialLinks> {
     const linksRef = db.collection('settings').doc('social-links');

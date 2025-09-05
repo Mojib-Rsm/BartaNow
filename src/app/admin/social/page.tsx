@@ -149,11 +149,6 @@ export default function SocialManagementPage() {
             </CardContent>
         </Card>
        </form>
-
-      <div className="text-center py-16 border-2 border-dashed rounded-lg mt-8">
-        <p className="text-muted-foreground">ভবিষ্যতে এখানে আরও সোশ্যাল মিডিয়া ইন্টিগ্রেশন ফিচার যোগ করা হবে।</p>
-        <p className="text-muted-foreground text-sm">যেমন: অটো-পোস্টিং, সোশ্যাল ফিড ইত্যাদি।</p>
-      </div>
     </div>
   )
 }
