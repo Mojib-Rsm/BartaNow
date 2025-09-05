@@ -28,6 +28,15 @@ const adSchema = z.object({
 
 type FormValues = z.infer<typeof adSchema>;
 
+const placementSizes: Record<string, string> = {
+  header: "প্রস্তাবিত সাইজ: 728x90px",
+  sidebar_top: "প্রস্তাবিত সাইজ: 300x250px",
+  sidebar_bottom: "প্রস্তাবিত সাইজ: 300x600px",
+  before_post: "প্রস্তাবিত সাইজ: 728x90px",
+  after_post: "প্রস্তাবিত সাইজ: 728x90px অথবা 300x250px",
+  in_article_1: "প্রস্তাবিত সাইজ: 300x250px",
+};
+
 export default function CreateAdPage() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -46,6 +55,7 @@ export default function CreateAdPage() {
   });
 
   const watchAdType = form.watch('type');
+  const watchPlacement = form.watch('placement');
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
@@ -115,6 +125,9 @@ export default function CreateAdPage() {
                     </Select>
                     )}
                 />
+                 {placementSizes[watchPlacement] && (
+                  <p className="text-xs text-muted-foreground">{placementSizes[watchPlacement]}</p>
+                )}
                 {form.formState.errors.placement && <p className="text-sm text-destructive">{form.formState.errors.placement.message}</p>}
             </div>
            </div>
