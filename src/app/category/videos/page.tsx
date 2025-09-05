@@ -1,4 +1,5 @@
 
+
 import { getArticles } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
