@@ -1,9 +1,9 @@
-# https://www.robotstxt.org/robotstxt.html
+# See https://www.robotstxt.org/robotstxt.html for syntax and more information
+
 User-agent: *
 Disallow: /admin/
 Disallow: /dashboard/
-Disallow: /install/
-Disallow: /login/
-Disallow: /api/
+Disallow: /install
+Allow: /
 
 Sitemap: https://bartanow.com/sitemap.xml

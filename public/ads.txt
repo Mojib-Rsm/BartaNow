@@ -1,0 +1,4 @@
+# BartaNow Ads.txt File
+# This file is used by ad networks like Google AdSense to verify authorized sellers.
+# Please add your own publisher ID from your AdSense account here.
+# Example: google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
