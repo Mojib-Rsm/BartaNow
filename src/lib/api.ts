@@ -2,7 +2,7 @@
 
 'use server';
 
-import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad } from './types';
+import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad, SocialLinks } from './types';
 import admin from 'firebase-admin';
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
@@ -568,6 +568,16 @@ async function updateMockMenuItem(id: string, data: Partial<Omit<MenuItem, 'id' 
 
 async function deleteMockMenuItem(id: string): Promise<void> {
     mockDb.menuItems = mockDb.menuItems.filter(item => item.id !== id);
+}
+
+
+async function getMockSocialLinks(): Promise<SocialLinks | null> {
+    return mockDb.socialLinks || null;
+}
+
+async function updateMockSocialLinks(data: SocialLinks): Promise<SocialLinks> {
+    mockDb.socialLinks = { ...mockDb.socialLinks, ...data };
+    return mockDb.socialLinks;
 }
 
 
@@ -1149,6 +1159,20 @@ async function deleteFirestoreAd(adId: string): Promise<void> {
     await db.collection('ads').doc(adId).delete();
 }
 
+async function getFirestoreSocialLinks(): Promise<SocialLinks | null> {
+    const doc = await db.collection('settings').doc('social-links').get();
+    if (!doc.exists) {
+        return { facebook: '', twitter: '', youtube: '', instagram: '' };
+    }
+    return doc.data() as SocialLinks;
+}
+
+async function updateFirestoreSocialLinks(data: SocialLinks): Promise<SocialLinks> {
+    const linksRef = db.collection('settings').doc('social-links');
+    await linksRef.set(data, { merge: true });
+    return data;
+}
+
 
 // --- PUBLIC API ---
 
@@ -1394,6 +1418,17 @@ export async function deleteCategory(categoryId: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockCategory(categoryId);
     return deleteFirestoreCategory(categoryId);
 }
+
+export async function getSocialLinks(): Promise<SocialLinks | null> {
+    if (!useFirestore || !db) return getMockSocialLinks();
+    return getFirestoreSocialLinks();
+}
+
+export async function updateSocialLinks(data: SocialLinks): Promise<SocialLinks> {
+    if (!useFirestore || !db) return updateMockSocialLinks(data);
+    return updateFirestoreSocialLinks(data);
+}
+
 
 // --- NON-CRUD APIs ---
 

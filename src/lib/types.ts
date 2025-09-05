@@ -228,3 +228,12 @@ export interface RssFeed {
   defaultCategory: Article['category'];
   entityType?: 'RSS_FEED';
 }
+
+export interface SocialLinks {
+  id?: 'social-links'; // To ensure it's a singleton document
+  facebook?: string;
+  twitter?: string;
+  youtube?: string;
+  instagram?: string;
+  entityType?: 'SETTINGS';
+}

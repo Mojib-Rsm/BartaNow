@@ -3,8 +3,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem, createAd, updateAd, deleteAd } from '@/lib/api';
-import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem, Ad } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem, createAd, updateAd, deleteAd, getSocialLinks, updateSocialLinks } from '@/lib/api';
+import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem, Ad, SocialLinks } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -1349,6 +1349,22 @@ export async function deleteAdAction(id: string) {
         await deleteAd(id);
         revalidatePath('/admin/ads');
         return { success: true, message: 'বিজ্ঞাপন সফলভাবে ডিলিট হয়েছে।' };
+    } catch (e: any) {
+        return { success: false, message: e.message };
+    }
+}
+
+
+// --- SOCIAL LINKS ACTIONS ---
+export async function getSocialLinksAction(): Promise<SocialLinks | null> {
+    return getSocialLinks();
+}
+
+export async function updateSocialLinksAction(data: SocialLinks) {
+    try {
+        await updateSocialLinks(data);
+        revalidatePath('/'); // Revalidate home page to update footer
+        return { success: true, message: "Social links updated successfully." };
     } catch (e: any) {
         return { success: false, message: e.message };
     }

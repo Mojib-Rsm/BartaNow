@@ -1,5 +1,5 @@
 
-import type { Article, Author, Poll, MemeNews, User, Comment, Media, Notification, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad } from './types';
+import type { Article, Author, Poll, MemeNews, User, Comment, Media, Notification, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad, SocialLinks } from './types';
 
 // Helper to generate a non-AI slug from a title for mock data
 const generateNonAiSlug = (title: string) => {
@@ -790,8 +790,8 @@ const ads: Ad[] = [
     {
         id: 'ad-1',
         name: 'Header Banner Ad',
-        type: 'banner',
-        imageUrl: 'https://picsum.photos/seed/ad1/728/90',
+        type: 'image',
+        content: 'https://picsum.photos/seed/ad1/728/90',
         targetUrl: '#',
         placement: 'header',
         isActive: true,
@@ -799,8 +799,8 @@ const ads: Ad[] = [
     {
         id: 'ad-2',
         name: 'Sidebar Ad',
-        type: 'sidebar',
-        imageUrl: 'https://picsum.photos/seed/ad2/300/250',
+        type: 'image',
+        content: 'https://picsum.photos/seed/ad2/300/250',
         targetUrl: '#',
         placement: 'sidebar_top',
         isActive: true,
@@ -808,10 +808,9 @@ const ads: Ad[] = [
     {
         id: 'ad-3',
         name: 'In-Article Ad',
-        type: 'in-article',
-        imageUrl: 'https://picsum.photos/seed/ad3/300/250',
-        targetUrl: '#',
-        placement: 'after_3rd_paragraph',
+        type: 'script',
+        content: '<div style="width: 100%; height: 200px; background: #eee; display: flex; align-items: center; justify-content: center; border: 1px solid #ccc;">Google Ad Script Placeholder</div>',
+        placement: 'after_post',
         isActive: true,
     }
 ];
@@ -852,6 +851,14 @@ const rssFeeds: RssFeed[] = [
   }
 ];
 
+const socialLinks: SocialLinks = {
+  id: 'social-links',
+  facebook: 'https://facebook.com',
+  twitter: 'https://twitter.com',
+  youtube: 'https://youtube.com',
+  instagram: 'https://instagram.com',
+};
+
 
 export const mockDb = {
   users,
@@ -870,4 +877,5 @@ export const mockDb = {
   contactMessages,
   ads,
   rssFeeds,
+  socialLinks,
 };

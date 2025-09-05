@@ -1,10 +1,27 @@
 
+'use client';
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Facebook, Twitter, Youtube, Instagram } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { getSocialLinksAction } from "@/app/actions";
+import type { SocialLinks } from "@/lib/types";
 
 export default function Footer() {
+  const [socialLinks, setSocialLinks] = useState<SocialLinks>({});
+
+  useEffect(() => {
+    async function fetchLinks() {
+        const links = await getSocialLinksAction();
+        if (links) {
+            setSocialLinks(links);
+        }
+    }
+    fetchLinks();
+  }, []);
+
   const currentYear = new Date().getFullYear();
   const yearInBangla = new Intl.NumberFormat('bn-BD').format(currentYear);
 
@@ -39,10 +56,10 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-lg text-primary font-headline mb-2">সামাজিক যোগাযোগ</h3>
             <div className="flex justify-center md:justify-start gap-4 mb-4">
-              <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook size={20} /></Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter size={20} /></Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary"><Youtube size={20} /></Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram size={20} /></Link>
+              {socialLinks.facebook && <Link href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Facebook size={20} /></Link>}
+              {socialLinks.twitter && <Link href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Twitter size={20} /></Link>}
+              {socialLinks.youtube && <Link href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Youtube size={20} /></Link>}
+              {socialLinks.instagram && <Link href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Instagram size={20} /></Link>}
             </div>
             <h3 className="font-bold text-lg text-primary font-headline mb-2 mt-4">নিউজলেটার</h3>
             <p className="text-muted-foreground text-sm mb-2">সর্বশেষ খবর সরাসরি আপনার ইনবক্সে পেতে সাবস্ক্রাইব করুন।</p>
