@@ -20,6 +20,7 @@ import { useEffect, useState } from 'react';
 import Autoplay from "embla-carousel-autoplay";
 import SocialFollow from './social-follow';
 import { generateNonAiSlug } from '@/lib/utils';
+import VideoCard from './video-card';
 
 const SectionHeader = ({ title, categorySlug }: { title: string, categorySlug: string }) => (
   <div className="flex items-center justify-between border-b-2 border-primary mb-4 pb-2">
@@ -219,40 +220,12 @@ export default function HomePageClient({
           <SectionHeader title="ভিডিও গ্যালারি" categorySlug="videos" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-                <div className="relative aspect-video w-full rounded-lg overflow-hidden group">
-                    <iframe
-                        src={videoArticles[0].videoUrl}
-                        title={videoArticles[0].title}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="w-full h-full"
-                    ></iframe>
-                </div>
-                <h2 className="text-2xl font-bold font-headline mt-2">{videoArticles[0].title}</h2>
+                <VideoCard article={videoArticles[0]} isFeatured={true} />
             </div>
             <div className="md:col-span-1 space-y-4">
-                {videoArticles.slice(1).map(video => {
-                    const categorySlug = generateNonAiSlug(video.category || "BartaNow-Unnamed");
-                    const articleUrl = `/${categorySlug}/${video.slug}`;
-                    return (
-                    <Link key={video.id} href={articleUrl} className="flex items-center gap-4 group">
-                        <div className="relative w-24 h-16 shrink-0 rounded-md overflow-hidden">
-                            <Image 
-                                src={video.imageUrl}
-                                alt={video.title}
-                                fill
-                                className="object-cover"
-                                data-ai-hint={video.imageHint}
-                            />
-                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                <PlayCircle className="h-8 w-8 text-white/80" />
-                            </div>
-                        </div>
-                        <h3 className="font-semibold text-sm group-hover:text-primary">{video.title}</h3>
-                    </Link>
-                    )
-                })}
+                {videoArticles.slice(1, 4).map(video => (
+                    <VideoCard key={video.id} article={video} isFeatured={false} />
+                ))}
             </div>
           </div>
         </section>
