@@ -1,6 +1,6 @@
 'use client';
 
-import { seedDatabase } from '../../../scripts/seed.ts';
+import { seedAction } from '@/app/actions';
 import { useState } from 'react';
 import { Rocket, CheckCircle, AlertTriangle, User, Key, Database, Building, Lock, Mail, Clapperboard, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,41 +10,66 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
+export type InstallFormData = {
+  siteName: string;
+  tagline: string;
+  adminName: string;
+  adminEmail: string;
+  adminPassword: string;
+  dbType: 'firestore' | 'mock';
+  dbHost?: string;
+  dbName?: string;
+  dbUser?: string;
+  dbPassword?: string;
+};
 
 const STEPS = [
   { id: 1, title: 'স্বাগতম' },
   { id: 2, title: 'সাইটের তথ্য' },
   { id: 3, title: 'অ্যাডমিন অ্যাকাউন্ট' },
-  { id: 4, title: 'পর্যালোচনা ও ইন্সটল' },
+  { id: 4, title: 'ডেটাবেস সেটআপ' },
+  { id: 5, title: 'পর্যালোচনা ও ইন্সটল' },
 ];
 
 export default function InstallPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<InstallFormData>({
       siteName: 'বার্তা নাও',
       tagline: 'আপনার প্রতিদিনের খবরের উৎস',
       adminName: 'Admin User',
       adminEmail: 'admin@bartanow.com',
       adminPassword: 'password123',
       dbType: 'firestore',
+      dbHost: 'localhost',
+      dbName: 'bartanow_db',
+      dbUser: 'root',
+      dbPassword: ''
   });
   const { toast } = useToast();
 
   const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
   const handlePrev = () => setCurrentStep(prev => Math.max(prev - 1, 1));
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
       setFormData(prev => ({ ...prev, [name]: value }));
   };
+
+  const handleRadioChange = (value: 'firestore' | 'mock') => {
+      setFormData(prev => ({ ...prev, dbType: value }));
+  }
 
   const handleInstall = async () => {
     setIsLoading(true);
     toast({ title: 'ইন্সটলেশন শুরু হচ্ছে...', description: 'অনুগ্রহ করে অপেক্ষা করুন, ডেটাবেস প্রস্তুত করা হচ্ছে।' });
 
     try {
-      const actionResult = await seedDatabase();
+      // Pass the form data to the seed action
+      const actionResult = await seedAction(formData);
 
       if (actionResult.success) {
         toast({
@@ -90,7 +115,7 @@ export default function InstallPage() {
           </CardDescription>
         </CardHeader>
         
-        <CardContent className="min-h-[250px]">
+        <CardContent className="min-h-[300px]">
           {currentStep === 1 && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">আপনার নিউজ পোর্টালে স্বাগতম!</h2>
@@ -131,6 +156,46 @@ export default function InstallPage() {
           )}
           
           {currentStep === 4 && (
+            <div className="space-y-6">
+                <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Database className="h-4 w-4" /> ডেটাবেস টাইপ</Label>
+                    <RadioGroup value={formData.dbType} onValueChange={handleRadioChange} className="flex gap-4 pt-2">
+                         <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="firestore" id="firestore" />
+                            <Label htmlFor="firestore">Firebase Firestore (Recommended)</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="mock" id="mock" />
+                            <Label htmlFor="mock">Local Mock DB (For Demo)</Label>
+                        </div>
+                    </RadioGroup>
+                </div>
+
+                {formData.dbType !== 'firestore' && formData.dbType !== 'mock' && (
+                     <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="dbName">Database Name</Label>
+                            <Input id="dbName" name="dbName" value={formData.dbName} onChange={handleChange} />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="dbUser">Username</Label>
+                            <Input id="dbUser" name="dbUser" value={formData.dbUser} onChange={handleChange} />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="dbPassword">Password</Label>
+                            <Input id="dbPassword" type="password" name="dbPassword" value={formData.dbPassword} onChange={handleChange} />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="dbHost">Database Host</Label>
+                            <Input id="dbHost" name="dbHost" value={formData.dbHost} onChange={handleChange} />
+                        </div>
+                    </div>
+                )}
+                 <Button type="button" variant="outline" disabled>Test Connection</Button>
+            </div>
+          )}
+          
+          {currentStep === 5 && (
             <div className="space-y-4">
                 <h3 className="font-semibold text-lg">পর্যালোচনা করুন</h3>
                 <p className="text-muted-foreground">অনুগ্রহ করে নিশ্চিত করুন যে সমস্ত তথ্য সঠিক আছে। "Install Now" বাটনে ক্লিক করলে আপনার ডেটাবেস সেটআপ হবে এবং অ্যাডমিন ব্যবহারকারী তৈরি হবে।</p>
@@ -139,7 +204,7 @@ export default function InstallPage() {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>ট্যাগলাইন:</strong> {formData.tagline}</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>অ্যাডমিন নাম:</strong> {formData.adminName}</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>অ্যাডমিন ইমেইল:</strong> {formData.adminEmail}</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>ডেটাবেস:</strong> Firestore (Recommended)</li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>ডেটাবেস:</strong> {formData.dbType === 'firestore' ? 'Firebase Firestore' : 'Local Mock DB'}</li>
                 </ul>
             </div>
           )}

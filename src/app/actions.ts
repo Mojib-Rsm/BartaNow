@@ -19,9 +19,10 @@ import { rankHeadline } from '@/ai/flows/rank-headline';
 import { suggestTagsForArticle } from '@/ai/flows/suggest-tags';
 import { analyzeImage } from '@/ai/flows/analyze-image';
 import { seedDatabase } from '../../scripts/seed.ts';
+import type { InstallFormData } from '@/app/install/page';
 
-export async function seedAction() {
-    return seedDatabase();
+export async function seedAction(installData: InstallFormData) {
+    return seedDatabase(installData);
 }
 
 export async function loginAction(credentials: { email?: string, password?: string }) {

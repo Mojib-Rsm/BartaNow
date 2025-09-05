@@ -4,15 +4,14 @@ import admin from 'firebase-admin';
 import { mockDb } from '../src/lib/data';
 import { config } from 'dotenv';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
+import type { InstallFormData } from '@/app/install/page';
 
 // Load environment variables from .env file at the root of the project
 config({ path: '.env' });
 
-const useFirestore = process.env.DATABASE_TYPE === 'firestore';
-
-function initializeFirebaseAdmin() {
-    if (!useFirestore) {
-        throw new Error("Cannot initialize Firebase Admin SDK when DATABASE_TYPE is not 'firestore'.");
+function initializeFirebaseAdmin(dbType: 'firestore' | 'mock') {
+    if (dbType !== 'firestore') {
+        return null; // Don't initialize for mock DB
     }
     // Initialize Firebase Admin SDK only if not already initialized
     if (admin.apps.length === 0) {
@@ -46,8 +45,8 @@ async function seedCollection(db: admin.firestore.Firestore, name: string, colle
     console.log(`${name} seeded successfully.`);
 }
 
-export async function seedDatabase() {
-  if (!useFirestore) {
+export async function seedDatabase(installData: InstallFormData) {
+  if (installData.dbType === 'mock') {
       console.log('Using mock data. Seeding process is simulated for local development.');
       // In local dev, the data is already in memory from `data.ts`.
       // We return a success message to confirm to the user that the action was acknowledged.
@@ -56,9 +55,12 @@ export async function seedDatabase() {
     
   console.log('Starting to seed Firestore database...');
   
-  let db: admin.firestore.Firestore;
+  let db: admin.firestore.Firestore | null;
   try {
-    db = initializeFirebaseAdmin();
+    db = initializeFirebaseAdmin(installData.dbType);
+    if (!db) {
+        throw new Error("Database could not be initialized.");
+    }
   } catch (e: any) {
     return { success: false, message: e.message };
   }
@@ -74,11 +76,21 @@ export async function seedDatabase() {
   const tagsCollection = db.collection('tags');
   const rssFeedsCollection = db.collection('rssFeeds');
   const menuItemsCollection = db.collection('menuItems');
+  const locationsCollection = db.collection('locations');
 
 
   try {
-    // Seed non-article collections
-    await seedCollection(db, 'users', usersCollection, mockDb.users);
+    // Modify users based on installData before seeding
+    const adminUser = {
+        ...mockDb.users[0], // Take the base admin user from mock
+        name: installData.adminName,
+        email: installData.adminEmail,
+        password: installData.adminPassword, // Note: In a real app, hash this!
+    };
+    const otherUsers = mockDb.users.slice(1);
+    const finalUsers = [adminUser, ...otherUsers];
+
+    await seedCollection(db, 'users', usersCollection, finalUsers);
     await seedCollection(db, 'authors', authorsCollection, mockDb.authors);
     await seedCollection(db, 'comments', commentsCollection, mockDb.comments);
     await seedCollection(db, 'media', mediaCollection, mockDb.media);
@@ -88,6 +100,7 @@ export async function seedDatabase() {
     await seedCollection(db, 'tags', tagsCollection, mockDb.tags);
     await seedCollection(db, 'rssFeeds', rssFeedsCollection, mockDb.rssFeeds);
     await seedCollection(db, 'menuItems', menuItemsCollection, mockDb.menuItems);
+    await seedCollection(db, 'locations', locationsCollection, mockDb.locations);
     
     // Seed Articles with AI-generated slugs
     console.log(`Generating slugs and seeding ${mockDb.articles.length} articles...`);
@@ -122,9 +135,17 @@ export async function seedDatabase() {
   }
 }
 
-// This allows the script to be run directly from the command line
+// This allows the script to be run directly from the command line for testing
 if (require.main === module) {
-    seedDatabase().catch(err => {
+    const testInstallData: InstallFormData = {
+        siteName: 'BartaNow Test',
+        tagline: 'Test Tagline',
+        adminName: 'Test Admin',
+        adminEmail: 'test@admin.com',
+        adminPassword: 'password',
+        dbType: 'firestore',
+    };
+    seedDatabase(testInstallData).catch(err => {
         console.error("Error during database seeding:", err);
         process.exit(1);
     });
