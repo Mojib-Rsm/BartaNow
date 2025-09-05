@@ -1,3 +1,4 @@
+
 'use client';
 
 import { seedAction } from '@/app/actions';
@@ -18,7 +19,7 @@ export type InstallFormData = {
   adminName: string;
   adminEmail: string;
   adminPassword: string;
-  dbType: 'firestore' | 'mock';
+  dbType: 'firestore' | 'mock' | 'postgresql';
   dbHost?: string;
   dbName?: string;
   dbUser?: string;
@@ -59,7 +60,7 @@ export default function InstallPage() {
       setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleRadioChange = (value: 'firestore' | 'mock') => {
+  const handleRadioChange = (value: 'firestore' | 'mock' | 'postgresql') => {
       setFormData(prev => ({ ...prev, dbType: value }));
   }
 
@@ -159,10 +160,14 @@ export default function InstallPage() {
             <div className="space-y-6">
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Database className="h-4 w-4" /> ডেটাবেস টাইপ</Label>
-                    <RadioGroup value={formData.dbType} onValueChange={handleRadioChange} className="flex gap-4 pt-2">
+                    <RadioGroup value={formData.dbType} onValueChange={handleRadioChange} className="flex flex-wrap gap-4 pt-2">
                          <div className="flex items-center space-x-2">
                             <RadioGroupItem value="firestore" id="firestore" />
                             <Label htmlFor="firestore">Firebase Firestore (Recommended)</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="postgresql" id="postgresql" />
+                            <Label htmlFor="postgresql">PostgreSQL</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="mock" id="mock" />
@@ -171,9 +176,14 @@ export default function InstallPage() {
                     </RadioGroup>
                 </div>
 
-                {formData.dbType !== 'firestore' && formData.dbType !== 'mock' && (
-                     <div className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                {formData.dbType === 'postgresql' && (
+                     <div className="space-y-6 border-t pt-6">
+                         <p className="text-sm text-muted-foreground">আপনার PostgreSQL ডেটাবেসের তথ্য দিন। এই ফিচারটি এখনো নির্মাণাধীন।</p>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="dbHost">Database Host</Label>
+                                <Input id="dbHost" name="dbHost" value={formData.dbHost} onChange={handleChange} />
+                            </div>
                             <div className="space-y-2">
                                 <Label htmlFor="dbName">Database Name</Label>
                                 <Input id="dbName" name="dbName" value={formData.dbName} onChange={handleChange} />
@@ -185,10 +195,6 @@ export default function InstallPage() {
                             <div className="space-y-2">
                                 <Label htmlFor="dbPassword">Password</Label>
                                 <Input id="dbPassword" type="password" name="dbPassword" value={formData.dbPassword} onChange={handleChange} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="dbHost">Database Host</Label>
-                                <Input id="dbHost" name="dbHost" value={formData.dbHost} onChange={handleChange} />
                             </div>
                         </div>
                         <Button type="button" variant="outline" disabled>Test Connection</Button>
@@ -206,7 +212,7 @@ export default function InstallPage() {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>ট্যাগলাইন:</strong> {formData.tagline}</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>অ্যাডমিন নাম:</strong> {formData.adminName}</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>অ্যাডমিন ইমেইল:</strong> {formData.adminEmail}</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>ডেটাবেস:</strong> {formData.dbType === 'firestore' ? 'Firebase Firestore' : 'Local Mock DB'}</li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>ডেটাবেস:</strong> {formData.dbType === 'firestore' ? 'Firebase Firestore' : formData.dbType === 'postgresql' ? 'PostgreSQL' : 'Local Mock DB'}</li>
                 </ul>
             </div>
           )}
