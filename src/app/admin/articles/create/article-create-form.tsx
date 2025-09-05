@@ -12,11 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, BrainCircuit, Lightbulb, Sparkles, Badge as BadgeIcon } from 'lucide-react';
+import { Loader2, BrainCircuit, Sparkles, Badge as BadgeIcon } from 'lucide-react';
 import { createArticleAction, rankHeadlineAction, suggestTagsAction } from '@/app/actions';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import Image from 'next/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format, isFuture } from 'date-fns';
@@ -28,6 +27,7 @@ import { Progress } from '@/components/ui/progress';
 import { Editor } from '@tinymce/tinymce-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getAllLocations } from '@/lib/api';
+import ImageSelector from '@/components/image-selector';
 
 
 const formSchema = z.object({
@@ -58,7 +58,6 @@ type ArticleCreateFormProps = {
 
 export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
   const [loading, setLoading] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSuggestingTags, setIsSuggestingTags] = useState(false);
   const [headlineRanking, setHeadlineRanking] = useState<{ score: number; feedback: string } | null>(null);
   const [isRanking, setIsRanking] = useState(false);
@@ -127,20 +126,6 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
     });
     return () => subscription.unsubscribe();
   }, [form, debouncedSlugGeneration, searchParams]);
-
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setPreviewImage(base64String);
-        form.setValue('imageUrl', base64String);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
   
   const handleGenerateTags = async () => {
     const content = form.getValues('content');
@@ -246,19 +231,15 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-          <div className="flex flex-col items-center gap-4">
-              {previewImage && (
-                <div className="relative w-full max-w-sm aspect-video rounded-md overflow-hidden border">
-                    <Image src={previewImage} alt="Article preview" fill className="object-cover" />
-                </div>
-              )}
-                 <Input id="picture" type="file" className="hidden" onChange={handleFileChange} accept="image/*"/>
-                 <Button type="button" variant="outline" asChild>
-                    <Label htmlFor="picture" className="cursor-pointer">
-                        <Upload className="mr-2 h-4 w-4"/>
-                        ছবি আপলোড করুন
-                    </Label>
-                 </Button>
+            <div className="grid gap-2">
+                <Label>ফিচার্ড ইমেজ</Label>
+                <ImageSelector 
+                    onImageSelect={(url) => form.setValue('imageUrl', url, { shouldDirty: true })} 
+                    initialValue={form.getValues('imageUrl')}
+                />
+                 {form.formState.errors.imageUrl && (
+                    <p className="text-xs text-destructive">{form.formState.errors.imageUrl.message}</p>
+                )}
             </div>
 
             <div className="grid gap-2">
@@ -329,30 +310,21 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
             )}
           </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div className="grid gap-2">
-                    <Label htmlFor="category">ক্যাটাগরি</Label>
-                    <Select onValueChange={(value) => form.setValue('category', value as FormValues['category'])} defaultValue={form.getValues('category')}>
-                        <SelectTrigger id="category">
-                        <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ'].map(cat => (
-                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                        {form.formState.errors.category && (
-                        <p className="text-xs text-destructive">{form.formState.errors.category.message}</p>
-                    )}
-                </div>
-                 <div className="grid gap-2">
-                    <Label htmlFor="imageUrl">অথবা ইমেজ URL দিন</Label>
-                    <Input id="imageUrl" {...form.register('imageUrl')} placeholder="একটি ছবি আপলোড করলে এই ফিল্ডটি উপেক্ষা করা হবে" />
-                    {form.formState.errors.imageUrl && (
-                    <p className="text-xs text-destructive">{form.formState.errors.imageUrl.message}</p>
-                    )}
-                </div>
+            <div className="grid gap-2">
+                <Label htmlFor="category">ক্যাটাগরি</Label>
+                <Select onValueChange={(value) => form.setValue('category', value as FormValues['category'])} defaultValue={form.getValues('category')}>
+                    <SelectTrigger id="category">
+                    <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {['রাজনীতি' , 'খেলা' , 'প্রযুক্তি' , 'বিনোদন' , 'অর্থনীতি' , 'আন্তর্জাতিক' , 'মতামত' , 'স্বাস্থ্য' , 'শিক্ষা' , 'পরিবেশ' , 'বিশেষ-কভারেজ' , 'জাতীয়' , 'ইসলামী-জীবন' , 'তথ্য-যাচাই' , 'মিম-নিউজ', 'ভিডিও' , 'সর্বশেষ' , 'সম্পাদকের-পছন্দ'].map(cat => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                    {form.formState.errors.category && (
+                    <p className="text-xs text-destructive">{form.formState.errors.category.message}</p>
+                )}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
