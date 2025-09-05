@@ -81,6 +81,15 @@ export interface Tag {
   entityType?: 'TAG';
 }
 
+export interface Location {
+  id: string;
+  name: string;
+  slug: string;
+  type: 'বিভাগ' | 'জেলা' | 'শহর';
+  entityType?: 'LOCATION';
+}
+
+
 export interface Article {
   id: string;
   slug: string;

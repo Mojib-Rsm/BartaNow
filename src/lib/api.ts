@@ -2,7 +2,7 @@
 
 'use server';
 
-import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad, SocialLinks } from './types';
+import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad, SocialLinks, Location } from './types';
 import admin from 'firebase-admin';
 import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
@@ -578,6 +578,37 @@ async function getMockSocialLinks(): Promise<SocialLinks | null> {
 async function updateMockSocialLinks(data: SocialLinks): Promise<SocialLinks> {
     mockDb.socialLinks = { ...mockDb.socialLinks, ...data };
     return mockDb.socialLinks;
+}
+
+async function getMockAllLocations(): Promise<Location[]> {
+    return [...mockDb.locations];
+}
+
+async function getMockLocationById(id: string): Promise<Location | undefined> {
+    return mockDb.locations.find(loc => loc.id === id);
+}
+
+async function createMockLocation(data: Omit<Location, 'id'>): Promise<Location> {
+    const newLocation: Location = {
+        id: `loc-${Date.now()}`,
+        slug: data.slug || generateNonAiSlug(data.name),
+        ...data,
+    };
+    mockDb.locations.unshift(newLocation);
+    return newLocation;
+}
+
+async function updateMockLocation(id: string, data: Partial<Location>): Promise<Location | undefined> {
+    const locIndex = mockDb.locations.findIndex(loc => loc.id === id);
+    if (locIndex === -1) return undefined;
+    const updatedLocation = { ...mockDb.locations[locIndex], ...data };
+    mockDb.locations[locIndex] = updatedLocation;
+    return updatedLocation;
+}
+
+async function deleteMockLocation(id: string): Promise<void> {
+    const index = mockDb.locations.findIndex(loc => loc.id === id);
+    if (index > -1) mockDb.locations.splice(index, 1);
 }
 
 
@@ -1173,6 +1204,39 @@ async function updateFirestoreSocialLinks(data: SocialLinks): Promise<SocialLink
     return data;
 }
 
+async function getFirestoreAllLocations(): Promise<Location[]> {
+    const snapshot = await db.collection('locations').orderBy('name').get();
+    return snapshot.docs.map(doc => doc.data() as Location);
+}
+
+async function getFirestoreLocationById(id: string): Promise<Location | undefined> {
+    const doc = await db.collection('locations').doc(id).get();
+    return doc.exists ? doc.data() as Location : undefined;
+}
+
+async function createFirestoreLocation(data: Omit<Location, 'id'>): Promise<Location> {
+    const slug = data.slug || generateNonAiSlug(data.name);
+    const newLocation: Location = {
+        id: `loc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        entityType: 'LOCATION',
+        ...data,
+        slug,
+    };
+    await db.collection('locations').doc(newLocation.id).set(newLocation);
+    return newLocation;
+}
+
+async function updateFirestoreLocation(id: string, data: Partial<Location>): Promise<Location | undefined> {
+    const locationRef = db.collection('locations').doc(id);
+    await locationRef.update(data);
+    const updatedDoc = await locationRef.get();
+    return updatedDoc.data() as Location | undefined;
+}
+
+async function deleteFirestoreLocation(id: string): Promise<void> {
+    await db.collection('locations').doc(id).delete();
+}
+
 
 // --- PUBLIC API ---
 
@@ -1428,6 +1492,32 @@ export async function updateSocialLinks(data: SocialLinks): Promise<SocialLinks>
     if (!useFirestore || !db) return updateMockSocialLinks(data);
     return updateFirestoreSocialLinks(data);
 }
+
+export async function getAllLocations(): Promise<Location[]> {
+    if (!useFirestore || !db) return getMockAllLocations();
+    return getFirestoreAllLocations();
+}
+
+export async function getLocationById(id: string): Promise<Location | undefined> {
+    if (!useFirestore || !db) return getMockLocationById(id);
+    return getFirestoreLocationById(id);
+}
+
+export async function createLocation(data: Omit<Location, 'id'>): Promise<Location> {
+    if (!useFirestore || !db) return createMockLocation(data);
+    return createFirestoreLocation(data);
+}
+
+export async function updateLocation(id: string, data: Partial<Location>): Promise<Location | undefined> {
+    if (!useFirestore || !db) return updateMockLocation(id, data);
+    return updateFirestoreLocation(id, data);
+}
+
+export async function deleteLocation(id: string): Promise<void> {
+    if (!useFirestore || !db) return deleteMockLocation(id);
+    return deleteFirestoreLocation(id);
+}
+
 
 
 // --- NON-CRUD APIs ---

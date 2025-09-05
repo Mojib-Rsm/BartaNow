@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Article, User } from '@/lib/types';
+import type { Article, User, Location } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format, isFuture } from 'date-fns';
 import { bn } from 'date-fns/locale';
-import { getAllUsers } from '@/lib/api';
+import { getAllUsers, getAllLocations } from '@/lib/api';
 import { useAuthorization } from '@/hooks/use-authorization';
 import { Progress } from '@/components/ui/progress';
 import { Editor } from '@tinymce/tinymce-react';
@@ -44,6 +44,7 @@ const formSchema = z.object({
   authorId: z.string(),
   status: z.enum(['Draft', 'Pending Review', 'Published', 'Scheduled']),
   badge: z.enum(['নতুন', 'জনপ্রিয়', '__none__']).optional(),
+  location: z.string().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   metaKeywords: z.string().optional(),
@@ -63,6 +64,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
   const [isSuggestingTags, setIsSuggestingTags] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(article.imageUrl);
   const [users, setUsers] = useState<User[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
     const [checklist, setChecklist] = useState({
       factsVerified: false,
       imageLicensed: false,
@@ -76,13 +78,15 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
   const isChecklistComplete = Object.values(checklist).every(Boolean);
 
   useEffect(() => {
-    async function fetchUsers() {
+    async function fetchData() {
         if(hasPermission('edit_article')) { // Assuming only users who can edit can change author
             const allUsers = await getAllUsers();
             setUsers(allUsers.filter(u => u.role === 'admin' || u.role === 'editor' || u.role === 'reporter'));
         }
+        const allLocations = await getAllLocations();
+        setLocations(allLocations);
     }
-    fetchUsers();
+    fetchData();
   }, [hasPermission]);
 
   const form = useForm<FormValues>({
@@ -102,6 +106,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
       authorId: article.authorId,
       status: article.status,
       badge: article.badge || '__none__',
+      location: article.location || '__none__',
       metaTitle: article.metaTitle || '',
       metaDescription: article.metaDescription || '',
       metaKeywords: article.metaKeywords?.join(', ') || '',
@@ -357,7 +362,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
                   <Input id="focusKeywords" {...form.register('focusKeywords')} placeholder="যেমন: নির্বাচন ২০২৪, নতুন সরকার" />
               </div>
           </div>
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
              <div className="grid gap-2">
                 <Label htmlFor="status">স্ট্যাটাস</Label>
                  <Controller
@@ -392,6 +397,26 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
                                 <SelectItem value="__none__">কোনোটিই নয়</SelectItem>
                                 <SelectItem value="নতুন">নতুন</SelectItem>
                                 <SelectItem value="জনপ্রিয়">জনপ্রিয়</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
+                />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="location">লোকেশন (ঐচ্ছিক)</Label>
+                    <Controller
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <SelectTrigger id="location">
+                                <SelectValue placeholder="লোকেশন নির্বাচন করুন" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="__none__">কোনোটিই নয়</SelectItem>
+                                {locations.map(loc => (
+                                    <SelectItem key={loc.id} value={loc.name}>{loc.name}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     )}

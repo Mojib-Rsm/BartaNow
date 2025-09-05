@@ -1,5 +1,5 @@
 
-import type { Article, Author, Poll, MemeNews, User, Comment, Media, Notification, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad, SocialLinks } from './types';
+import type { Article, Author, Poll, MemeNews, User, Comment, Media, Notification, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad, SocialLinks, Location } from './types';
 import { generateNonAiSlug } from './utils';
 
 const users: User[] = [
@@ -544,6 +544,12 @@ const tags: Tag[] = [
     slug: generateNonAiSlug(name),
 }));
 
+const locations: Location[] = [
+    { id: 'loc-1', name: 'ঢাকা', slug: 'dhaka', type: 'জেলা' },
+    { id: 'loc-2', name: 'চট্টগ্রাম', slug: 'chattogram', type: 'জেলা' },
+    { id: 'loc-3', name: 'খুলনা', slug: 'khulna', type: 'বিভাগ' },
+];
+
 
 const pages: Page[] = [
     {
@@ -855,6 +861,7 @@ export const mockDb = {
   articles,
   categories,
   tags,
+  locations,
   pages,
   polls,
   memeNews,

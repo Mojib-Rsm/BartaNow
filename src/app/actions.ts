@@ -3,8 +3,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem, createAd, updateAd, deleteAd, getSocialLinks, updateSocialLinks } from '@/lib/api';
-import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem, Ad, SocialLinks } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem, createAd, updateAd, deleteAd, getSocialLinks, updateSocialLinks, createLocation, updateLocation, deleteLocation } from '@/lib/api';
+import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem, Ad, SocialLinks, Location } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -224,6 +224,10 @@ const articleSchema = z.object({
   badge: z.enum(['নতুন', 'জনপ্রিয়', '__none__']).optional(),
   authorId: z.string().optional(),
   status: z.enum(['Draft', 'Pending Review', 'Published', 'Scheduled']).optional(),
+  location: z.string().optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  metaKeywords: z.array(z.string()).optional(),
 });
 
 
@@ -250,6 +254,10 @@ export async function updateArticleAction(data: z.infer<typeof articleSchema>) {
             badge: data.badge === '__none__' ? undefined : data.badge,
             authorId: data.authorId,
             status: data.status,
+            location: data.location === '__none__' ? undefined : data.location,
+            metaTitle: data.metaTitle,
+            metaDescription: data.metaDescription,
+            metaKeywords: data.metaKeywords,
         };
 
         if (data.imageUrl && data.imageUrl.startsWith('data:image')) {
@@ -335,6 +343,10 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             isAiGenerated: data.isAiGenerated || false,
             badge: data.badge === '__none__' ? undefined : data.badge,
             status: data.status || 'Draft',
+            location: data.location === '__none__' ? undefined : data.location,
+            metaTitle: data.metaTitle,
+            metaDescription: data.metaDescription,
+            metaKeywords: data.metaKeywords,
         };
 
         const newArticle = await createArticle(newArticleData);
@@ -1367,5 +1379,68 @@ export async function updateSocialLinksAction(data: SocialLinks) {
         return { success: true, message: "Social links updated successfully." };
     } catch (e: any) {
         return { success: false, message: e.message };
+    }
+}
+
+// --- LOCATION ACTIONS ---
+const locationSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "লোকেশন নাম কমপক্ষে ২ অক্ষরের হতে হবে।"),
+  type: z.enum(['বিভাগ', 'জেলা', 'শহর']),
+  slug: z.string().min(2, "Slug কমপক্ষে ২ অক্ষরের হতে হবে।").optional().or(z.literal('')),
+});
+
+type LocationFormValues = z.infer<typeof locationSchema>;
+
+export async function createLocationAction(data: LocationFormValues) {
+    const validation = locationSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+    
+    try {
+        const newLocation = await createLocation(data);
+        if (!newLocation) {
+            return { success: false, message: 'লোকেশন তৈরি করা যায়নি।' };
+        }
+        revalidatePath('/admin/location');
+        return { success: true, message: 'লোকেশন সফলভাবে তৈরি হয়েছে।', location: newLocation };
+    } catch (error) {
+        console.error("Create Location Error:", error);
+        return { success: false, message: 'লোকেশন তৈরি করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function updateLocationAction(data: LocationFormValues) {
+    if (!data.id) return { success: false, message: 'লোকেশন আইডি পাওয়া যায়নি।' };
+    
+    const validation = locationSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+
+    try {
+        const updatedLocation = await updateLocation(data.id, data);
+        if (!updatedLocation) {
+            return { success: false, message: 'লোকেশনটি আপডেট করা যায়নি।' };
+        }
+        revalidatePath('/admin/location');
+        revalidatePath(`/admin/location/edit/${data.id}`);
+        return { success: true, message: 'লোকেশন সফলভাবে আপডেট হয়েছে।', location: updatedLocation };
+    } catch (error) {
+        console.error("Update Location Error:", error);
+        return { success: false, message: 'লোকেশন আপডেট করতে একটি সমস্যা হয়েছে।' };
+    }
+}
+
+export async function deleteLocationAction(locationId: string) {
+    try {
+        await deleteLocation(locationId);
+        revalidatePath('/admin/location');
+        return { success: true, message: 'লোকেশন সফলভাবে ডিলিট হয়েছে।' };
+    } catch (error) {
+        console.error("Delete Location Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'লোকেশন ডিলিট করতে একটি সমস্যা হয়েছে।';
+        return { success: false, message: errorMessage };
     }
 }

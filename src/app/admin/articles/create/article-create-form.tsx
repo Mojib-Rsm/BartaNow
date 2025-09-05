@@ -23,10 +23,11 @@ import { format, isFuture } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { useDebouncedCallback } from 'use-debounce';
-import type { Article } from '@/lib/types';
+import type { Article, Location } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
 import { Editor } from '@tinymce/tinymce-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { getAllLocations } from '@/lib/api';
 
 
 const formSchema = z.object({
@@ -43,6 +44,10 @@ const formSchema = z.object({
   status: z.enum(['Draft', 'Pending Review', 'Published']),
   isAiGenerated: z.boolean().optional(),
   badge: z.enum(['নতুন', 'জনপ্রিয়', '__none__']).optional(),
+  location: z.string().optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  metaKeywords: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -57,6 +62,7 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
   const [isSuggestingTags, setIsSuggestingTags] = useState(false);
   const [headlineRanking, setHeadlineRanking] = useState<{ score: number; feedback: string } | null>(null);
   const [isRanking, setIsRanking] = useState(false);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [checklist, setChecklist] = useState({
       factsVerified: false,
       imageLicensed: false,
@@ -68,6 +74,14 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
   const searchParams = useSearchParams();
 
   const isChecklistComplete = Object.values(checklist).every(Boolean);
+
+  useEffect(() => {
+    async function fetchLocations() {
+      const allLocations = await getAllLocations();
+      setLocations(allLocations);
+    }
+    fetchLocations();
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -85,6 +99,10 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
       status: (searchParams.get('status') as FormValues['status']) || 'Draft',
       isAiGenerated: searchParams.get('isAiGenerated') === 'true',
       badge: '__none__',
+      location: '__none__',
+      metaTitle: '',
+      metaDescription: '',
+      metaKeywords: '',
     },
   });
 
@@ -190,10 +208,11 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
 
     const tagArray = data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [];
     const keywordsArray = data.focusKeywords?.split(',').map(kw => kw.trim()).filter(Boolean) || [];
+    const metaKeywordsArray = data.metaKeywords?.split(',').map(kw => kw.trim()).filter(Boolean) || [];
     
     const status = isFuture(publishedDate) && data.status === 'Published' ? 'Scheduled' : data.status;
 
-    const finalData = { ...data, tags: tagArray, focusKeywords: keywordsArray, publishedAt: publishedDate.toISOString(), status };
+    const finalData = { ...data, tags: tagArray, focusKeywords: keywordsArray, metaKeywords: metaKeywordsArray, publishedAt: publishedDate.toISOString(), status };
 
     const result = await createArticleAction({ ...finalData, userId });
     setLoading(false);
@@ -352,7 +371,7 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
                   <Input id="focusKeywords" {...form.register('focusKeywords')} placeholder="যেমন: নির্বাচন ২০২৪, নতুন সরকার" />
                 </div>
             </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="grid gap-2">
                     <Label htmlFor="status">স্ট্যাটাস</Label>
                     <Controller
@@ -386,6 +405,26 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
                                     <SelectItem value="__none__">কোনোটিই নয়</SelectItem>
                                     <SelectItem value="নতুন">নতুন</SelectItem>
                                     <SelectItem value="জনপ্রিয়">জনপ্রিয়</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        )}
+                    />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="location">লোকেশন (ঐচ্ছিক)</Label>
+                     <Controller
+                        control={form.control}
+                        name="location"
+                        render={({ field }) => (
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <SelectTrigger id="location">
+                                    <SelectValue placeholder="লোকেশন নির্বাচন করুন" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="__none__">কোনোটিই নয়</SelectItem>
+                                    {locations.map(loc => (
+                                      <SelectItem key={loc.id} value={loc.name}>{loc.name}</SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         )}
@@ -430,6 +469,28 @@ export default function ArticleCreateForm({ userId }: ArticleCreateFormProps) {
                             type="time"
                             {...form.register('publishTime')}
                         />
+                    </div>
+                </CardContent>
+            </Card>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-base">SEO Settings</CardTitle>
+                    <CardDescription>সার্চ ইঞ্জিন অপটিমাইজেশনের জন্য মেটা তথ্য যোগ করুন।</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="metaTitle">মেটা শিরোনাম (Meta Title)</Label>
+                        <Input id="metaTitle" {...form.register('metaTitle')} placeholder="SEO-ফ্রেন্ডলি শিরোনাম দিন" />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="metaDescription">মেটা ডেসক্রিপশন (Meta Description)</Label>
+                        <Input id="metaDescription" {...form.register('metaDescription')} placeholder="সার্চ রেজাল্টে দেখানোর জন্য সংক্ষিপ্ত বিবরণ" />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="metaKeywords">মেটা কীওয়ার্ড (Meta Keywords)</Label>
+                        <Input id="metaKeywords" {...form.register('metaKeywords')} placeholder="যেমন: খবর, বাংলাদেশ, রাজনীতি" />
+                         <p className="text-xs text-muted-foreground">কীওয়ার্ডগুলো কমা (,) দিয়ে আলাদা করুন।</p>
                     </div>
                 </CardContent>
             </Card>
