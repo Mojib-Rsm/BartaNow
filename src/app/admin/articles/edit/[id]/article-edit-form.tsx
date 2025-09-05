@@ -27,6 +27,7 @@ import { useAuthorization } from '@/hooks/use-authorization';
 import { Progress } from '@/components/ui/progress';
 import { Editor } from '@tinymce/tinymce-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
   id: z.string(),
@@ -43,6 +44,9 @@ const formSchema = z.object({
   authorId: z.string(),
   status: z.enum(['Draft', 'Pending Review', 'Published', 'Scheduled']),
   badge: z.enum(['নতুন', 'জনপ্রিয়', '__none__']).optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  metaKeywords: z.string().optional(),
 });
 
 
@@ -98,6 +102,9 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
       authorId: article.authorId,
       status: article.status,
       badge: article.badge || '__none__',
+      metaTitle: article.metaTitle || '',
+      metaDescription: article.metaDescription || '',
+      metaKeywords: article.metaKeywords?.join(', ') || '',
     },
   });
   
@@ -178,6 +185,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
 
     const tagArray = data.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [];
     const keywordsArray = data.focusKeywords?.split(',').map(kw => kw.trim()).filter(Boolean) || [];
+    const metaKeywordsArray = data.metaKeywords?.split(',').map(kw => kw.trim()).filter(Boolean) || [];
 
     const status = isFuture(publishedDate) && data.status === 'Published' ? 'Scheduled' : data.status;
 
@@ -187,6 +195,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
         ...data, 
         tags: tagArray,
         focusKeywords: keywordsArray,
+        metaKeywords: metaKeywordsArray,
         publishedAt: publishedDate.toISOString(),
         status,
         authorName: selectedAuthor?.name,
@@ -449,6 +458,28 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
                             type="time"
                             {...form.register('publishTime')}
                         />
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-base">SEO Settings</CardTitle>
+                    <CardDescription>সার্চ ইঞ্জিন অপটিমাইজেশনের জন্য মেটা তথ্য যোগ করুন।</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="metaTitle">মেটা শিরোনাম (Meta Title)</Label>
+                        <Input id="metaTitle" {...form.register('metaTitle')} placeholder="SEO-ফ্রেন্ডলি শিরোনাম দিন" />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="metaDescription">মেটা ডেসক্রিপশন (Meta Description)</Label>
+                        <Textarea id="metaDescription" {...form.register('metaDescription')} placeholder="সার্চ রেজাল্টে দেখানোর জন্য সংক্ষিপ্ত বিবরণ" />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="metaKeywords">মেটা কীওয়ার্ড (Meta Keywords)</Label>
+                        <Input id="metaKeywords" {...form.register('metaKeywords')} placeholder="যেমন: খবর, বাংলাদেশ, রাজনীতি" />
+                         <p className="text-xs text-muted-foreground">কীওয়ার্ডগুলো কমা (,) দিয়ে আলাদা করুন।</p>
                     </div>
                 </CardContent>
             </Card>

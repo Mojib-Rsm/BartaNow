@@ -38,9 +38,9 @@ export async function generateMetadata(
 
   const siteName = 'BartaNow | বার্তা নাও';
   const articleUrl = `/${generateNonAiSlug(article.category)}/${article.slug}`;
-  const seoTitle = `${article.title} | ${siteName}`;
-  const description = article.aiSummary || article.content.substring(0, 160);
-  const keywords = [...(article.tags || []), ...(article.focusKeywords || [])];
+  const seoTitle = article.metaTitle || `${article.title} | ${siteName}`;
+  const description = article.metaDescription || article.aiSummary || article.content.substring(0, 160);
+  const keywords = article.metaKeywords || [...(article.tags || []), ...(article.focusKeywords || [])];
  
   const openGraphImages = article.imageUrl ? [{
         url: article.imageUrl,
@@ -123,7 +123,7 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
             url: 'https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/refs/heads/main/public/log-heado.png', // Replace with your actual logo URL
         },
     },
-    description: article.aiSummary,
+    description: article.metaDescription || article.aiSummary,
     mainEntityOfPage: {
         '@type': 'WebPage',
         '@id': `${process.env.NEXT_PUBLIC_SITE_URL}/${generateNonAiSlug(article.category)}/${article.slug}`

@@ -94,6 +94,9 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     location: 'চট্টগ্রাম',
     tags: ['ক্রিকেট', 'বাংলাদেশ', 'এশিয়া কাপ'],
+    metaTitle: 'খেলা: এশিয়া কাপে বাংলাদেশের विजयी সূচনা',
+    metaDescription: 'অধিনায়কের অসাধারণ শতকে ভর করে এশিয়া কাপের উদ্বোধনী ম্যাচে দুর্দান্ত জয় পেয়েছে বাংলাদেশ। বিস্তারিত পড়ুন।',
+    metaKeywords: ['ক্রিকেট', 'বাংলাদেশ ক্রিকেট', 'এশিয়া কাপ ২০২৪'],
   },
   {
     id: '2',
