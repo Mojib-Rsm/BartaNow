@@ -120,7 +120,7 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
         name: 'BartaNow | বার্তা নাও',
         logo: {
             '@type': 'ImageObject',
-            url: 'https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/refs/heads/main/public/log-heado.png', // Replace with your actual logo URL
+            url: process.env.NEXT_PUBLIC_LOGO_URL || 'https://www.bartanow.com/log-heado.png',
         },
     },
     description: article.metaDescription || article.aiSummary,

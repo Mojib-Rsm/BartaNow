@@ -110,6 +110,8 @@ function AdminLayoutContent({
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL || 'https://www.bartanow.com/log-heado.png';
+
 
   useEffect(() => {
     const handleStorageChange = () => {

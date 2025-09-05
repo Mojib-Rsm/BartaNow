@@ -2,7 +2,7 @@
 import { getArticles, getAllPages, getAllAuthors, getAllCategories } from '@/lib/api';
 import { generateNonAiSlug } from '@/lib/utils';
 
-const URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002';
+const URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com';
 
 function generateSiteMap(
     articles: any[], 

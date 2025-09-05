@@ -4,11 +4,12 @@ import RSS from 'rss';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com';
   const feed = new RSS({
     title: 'BartaNow | বার্তা নাও - সর্বশেষ সংবাদ',
     description: 'বার্তা নাও থেকে সর্বশেষ এবং নির্ভরযোগ্য সংবাদের জন্য আপনার বিশ্বস্ত উৎস।',
-    feed_url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/rss`,
-    site_url: `${process.env.NEXT_PUBLIC_SITE_URL}`,
+    feed_url: `${siteUrl}/api/rss`,
+    site_url: siteUrl,
     language: 'bn',
     pubDate: new Date(),
     ttl: 60,
@@ -20,7 +21,7 @@ export async function GET() {
     feed.item({
       title: article.title,
       description: article.aiSummary,
-      url: `${process.env.NEXT_PUBLIC_SITE_URL}/${article.slug}`,
+      url: `${siteUrl}/${article.slug}`,
       guid: article.id,
       author: article.authorName,
       date: article.publishedAt,

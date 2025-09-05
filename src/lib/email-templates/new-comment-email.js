@@ -1,8 +1,8 @@
 
 
 export function getNewCommentEmailHtml({ comment, article }) {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002';
-    const logoUrl = "https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/refs/heads/main/public/log-heado.png";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com';
+    const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL || "https://www.bartanow.com/log-heado.png";
     const moderationUrl = `${siteUrl}/admin/comments`;
     const yearInBangla = new Intl.NumberFormat('bn-BD').format(new Date().getFullYear());
 

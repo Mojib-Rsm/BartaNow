@@ -429,7 +429,7 @@ export async function sendNotificationAction(payload: { title: string; body: str
   // It calls our own API route to trigger the web push.
   try {
     // Construct the absolute URL for the API endpoint
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com';
     const response = await fetch(`${baseUrl}/api/push/notify`, {
       method: 'POST',
       headers: {
@@ -876,7 +876,7 @@ export async function sendNewsletterAction(data: { articleIds: string[], customM
 
 export async function triggerRssImportAction() {
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002';
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com';
         const response = await fetch(`${baseUrl}/api/cron/import-rss`, {
             method: 'GET',
             headers: {
