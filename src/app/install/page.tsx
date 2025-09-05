@@ -178,7 +178,7 @@ export default function InstallPage() {
 
                 {formData.dbType === 'postgresql' && (
                      <div className="space-y-6 border-t pt-6">
-                         <p className="text-sm text-muted-foreground">আপনার PostgreSQL ডেটাবেসের তথ্য দিন। এই ফিচারটি এখনো নির্মাণাধীন।</p>
+                         <p className="text-sm text-muted-foreground">আপনার PostgreSQL ডেটাবেসের তথ্য দিন।</p>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="dbHost">Database Host</Label>
