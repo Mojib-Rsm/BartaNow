@@ -1,9 +1,6 @@
-# See https://www.robotstxt.org/robotstxt.html for syntax and more information
+# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
 
 User-agent: *
-Disallow: /admin/
-Disallow: /dashboard/
-Disallow: /install
 Allow: /
 
-Sitemap: https://bartanow.com/sitemap.xml
+Sitemap: https://www.bartanow.com/sitemap.xml

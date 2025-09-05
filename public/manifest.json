@@ -1,24 +1,22 @@
-
 {
-  "name": "BartaNow",
+  "name": "BartaNow | বার্তা নাও",
   "short_name": "BartaNow",
-  "description": "The latest news and updates from BartaNow.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#007BFF",
+  "description": "BartaNow | বার্তা নাও - আপনার প্রতিদিনের খবরের উৎস",
   "icons": [
     {
-      "src": "/log-heado.png",
+      "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/log-heado.png",
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
 }
-
-    

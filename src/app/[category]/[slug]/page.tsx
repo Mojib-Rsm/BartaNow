@@ -126,7 +126,7 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
     description: article.metaDescription || article.aiSummary,
     mainEntityOfPage: {
         '@type': 'WebPage',
-        '@id': `${process.env.NEXT_PUBLIC_SITE_URL}/${generateNonAiSlug(article.category)}/${article.slug}`
+        '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com'}/${generateNonAiSlug(article.category)}/${article.slug}`
     }
   };
 
