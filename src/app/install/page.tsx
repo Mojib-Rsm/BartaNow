@@ -1,9 +1,9 @@
 
 'use client';
 
-import { seedAction } from '@/app/actions';
+import { seedAction, testDbConnectionAction } from '@/app/actions';
 import { useState } from 'react';
-import { Rocket, CheckCircle, AlertTriangle, User, Key, Database, Building, Lock, Mail, Clapperboard, Check } from 'lucide-react';
+import { Rocket, CheckCircle, AlertTriangle, User, Key, Database, Building, Lock, Mail, Clapperboard, Check, DatabaseZap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { cn } from '@/lib/utils';
 
 export type InstallFormData = {
   siteName: string;
@@ -37,6 +38,7 @@ const STEPS = [
 export default function InstallPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
   const router = useRouter();
   const [formData, setFormData] = useState<InstallFormData>({
       siteName: 'বার্তা নাও',
@@ -47,7 +49,7 @@ export default function InstallPage() {
       dbType: 'firestore',
       dbHost: 'localhost',
       dbName: 'bartanow_db',
-      dbUser: 'root',
+      dbUser: 'postgres',
       dbPassword: ''
   });
   const { toast } = useToast();
@@ -69,7 +71,6 @@ export default function InstallPage() {
     toast({ title: 'ইন্সটলেশন শুরু হচ্ছে...', description: 'অনুগ্রহ করে অপেক্ষা করুন, ডেটাবেস প্রস্তুত করা হচ্ছে।' });
 
     try {
-      // Pass the form data to the seed action
       const actionResult = await seedAction(formData);
 
       if (actionResult.success) {
@@ -99,6 +100,24 @@ export default function InstallPage() {
       setIsLoading(false);
     }
   };
+
+  const handleTestConnection = async () => {
+    setIsTestingConnection(true);
+    const result = await testDbConnectionAction({
+        dbHost: formData.dbHost,
+        dbName: formData.dbName,
+        dbUser: formData.dbUser,
+        dbPassword: formData.dbPassword,
+    });
+    setIsTestingConnection(false);
+
+    if (result.success) {
+        toast({ title: 'সফল', description: result.message });
+    } else {
+        toast({ variant: 'destructive', title: 'ব্যর্থ', description: result.message });
+    }
+  };
+
 
   const progress = (currentStep / STEPS.length) * 100;
 
@@ -176,30 +195,32 @@ export default function InstallPage() {
                     </RadioGroup>
                 </div>
 
-                {formData.dbType === 'postgresql' && (
-                     <div className="space-y-6 border-t pt-6">
-                         <p className="text-sm text-muted-foreground">আপনার PostgreSQL ডেটাবেসের তথ্য দিন।</p>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="dbHost">Database Host</Label>
-                                <Input id="dbHost" name="dbHost" value={formData.dbHost} onChange={handleChange} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="dbName">Database Name</Label>
-                                <Input id="dbName" name="dbName" value={formData.dbName} onChange={handleChange} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="dbUser">Username</Label>
-                                <Input id="dbUser" name="dbUser" value={formData.dbUser} onChange={handleChange} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="dbPassword">Password</Label>
-                                <Input id="dbPassword" type="password" name="dbPassword" value={formData.dbPassword} onChange={handleChange} />
-                            </div>
+                <div className={cn("space-y-6 border-t pt-6", formData.dbType === 'postgresql' ? 'block' : 'hidden')}>
+                    <p className="text-sm text-muted-foreground">আপনার PostgreSQL ডেটাবেসের তথ্য দিন।</p>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="dbHost">Database Host</Label>
+                            <Input id="dbHost" name="dbHost" value={formData.dbHost} onChange={handleChange} />
                         </div>
-                        <Button type="button" variant="outline" disabled>Test Connection</Button>
+                        <div className="space-y-2">
+                            <Label htmlFor="dbName">Database Name</Label>
+                            <Input id="dbName" name="dbName" value={formData.dbName} onChange={handleChange} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="dbUser">Username</Label>
+                            <Input id="dbUser" name="dbUser" value={formData.dbUser} onChange={handleChange} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="dbPassword">Password</Label>
+                            <Input id="dbPassword" type="password" name="dbPassword" value={formData.dbPassword} onChange={handleChange} />
+                        </div>
                     </div>
-                )}
+                    <Button type="button" variant="outline" onClick={handleTestConnection} disabled={isTestingConnection}>
+                        {isTestingConnection && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        <DatabaseZap className="mr-2 h-4 w-4" />
+                        Test Connection
+                    </Button>
+                </div>
             </div>
           )}
           

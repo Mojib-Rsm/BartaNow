@@ -20,6 +20,36 @@ import { suggestTagsForArticle } from '@/ai/flows/suggest-tags';
 import { analyzeImage } from '@/ai/flows/analyze-image';
 import { seedDatabase } from '../../scripts/seed.ts';
 import type { InstallFormData } from '@/app/install/page';
+import { Pool } from 'pg';
+
+export async function testDbConnectionAction(dbConfig: { dbHost?: string; dbName?: string; dbUser?: string; dbPassword?: string; }) {
+    const { dbHost, dbName, dbUser, dbPassword } = dbConfig;
+    
+    if (!dbHost || !dbName || !dbUser) {
+        return { success: false, message: 'অনুগ্রহ করে হোস্ট, ডেটাবেস নাম এবং ব্যবহারকারী তথ্য পূরণ করুন।' };
+    }
+
+    const pool = new Pool({
+        host: dbHost,
+        database: dbName,
+        user: dbUser,
+        password: dbPassword,
+        port: 5432,
+        connectionTimeoutMillis: 5000, 
+    });
+
+    try {
+        const client = await pool.connect();
+        client.release();
+        return { success: true, message: 'ডেটাবেস সংযোগ সফল হয়েছে!' };
+    } catch (error: any) {
+        console.error("DB Connection Test Error:", error);
+        return { success: false, message: `সংযোগ ব্যর্থ: ${error.message}` };
+    } finally {
+        await pool.end();
+    }
+}
+
 
 export async function seedAction(installData: InstallFormData) {
     return seedDatabase(installData);
