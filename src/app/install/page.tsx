@@ -1,15 +1,15 @@
-
 'use client';
 
 import { seedDatabase } from '../../../scripts/seed.ts';
 import { useState } from 'react';
-import { Rocket, CheckCircle, AlertTriangle, User, Key, Database, Building, Lock, Mail, Clapperboard } from 'lucide-react';
+import { Rocket, CheckCircle, AlertTriangle, User, Key, Database, Building, Lock, Mail, Clapperboard, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useRouter } from 'next/navigation';
 
 const STEPS = [
   { id: 1, title: 'স্বাগতম' },
@@ -21,12 +21,14 @@ const STEPS = [
 export default function InstallPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const [formData, setFormData] = useState({
       siteName: 'বার্তা নাও',
       tagline: 'আপনার প্রতিদিনের খবরের উৎস',
       adminName: 'Admin User',
       adminEmail: 'admin@bartanow.com',
       adminPassword: 'password123',
+      dbType: 'firestore',
   });
   const { toast } = useToast();
 
@@ -50,9 +52,7 @@ export default function InstallPage() {
           description: 'আপনাকে অ্যাডমিন ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...',
           duration: 5000,
         });
-        // In a real scenario, you would redirect to the admin panel
-        // For this demo, we can just show a success state.
-        setCurrentStep(prev => prev + 1); // Go to success step
+        setCurrentStep(prev => prev + 1); 
       } else {
         toast({
           variant: 'destructive',
@@ -135,10 +135,11 @@ export default function InstallPage() {
                 <h3 className="font-semibold text-lg">পর্যালোচনা করুন</h3>
                 <p className="text-muted-foreground">অনুগ্রহ করে নিশ্চিত করুন যে সমস্ত তথ্য সঠিক আছে। "Install Now" বাটনে ক্লিক করলে আপনার ডেটাবেস সেটআপ হবে এবং অ্যাডমিন ব্যবহারকারী তৈরি হবে।</p>
                 <ul className="space-y-2 rounded-lg border p-4">
-                    <li><strong>সাইটের নাম:</strong> {formData.siteName}</li>
-                    <li><strong>ট্যাগলাইন:</strong> {formData.tagline}</li>
-                    <li><strong>অ্যাডমিন নাম:</strong> {formData.adminName}</li>
-                    <li><strong>অ্যাডমিন ইমেইল:</strong> {formData.adminEmail}</li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>সাইটের নাম:</strong> {formData.siteName}</li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>ট্যাগলাইন:</strong> {formData.tagline}</li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>অ্যাডমিন নাম:</strong> {formData.adminName}</li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>অ্যাডমিন ইমেইল:</strong> {formData.adminEmail}</li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /><strong>ডেটাবেস:</strong> Firestore (Recommended)</li>
                 </ul>
             </div>
           )}
@@ -148,9 +149,7 @@ export default function InstallPage() {
                     <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
                     <h2 className="text-2xl font-bold">ইন্সটলেশন সফল!</h2>
                     <p className="text-muted-foreground">আপনার ওয়েবসাইট এখন ব্যবহারের জন্য প্রস্তুত। অ্যাডমিন প্যানেলে যেতে নিচের বাটনে ক্লিক করুন।</p>
-                    <Button asChild>
-                        <a href="/admin">অ্যাডমিন ড্যাশবোর্ডে যান</a>
-                    </Button>
+                    <Button onClick={() => router.push('/admin')}>অ্যাডমিন ড্যাশবোর্ডে যান</Button>
                 </div>
           )}
 

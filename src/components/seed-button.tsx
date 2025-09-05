@@ -6,10 +6,12 @@ import { Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { seedAction } from '@/app/actions';
+import { useRouter } from 'next/navigation';
 
 export default function SeedButton() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleSeed = async () => {
     setIsLoading(true);
@@ -20,8 +22,8 @@ export default function SeedButton() {
           title: 'Success',
           description: result.message,
         });
-        // Optionally, refresh the page to show the new data
-        window.location.reload();
+        // Redirect to install page
+        router.push('/install');
       } else {
         toast({
           variant: 'destructive',
@@ -43,7 +45,7 @@ export default function SeedButton() {
   return (
     <Button onClick={handleSeed} disabled={isLoading}>
       <Rocket className="mr-2 h-4 w-4" />
-      {isLoading ? 'Seeding...' : 'Seed Database'}
+      {isLoading ? 'Seeding...' : 'Install Website'}
     </Button>
   );
 }
