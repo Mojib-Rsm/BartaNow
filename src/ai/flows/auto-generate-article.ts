@@ -11,14 +11,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 import { uploadImage } from '@/lib/imagekit';
 import { generateNonAiSlug } from '@/lib/utils';
 
 const AutoGenerateArticleInputSchema = z.object({
   keyword: z.string().describe('The keyword or topic for the news article.'),
   language: z.enum(['Bengali', 'English']).default('Bengali'),
-  wordCount: z.enum(['500', '1000', '1500', '2000']).default('1000'),
+  wordCount: z.enum(['700', '1000', '1500', '2000']).default('700'),
   category: z.string().default('সর্বশেষ'),
 });
 export type AutoGenerateArticleInput = z.infer<typeof AutoGenerateArticleInputSchema>;
@@ -90,3 +90,4 @@ const articleGenerationPrompt = ai.definePrompt({
 Ensure all generated text fields respect the specified language.
 `,
 });
+
