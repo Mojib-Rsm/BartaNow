@@ -2,20 +2,29 @@
 import { getArticles } from '@/lib/api';
 import { NextResponse } from 'next/server';
 import { generateNonAiSlug } from '@/lib/utils';
+import type { Article } from '@/lib/types';
 
 const URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com';
 
-// Google News sitemaps should only contain articles from the last 48 hours.
-function generateNewsSiteMap(articles: any[]) {
+// Google News sitemaps should ideally contain articles from the last 48 hours.
+// This function will prioritize recent articles but will fall back to the latest articles
+// to ensure the sitemap is never empty.
+function generateNewsSiteMap(articles: Article[]) {
   const twoDaysAgo = new Date();
   twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
-  const recentArticles = articles.filter(
+  let recentArticles = articles.filter(
     (article) => new Date(article.publishedAt) > twoDaysAgo
   );
 
-  const escapeXml = (unsafe: string) => 
-    unsafe.replace(/[<>&'"]/g, (c) => {
+  // If no articles in the last 48 hours, fall back to the 10 most recent articles to avoid an empty sitemap
+  if (recentArticles.length === 0 && articles.length > 0) {
+    recentArticles = articles.slice(0, 10);
+  }
+
+  const escapeXml = (unsafe: string | undefined) => {
+    if (!unsafe) return '';
+    return unsafe.replace(/[<>&'"]/g, (c) => {
       switch (c) {
         case '<': return '&lt;';
         case '>': return '&gt;';
@@ -25,6 +34,7 @@ function generateNewsSiteMap(articles: any[]) {
         default: return c;
       }
     });
+  }
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
