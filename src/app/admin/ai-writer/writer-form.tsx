@@ -256,19 +256,30 @@ export default function WriterForm() {
                              <TabsContent key={index} value={`variant-${index}`} className="space-y-4 mt-4">
                                 <div>
                                     <Label>শিরোনাম</Label>
-                                    <Input value={variant.title} readOnly />
+                                    <Input 
+                                        defaultValue={variant.title} 
+                                        onChange={(e) => {
+                                            const newVariants = [...generatedVariants];
+                                            newVariants[index].title = e.target.value;
+                                            setGeneratedVariants(newVariants);
+                                        }}
+                                    />
                                 </div>
                                 <div>
                                     <Label>কনটেন্ট</Label>
                                     <Editor
                                         apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
-                                        value={variant.content}
+                                        initialValue={variant.content}
+                                        onEditorChange={(content) => {
+                                            const newVariants = [...generatedVariants];
+                                            newVariants[index].content = content;
+                                            setGeneratedVariants(newVariants);
+                                        }}
                                         init={{
                                             height: 500,
                                             menubar: false,
                                             plugins: 'lists link image code wordcount',
                                             toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link image | code',
-                                            readonly: true,
                                             content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
                                         }}
                                      />
