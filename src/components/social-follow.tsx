@@ -7,7 +7,7 @@ import { Facebook, Twitter, Instagram, Youtube, Rss } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SocialFollow() {
-  const facebookPageUrl = "https://www.facebook.com/prothomalo"; // Replace with your Facebook page URL
+  const facebookPageUrl = "https://www.facebook.com/NowBarta"; // Replace with your Facebook page URL
 
   return (
     <Card>
@@ -60,4 +60,5 @@ export default function SocialFollow() {
     </Card>
   );
 }
+
 
