@@ -172,26 +172,28 @@ export default function InstallPage() {
                 </div>
 
                 {formData.dbType !== 'firestore' && formData.dbType !== 'mock' && (
-                     <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="dbName">Database Name</Label>
-                            <Input id="dbName" name="dbName" value={formData.dbName} onChange={handleChange} />
+                     <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="dbName">Database Name</Label>
+                                <Input id="dbName" name="dbName" value={formData.dbName} onChange={handleChange} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="dbUser">Username</Label>
+                                <Input id="dbUser" name="dbUser" value={formData.dbUser} onChange={handleChange} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="dbPassword">Password</Label>
+                                <Input id="dbPassword" type="password" name="dbPassword" value={formData.dbPassword} onChange={handleChange} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="dbHost">Database Host</Label>
+                                <Input id="dbHost" name="dbHost" value={formData.dbHost} onChange={handleChange} />
+                            </div>
                         </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="dbUser">Username</Label>
-                            <Input id="dbUser" name="dbUser" value={formData.dbUser} onChange={handleChange} />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="dbPassword">Password</Label>
-                            <Input id="dbPassword" type="password" name="dbPassword" value={formData.dbPassword} onChange={handleChange} />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="dbHost">Database Host</Label>
-                            <Input id="dbHost" name="dbHost" value={formData.dbHost} onChange={handleChange} />
-                        </div>
+                        <Button type="button" variant="outline" disabled>Test Connection</Button>
                     </div>
                 )}
-                 <Button type="button" variant="outline" disabled>Test Connection</Button>
             </div>
           )}
           
