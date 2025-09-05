@@ -48,10 +48,16 @@ export default function AdSpot({ className, placement }: AdSpotProps) {
   }
 
   if (ad.type === 'image') {
+    let imageUrl = ad.content;
+    // Ensure the URL is absolute
+    if (!imageUrl.startsWith('http')) {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com';
+        imageUrl = `${siteUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+    }
     return (
       <Link href={ad.targetUrl || '#'} target="_blank" rel="noopener noreferrer sponsored">
         <div className={`relative w-full overflow-hidden rounded-md ${className}`}>
-           <Image src={ad.content} alt={ad.name} fill className="object-cover" />
+           <Image src={imageUrl} alt={ad.name} fill className="object-cover" />
         </div>
       </Link>
     );
