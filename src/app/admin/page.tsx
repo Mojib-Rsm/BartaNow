@@ -1,4 +1,5 @@
 
+      
 'use client'
 
 import {
@@ -44,9 +45,10 @@ import {
 import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { Article, Comment, User, Page, Poll, MemeNews } from "@/lib/types";
-import { getArticles, getAllComments, getAllUsers, getAllPages, getAllPolls, getMemeNews } from "@/lib/api";
+import { getArticles, getAllComments, getAllUsers, getAllPages, getAllPolls, getMemeNews, getAllAds, getAllCategories } from "@/lib/api";
+import { generateNonAiSlug } from "@/lib/utils";
 
 const StatCard = ({ title, value, icon: Icon, subValue1, subValue2, bgColor }: { title: string, value: string | number, icon?: React.ElementType, subValue1?: string, subValue2?: string, bgColor?: string }) => (
     <Card className={`text-white ${bgColor}`}>
@@ -73,7 +75,7 @@ const MiniStatCard = ({ title, value, icon: Icon, color }: { title: string, valu
                 <Icon className="h-5 w-5" style={{ color: color }}/>
              </div>
             <div>
-                <div className="text-xl font-bold">{value}</div>
+                <div className="text-xl font-bold">{new Intl.NumberFormat('bn-BD').format(Number(value))}</div>
                 <p className="text-sm text-muted-foreground">{title}</p>
             </div>
         </CardContent>
@@ -81,6 +83,7 @@ const MiniStatCard = ({ title, value, icon: Icon, color }: { title: string, valu
 );
 
 const UserStatisticChart = () => {
+    // This data is still simulated as user creation date is not tracked in the DB.
     const data = [
         { name: 'Jan', free: 4000, subscribed: 2400 },
         { name: 'Feb', free: 3000, subscribed: 1398 },
@@ -105,20 +108,32 @@ const UserStatisticChart = () => {
     );
 };
 
-const CategoryWiseNewsChart = () => {
-    const data = [
-        { name: 'Business', value: 400, color: '#3B82F6' },
-        { name: 'Politics', value: 300, color: '#8B5CF6' },
-        { name: 'Health', value: 300, color: '#10B981' },
-        { name: 'Sports', value: 200, color: '#F97316' },
-        { name: 'Travels', value: 278, color: '#F59E0B' },
-        { name: 'Technology', value: 189, color: '#14B8A6' },
-    ];
+const CategoryWiseNewsChart = ({ articles }: { articles: Article[] }) => {
+    const categoryData = useMemo(() => {
+        const categoryCounts = articles.reduce((acc, article) => {
+            const category = article.category || 'Uncategorized';
+            acc[category] = (acc[category] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        const colors = ['#3B82F6', '#8B5CF6', '#10B981', '#F97316', '#F59E0B', '#14B8A6'];
+        
+        return Object.entries(categoryCounts)
+            .map(([name, value], index) => ({ name, value, color: colors[index % colors.length] }))
+            .sort((a,b) => b.value - a.value)
+            .slice(0, 6);
+
+    }, [articles]);
+
+    if (categoryData.length === 0) {
+        return <div className="text-center text-muted-foreground">No category data available.</div>;
+    }
+    
     return (
         <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-                <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} fill="#8884d8" paddingAngle={5}>
-                    {data.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                <Pie data={categoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} fill="#8884d8" paddingAngle={5}>
+                    {categoryData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                 </Pie>
                 <Tooltip />
                 <Legend iconType="circle" />
@@ -135,13 +150,17 @@ export default function AdminPage() {
         draftArticles: 0,
         breakingArticles: 0,
         totalUsers: 0,
+        subscribedUsers: 0,
+        freeUsers: 0,
         totalComments: 0,
         totalPages: 0,
         totalPolls: 0,
+        totalAds: 0,
         totalMemeNews: 0,
         uniqueCategories: 0,
         mostViewed: [] as Article[],
         latestComments: [] as Comment[],
+        allArticles: [] as Article[],
     });
 
     useEffect(() => {
@@ -152,7 +171,9 @@ export default function AdminPage() {
                 pages,
                 users,
                 polls,
-                memeNews
+                memeNews,
+                ads,
+                categories,
             ] = await Promise.all([
                 getArticles({ limit: 10000 }),
                 getAllComments(),
@@ -160,21 +181,27 @@ export default function AdminPage() {
                 getAllUsers(),
                 getAllPolls(),
                 getMemeNews(),
+                getAllAds(),
+                getAllCategories(),
             ]);
 
             setStats({
                 totalArticles: articles.length,
                 publishedArticles: articles.filter(a => a.status === 'Published').length,
-                draftArticles: articles.filter(a => a.status === 'Draft').length,
+                draftArticles: articles.filter(a => a.status === 'Draft' || a.status === 'Pending Review' || a.status === 'Scheduled').length,
                 breakingArticles: articles.filter(a => a.category === 'বিশেষ-কভারেজ').length, // Example logic
                 totalUsers: users.length,
+                subscribedUsers: 10000, // Mocked for now
+                freeUsers: 20000, // Mocked for now
                 totalComments: comments.length,
                 totalPages: pages.length,
                 totalPolls: polls.length,
+                totalAds: ads.length,
                 totalMemeNews: memeNews.length,
-                uniqueCategories: new Set(articles.map(a => a.category)).size,
-                mostViewed: [...articles].sort(() => Math.random() - 0.5).slice(0, 5), // Mocking views
+                uniqueCategories: categories.length,
+                mostViewed: articles.slice(0, 5), // Using latest as most viewed for now
                 latestComments: comments.slice(0, 5),
+                allArticles: articles,
             });
         };
         fetchData();
@@ -183,10 +210,10 @@ export default function AdminPage() {
   return (
     <div className="space-y-6">
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard title="News Readers" value="30,000" subValue1="Subscribe: 10,000" subValue2="Free: 20,000" bgColor="bg-blue-500" />
-            <StatCard title="Featured Section" value="8+" icon={Grid} bgColor="bg-teal-500" />
+            <StatCard title="News Readers" value={new Intl.NumberFormat('bn-BD').format(stats.totalUsers)} subValue1={`Subscribe: ${new Intl.NumberFormat('bn-BD').format(stats.subscribedUsers)}`} subValue2={`Free: ${new Intl.NumberFormat('bn-BD').format(stats.freeUsers)}`} bgColor="bg-blue-500" />
+            <StatCard title="Total Categories" value={stats.uniqueCategories} icon={Grid} bgColor="bg-teal-500" />
             <StatCard title="Language" value="40+" icon={Languages} bgColor="bg-rose-500" />
-            <StatCard title="Ad Spaces" value="4" icon={CheckSquare} bgColor="bg-green-500" />
+            <StatCard title="Ad Spaces" value={stats.totalAds} icon={CheckSquare} bgColor="bg-green-500" />
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -194,7 +221,7 @@ export default function AdminPage() {
                 <MiniStatCard title="Published News" value={stats.publishedArticles} icon={Newspaper} color="#F97316" />
                 <MiniStatCard title="Draft News" value={stats.draftArticles} icon={FileDown} color="#10B981" />
                 <MiniStatCard title="Breaking News" value={stats.breakingArticles} icon={FileText} color="#EF4444" />
-                <MiniStatCard title="Total Blogs" value={stats.totalPages} icon={Box} color="#8B5CF6" />
+                <MiniStatCard title="Total Pages" value={stats.totalPages} icon={Box} color="#8B5CF6" />
                 <MiniStatCard title="SEO Score" value="78" icon={BarChartHorizontal} color="#3B82F6" />
                 <MiniStatCard title="Readability Score" value="85" icon={BookOpen} color="#14B8A6" />
                 <MiniStatCard title="Live Show" value="5" icon={Radio} color="#F43F5E" />
@@ -213,7 +240,7 @@ export default function AdminPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-1">
-                <CardHeader><CardTitle>Most Viewed News</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Latest News</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     {stats.mostViewed.map(article => (
                         <div key={article.id} className="flex items-center gap-4">
@@ -249,10 +276,12 @@ export default function AdminPage() {
              <Card className="lg:col-span-1">
                 <CardHeader><CardTitle>Category Wise News</CardTitle></CardHeader>
                 <CardContent>
-                    <CategoryWiseNewsChart />
+                    <CategoryWiseNewsChart articles={stats.allArticles} />
                 </CardContent>
             </Card>
         </div>
     </div>
   )
 }
+
+    
