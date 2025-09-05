@@ -796,8 +796,7 @@ const ads: Ad[] = [
         name: 'Sidebar Ad',
         type: 'image',
         content: 'https://picsum.photos/seed/ad2/300/250',
-        targetUrl: '#',
-        placement: 'sidebar_top',
+        targetUrl: 'sidebar_top',
         isActive: true,
     },
     {

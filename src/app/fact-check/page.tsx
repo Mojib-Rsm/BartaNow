@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function FactCheckPage() {
-  const { articles } = await getArticles({ category: 'তথ্য যাচাই', limit: 100 });
+  const { articles } = await getArticles({ category: 'তথ্য-যাচাই', limit: 100 });
 
   return (
     <div className="space-y-8">
