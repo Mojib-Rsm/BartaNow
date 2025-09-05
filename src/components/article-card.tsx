@@ -13,8 +13,9 @@ type ArticleCardProps = {
 
 export default function ArticleCard({ article }: ArticleCardProps) {
   const formattedDate = format(new Date(article.publishedAt), "d MMMM, yyyy", { locale: bn });
-  const categorySlug = generateNonAiSlug(article.category || "BartaNow-Unnamed");
-  const articleUrl = `/${categorySlug}/${article.slug}`;
+  const categorySlug = generateNonAiSlug(article.category || "uncategorized");
+  const articleSlug = article.slug || generateNonAiSlug(article.title);
+  const articleUrl = `/${categorySlug}/${articleSlug}`;
 
   return (
     <Card className="flex flex-col overflow-hidden bg-card rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 group border">

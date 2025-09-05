@@ -1,17 +1,6 @@
 
 import type { Article, Author, Poll, MemeNews, User, Comment, Media, Notification, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad, SocialLinks } from './types';
-
-// Helper to generate a non-AI slug from a title for mock data
-const generateNonAiSlug = (title: string) => {
-    return title
-        .toLowerCase()
-        .replace(/\s+/g, '-') // Replace spaces with -
-        .replace(/[^\p{L}\p{N}-]/gu, '') // Remove all non-alphanumeric characters except dashes
-        .replace(/--+/g, '-') // Replace multiple - with single -
-        .replace(/^-+/, '') // Trim - from start of text
-        .replace(/-+$/, ''); // Trim - from end of text
-};
-
+import { generateNonAiSlug } from './utils';
 
 const users: User[] = [
     { 
