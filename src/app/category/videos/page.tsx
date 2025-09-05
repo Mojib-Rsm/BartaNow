@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { PlayCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 import VideoCard from '@/components/video-card';
+import { generateNonAiSlug } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'ভিডিও গ্যালারি',
