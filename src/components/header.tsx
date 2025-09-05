@@ -7,7 +7,7 @@ import { Menu, X, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
+import { cn, generateNonAiSlug } from '@/lib/utils';
 import SearchInput from './search-input';
 import { ThemeToggle } from './theme-toggle';
 import type { User as UserType, MenuItem } from '@/lib/types';
@@ -21,14 +21,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useRouter } from 'next/navigation';
-import { getMenuItems } from '@/lib/api';
+import { getMenuItems, getArticles } from '@/lib/api';
 import { Skeleton } from './ui/skeleton';
-
-const topNavLinks = [
-    { title: 'খেলা: বাংলাদেশের দুর্দান্ত জয়ে এশিয়া কাপ শুরু', image: 'https://picsum.photos/seed/bangles/50/50', href: '/খেলা-বাংলাদেশের-দুর্দান্ত-জয়ে-এশিয়া-কাপ-শুরু' },
-    { title: 'মিথিলার গর্ব: পেলেন \'ডক্টর\' উপাধি', image: 'https://picsum.photos/seed/mithila/50/50', href: '/প্রযুক্তি-দেশজুড়ে-5g-সেবা-চালু-হতে-যাচ্ছে' },
-    { title: 'আগুন নেভানোর জন্য পানি আনতে গিয়ে পুকুরেই ডুবল...', image: 'https://picsum.photos/seed/firefighter/50/50', href: '/অর্থনীতি-ডলারের-বাজারে-অস্থিরতা-অর্থনীতিতে-প্রভাব' },
-];
 
 const NavMenuSkeleton = () => (
     <div className="hidden md:flex items-center gap-6 flex-grow">
@@ -43,7 +37,8 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<UserType | null>(null);
   const [mainNavLinks, setMainNavLinks] = useState<MenuItem[]>([]);
-  const [loadingMenu, setLoadingMenu] = useState(true);
+  const [topNavLinks, setTopNavLinks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -65,18 +60,29 @@ export default function Header() {
     };
     window.addEventListener('storage', handleStorageChange);
     
-    async function fetchMenu() {
+    async function fetchData() {
         try {
-            const menuItems = await getMenuItems();
+            const [menuItems, { articles }] = await Promise.all([
+              getMenuItems(),
+              getArticles({ limit: 3, editorsPick: true })
+            ]);
+            
             setMainNavLinks(menuItems);
+
+            const topLinks = articles.map(article => ({
+                title: article.title,
+                image: article.imageUrl,
+                href: `/${generateNonAiSlug(article.category)}/${article.slug}`
+            }));
+            setTopNavLinks(topLinks);
+
         } catch (error) {
-            console.error("Failed to fetch menu items", error);
-            // Fallback to mock data or show error
+            console.error("Failed to fetch menu items or top articles", error);
         } finally {
-            setLoadingMenu(false);
+            setLoading(false);
         }
     }
-    fetchMenu();
+    fetchData();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -166,7 +172,7 @@ export default function Header() {
                    <Image src="https://raw.githubusercontent.com/Mojib-Rsm/BartaNow/main/public/log-heado.png" alt="BartaNow Logo" width={150} height={35} className="h-8 w-auto" />
               </Link>
             </div>
-            {loadingMenu ? (
+            {loading ? (
                 <NavMenuSkeleton />
             ) : (
                 <nav className="hidden md:flex items-center gap-6 flex-grow">

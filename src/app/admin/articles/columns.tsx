@@ -33,7 +33,7 @@ import { useRouter } from "next/navigation"
 import { useAuthorization } from "@/hooks/use-authorization"
 import { format, isFuture } from "date-fns"
 import { bn } from "date-fns/locale"
-import { cn } from "@/lib/utils"
+import { cn, generateNonAiSlug } from "@/lib/utils"
 
 const DeleteConfirmationDialog = ({ article, onDeleted }: { article: Article, onDeleted: () => void }) => {
     const [isOpen, setIsOpen] = useState(false)
@@ -232,6 +232,9 @@ export const columns: ColumnDef<Article>[] = [
       const article = row.original
       const router = useRouter()
       const { hasPermission } = useAuthorization();
+      const categorySlug = generateNonAiSlug(article.category || 'uncategorized');
+      const articleUrl = `/${categorySlug}/${article.slug}`;
+
 
       const handleDeleted = () => {
         router.refresh()
@@ -254,7 +257,7 @@ export const columns: ColumnDef<Article>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/${article.slug}`} target="_blank">আর্টিকেল দেখুন</Link>
+              <Link href={articleUrl} target="_blank">আর্টিকেল দেখুন</Link>
             </DropdownMenuItem>
             {hasPermission('edit_article') && (
                 <DropdownMenuItem asChild>

@@ -2,13 +2,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { User, Notification } from '@/lib/types';
+import type { User, Notification, Article } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { getNotificationsForUser } from '@/lib/api';
+import { getNotificationsForUser, getArticleById } from '@/lib/api';
 import { Loader2, Bell, AlertTriangle, Newspaper } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn, generateNonAiSlug } from '@/lib/utils';
 import Link from 'next/link';
 
 const iconMap = {
@@ -17,9 +17,11 @@ const iconMap = {
   system: <Bell className="h-5 w-5 text-muted-foreground" />,
 };
 
+type EnrichedNotification = Notification & { article?: Article | null };
+
 export default function NotificationsPage() {
   const [user, setUser] = useState<User | null>(null);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<EnrichedNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { toast } = useToast();
@@ -33,7 +35,16 @@ export default function NotificationsPage() {
       const fetchNotifications = async (userId: string) => {
         try {
           const data = await getNotificationsForUser(userId);
-          setNotifications(data);
+          const enrichedNotifications = await Promise.all(
+              data.map(async (n) => {
+                  if (n.articleId) {
+                      const article = await getArticleById(n.articleId);
+                      return { ...n, article };
+                  }
+                  return { ...n, article: null };
+              })
+          );
+          setNotifications(enrichedNotifications);
         } catch (error) {
           toast({
             variant: 'destructive',
@@ -71,44 +82,47 @@ export default function NotificationsPage() {
       <CardContent>
         {notifications.length > 0 ? (
           <div className="space-y-4">
-            {notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={cn(
-                  "flex items-start gap-4 p-4 rounded-lg border transition-colors",
-                  notification.isRead ? 'bg-transparent text-muted-foreground' : 'bg-muted/50'
-                )}
-              >
-                <div className="mt-1">{iconMap[notification.type]}</div>
-                <div className="flex-1">
-                  <p className={cn("font-semibold", !notification.isRead && "text-foreground")}>
-                    {notification.title}
-                  </p>
-                  <p className="text-sm">{notification.message}</p>
-                   <div className="text-xs mt-1">
-                    {new Date(notification.timestamp).toLocaleString('bn-BD', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                    })}
+            {notifications.map((notification) => {
+                const articleUrl = notification.article ? `/${generateNonAiSlug(notification.article.category)}/${notification.article.slug}` : '#';
+                return (
+                  <div
+                    key={notification.id}
+                    className={cn(
+                      "flex items-start gap-4 p-4 rounded-lg border transition-colors",
+                      notification.isRead ? 'bg-transparent text-muted-foreground' : 'bg-muted/50'
+                    )}
+                  >
+                    <div className="mt-1">{iconMap[notification.type]}</div>
+                    <div className="flex-1">
+                      <p className={cn("font-semibold", !notification.isRead && "text-foreground")}>
+                        {notification.title}
+                      </p>
+                      <p className="text-sm">{notification.message}</p>
+                       <div className="text-xs mt-1">
+                        {new Date(notification.timestamp).toLocaleString('bn-BD', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {notification.article && (
+                            <Link href={articleUrl} className="text-primary text-sm hover:underline">
+                                দেখুন
+                            </Link>
+                        )}
+                        {!notification.isRead && (
+                            <button onClick={() => handleMarkAsRead(notification.id)} title="Mark as read">
+                                <span className="block h-2.5 w-2.5 rounded-full bg-primary" />
+                            </button>
+                        )}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    {notification.articleSlug && (
-                        <Link href={`/${notification.articleSlug}`} className="text-primary text-sm hover:underline">
-                            দেখুন
-                        </Link>
-                    )}
-                    {!notification.isRead && (
-                        <button onClick={() => handleMarkAsRead(notification.id)} title="Mark as read">
-                            <span className="block h-2.5 w-2.5 rounded-full bg-primary" />
-                        </button>
-                    )}
-                </div>
-              </div>
-            ))}
+                )
+            })}
           </div>
         ) : (
           <div className="text-center py-16 border-2 border-dashed rounded-lg">
