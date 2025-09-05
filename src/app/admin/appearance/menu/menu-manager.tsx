@@ -3,15 +3,13 @@
 
 import { useState, useEffect } from 'react';
 import type { MenuItem } from '@/lib/types';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { SortableMenuItem } from './sortable-menu-item';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { updateMenuOrderAction } from '@/app/actions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import MenuForm from './menu-form';
+import { SortableMenuItem } from './sortable-menu-item';
 
 export default function MenuManager({ initialItems }: { initialItems: MenuItem[] }) {
     const [items, setItems] = useState<MenuItem[]>(initialItems);
@@ -24,33 +22,6 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
     useEffect(() => {
         setItems(initialItems);
     }, [initialItems]);
-
-    const sensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
-
-    const handleDragStart = (event: any) => {
-        const { active } = event;
-        setActiveItem(items.find(item => item.id === active.id) || null);
-    };
-
-    const handleDragEnd = (event: any) => {
-        const { active, over } = event;
-        setActiveItem(null);
-        if (over && active.id !== over.id) {
-            setItems((currentItems) => {
-                const oldIndex = currentItems.findIndex((item) => item.id === active.id);
-                const newIndex = currentItems.findIndex((item) => item.id === over.id);
-                const newItems = Array.from(currentItems);
-                const [removed] = newItems.splice(oldIndex, 1);
-                newItems.splice(newIndex, 0, removed);
-                return newItems.map((item, index) => ({ ...item, order: index }));
-            });
-        }
-    };
 
     const handleSaveChanges = async () => {
         setIsSaving(true);
@@ -113,25 +84,16 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
             </div>
 
             <div className="p-4 bg-muted/50 rounded-lg">
-                <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
-                >
-                    <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                        <div className="space-y-2">
-                            {items.map(item => (
-                                <SortableMenuItem 
-                                    key={item.id} 
-                                    item={item} 
-                                    onEdit={handleEdit}
-                                    onDelete={handleDelete}
-                                />
-                            ))}
-                        </div>
-                    </SortableContext>
-                </DndContext>
+                <div className="space-y-2">
+                    {items.map(item => (
+                        <SortableMenuItem 
+                            key={item.id} 
+                            item={item} 
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                        />
+                    ))}
+                </div>
             </div>
             
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>

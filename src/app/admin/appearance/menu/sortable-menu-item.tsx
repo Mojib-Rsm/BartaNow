@@ -1,8 +1,6 @@
 
 'use client';
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent } from '@/components/ui/card';
 import { GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,15 +27,9 @@ type SortableMenuItemProps = {
 };
 
 export function SortableMenuItem({ item, onEdit, onDelete }: SortableMenuItemProps) {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
     const { toast } = useToast();
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
-    
     const handleDelete = async () => {
         setIsDeleting(true);
         const result = await deleteMenuItemAction(item.id);
@@ -51,10 +43,10 @@ export function SortableMenuItem({ item, onEdit, onDelete }: SortableMenuItemPro
     }
 
     return (
-        <Card ref={setNodeRef} style={style} className="bg-background">
+        <Card className="bg-background">
             <CardContent className="p-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="cursor-grab" {...attributes} {...listeners}>
+                    <Button variant="ghost" size="icon" className="cursor-grab">
                         <GripVertical className="h-5 w-5 text-muted-foreground" />
                     </Button>
                     <div>
