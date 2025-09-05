@@ -15,14 +15,7 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useDebouncedCallback } from 'use-debounce';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
-
-// Placeholder for the server action
-const createTagAction = async (data: any) => {
-    console.log("Creating tag with:", data);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return { success: true, message: 'ট্যাগ সফলভাবে তৈরি হয়েছে।' };
-};
-
+import { createTagAction } from '@/app/actions';
 
 const formSchema = z.object({
   name: z.string().min(2, "ট্যাগের নাম কমপক্ষে ২ অক্ষরের হতে হবে।"),
@@ -92,7 +85,7 @@ export default function TagCreateForm() {
       <CardHeader>
         <CardTitle className="text-2xl font-headline">নতুন ট্যাগ তৈরি করুন</CardTitle>
         <CardDescription>
-          নতুন ট্যাগের জন্য তথ্য পূরণ করুন।
+          নতুন ট্যাগের জন্য তথ্য পূরণ করুন। এই ট্যাগটি আর্টিকেলে ব্যবহার করা যাবে।
         </CardDescription>
       </CardHeader>
       <CardContent>

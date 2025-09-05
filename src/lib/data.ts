@@ -490,7 +490,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     publishedAt: '2024-07-28T14:00:00Z',
     aiSummary: 'সামাজিক মাধ্যমে চাঁদে জমি কেনার যে খবর প্রচারিত হচ্ছে, তা সম্পূর্ণ ভুয়া। চাঁদে জমি কেনা-বেচার কোনো আইনি ভিত্তি নেই।',
     factCheck: {
-      statement: "একজন বাংলাদেশী নাগরিক চাঁদে এক একর জমি কিনেছেন।",
+      statement: "একজন বাংলাদেশী নাগরিক চাঁদে এক একর জমি কিনেছেন。",
       verdict: 'ভুয়া',
       source: { name: "আন্তর্জাতিক মহাকাশ আইন", url: "#" }
     },
@@ -512,7 +512,7 @@ const articlesData: Omit<Article, 'slug' | 'status' | 'content'> & { content: st
     publishedAt: '2024-07-27T16:00:00Z',
     aiSummary: 'আনারস এবং দুধ একসাথে খেলে মানুষের মৃত্যু হয় - এই ধারণাটি একটি সম্পূর্ণ গুজব। হজমে সমস্যা হতে পারে, কিন্তু এটি প্রাণঘাতী নয়।',
     factCheck: {
-      statement: "আনারসের সাথে দুধ খেলে বিষক্রিয়া হয়ে মানুষের মৃত্যু হয়।",
+      statement: "আনারসের সাথে দুধ খেলে বিষক্রিয়া হয়ে মানুষের মৃত্যু হয়。",
       verdict: 'ভুয়া',
       source: { name: "পুষ্টি ও খাদ্যবিজ্ঞান ইনস্টিটিউট", url: "#" }
     },
@@ -536,12 +536,13 @@ const categories: Category[] = [
     description: `${name} বিষয়ক সর্বশেষ খবর এবং আপডেট।`
 }));
 
-const tags: Tag[] = [
-    ...new Set(articles.flatMap(a => a.tags || []))
-].map((name, index) => ({
+const allArticleTags = articles.flatMap(a => a.tags || []);
+const uniqueTags = [...new Set(allArticleTags)];
+const tags: Tag[] = uniqueTags.map((name, index) => ({
     id: `tag-${index + 1}`,
     name: name,
     slug: generateNonAiSlug(name),
+    count: allArticleTags.filter(t => t === name).length,
 }));
 
 const locations: Location[] = [
@@ -875,3 +876,5 @@ export const mockDb = {
   rssFeeds,
   socialLinks,
 };
+
+    

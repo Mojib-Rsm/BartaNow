@@ -474,8 +474,41 @@ async function deleteMockCategory(categoryId: string): Promise<void> {
 }
 
 async function getMockAllTags(): Promise<Tag[]> {
-    return [...mockDb.tags];
+    const allTags = mockDb.articles.flatMap(a => a.tags || []);
+    const uniqueTags = [...new Set(allTags)];
+    const tagCounts = allTags.reduce((acc, tag) => {
+        acc[tag] = (acc[tag] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    return uniqueTags.map((name, index) => ({
+        id: `tag-${index + 1}`,
+        name: name,
+        slug: generateNonAiSlug(name),
+        count: tagCounts[name] || 0,
+    }));
 }
+
+async function createMockTag(data: Omit<Tag, 'id' | 'count'>): Promise<Tag> {
+    const newTag: Tag = {
+        id: `tag-${Date.now()}`,
+        count: 0,
+        ...data,
+    };
+    // This is a simplified mock. We aren't adding it to a global tag list
+    // because that's derived dynamically in getMockAllTags.
+    // In a real DB, we would add to a 'tags' collection.
+    return newTag;
+}
+
+async function deleteMockTag(tagName: string): Promise<void> {
+    mockDb.articles.forEach(article => {
+        if (article.tags) {
+            article.tags = article.tags.filter(t => t !== tagName);
+        }
+    });
+}
+
 
 async function getMockAllContactMessages(): Promise<ContactMessage[]> {
     return [...mockDb.contactMessages].sort((a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime());
@@ -1094,6 +1127,56 @@ async function deleteFirestoreCategory(categoryId: string): Promise<void> {
     await db.collection('categories').doc(categoryId).delete();
 }
 
+async function getFirestoreAllTags(): Promise<Tag[]> {
+    // This is not efficient for large scale. A proper implementation would use aggregation
+    // or a separate tags collection that gets updated.
+    const articlesSnapshot = await db.collection('articles').get();
+    const allTags = articlesSnapshot.docs.flatMap(doc => (doc.data().tags || []) as string[]);
+    const uniqueTags = [...new Set(allTags)];
+    const tagCounts = allTags.reduce((acc, tag) => {
+        acc[tag] = (acc[tag] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    return uniqueTags.map((name, index) => ({
+        id: `tag-firestore-${index + 1}`,
+        name: name,
+        slug: generateNonAiSlug(name),
+        count: tagCounts[name] || 0,
+    }));
+}
+
+async function createFirestoreTag(data: Omit<Tag, 'id' | 'count'>): Promise<Tag> {
+    const newTagRef = db.collection('tags').doc(data.name);
+    const doc = await newTagRef.get();
+    if (doc.exists) {
+        throw new Error(`Tag '${data.name}' already exists.`);
+    }
+
+    const newTag: Omit<Tag, 'id' | 'count'> & { articleCount: number } = {
+        name: data.name,
+        slug: data.slug || generateNonAiSlug(data.name),
+        articleCount: 0,
+    };
+
+    await newTagRef.set(newTag);
+    return { ...newTag, id: newTagRef.id, count: newTag.articleCount };
+}
+
+async function deleteFirestoreTag(tagName: string): Promise<void> {
+    // This is a very expensive operation and should be used with caution.
+    // A better approach would be a batch job or cloud function.
+    const articlesSnapshot = await db.collection('articles').where('tags', 'array-contains', tagName).get();
+    const batch = db.batch();
+    articlesSnapshot.docs.forEach(doc => {
+        batch.update(doc.ref, {
+            tags: admin.firestore.FieldValue.arrayRemove(tagName)
+        });
+    });
+    await batch.commit();
+}
+
+
 async function getFirestoreAllContactMessages(): Promise<ContactMessage[]> {
     const snapshot = await db.collection('contactMessages').orderBy('receivedAt', 'desc').get();
     return snapshot.docs.map(doc => doc.data() as ContactMessage);
@@ -1527,10 +1610,18 @@ export async function deleteLocation(id: string): Promise<void> {
 // --- NON-CRUD APIs ---
 
 export async function getAllTags(): Promise<Tag[]> {
-    // For now, tags are derived from articles and not a separate collection
     if (!useFirestore || !db) return getMockAllTags();
-    // Firestore implementation would be more complex, maybe using an aggregation query or a separate collection
-    return getMockAllTags();
+    return getFirestoreAllTags();
+}
+
+export async function createTag(data: Omit<Tag, 'id' | 'count'>): Promise<Tag> {
+    if (!useFirestore || !db) return createMockTag(data);
+    return createFirestoreTag(data);
+}
+
+export async function deleteTag(tagName: string): Promise<void> {
+    if (!useFirestore || !db) return deleteMockTag(tagName);
+    return deleteFirestoreTag(tagName);
 }
 
 
@@ -1665,3 +1756,5 @@ export async function deleteAd(adId: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockAd(adId);
     return deleteFirestoreAd(adId);
 }
+
+    

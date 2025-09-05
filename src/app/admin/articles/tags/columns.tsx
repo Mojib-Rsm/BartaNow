@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-// import { deleteTagAction } from "@/app/actions"
+import { deleteTagAction } from "@/app/actions"
 
 const DeleteConfirmationDialog = ({ tag, onDeleted }: { tag: Tag, onDeleted: () => void }) => {
     const [isOpen, setIsOpen] = useState(false)
@@ -29,23 +29,22 @@ const DeleteConfirmationDialog = ({ tag, onDeleted }: { tag: Tag, onDeleted: () 
     const { hasPermission } = useAuthorization();
 
     const handleDelete = async () => {
-        // if (!hasPermission('delete_tag')) {
-        //     toast({
-        //         variant: "destructive",
-        //         title: "অনুমতি নেই",
-        //         description: "আপনার এই ট্যাগটি ডিলিট করার অনুমতি নেই।",
-        //     });
-        //     return;
-        // }
+        if (!hasPermission('delete_tag')) {
+            toast({
+                variant: "destructive",
+                title: "অনুমতি নেই",
+                description: "আপনার এই ট্যাগটি ডিলিট করার অনুমতি নেই।",
+            });
+            return;
+        }
 
-        // const result = await deleteTagAction(tag.id)
-        // if (result.success) {
-        //     toast({ title: "সফল", description: result.message })
-        //     onDeleted()
-        // } else {
-        //     toast({ variant: "destructive", title: "ব্যর্থ", description: result.message })
-        // }
-        toast({ title: "সফল", description: "ট্যাগ ডিলিট করার ফিচার শীঘ্রই আসছে।" });
+        const result = await deleteTagAction(tag.name)
+        if (result.success) {
+            toast({ title: "সফল", description: result.message })
+            onDeleted()
+        } else {
+            toast({ variant: "destructive", title: "ব্যর্থ", description: result.message })
+        }
         setIsOpen(false)
     }
 
@@ -64,7 +63,7 @@ const DeleteConfirmationDialog = ({ tag, onDeleted }: { tag: Tag, onDeleted: () 
                 <AlertDialogHeader>
                     <AlertDialogTitle>আপনি কি নিশ্চিত?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        এই কাজটি আনডু করা যাবে না। এটি স্থায়ীভাবে ট্যাগটি ডিলিট করে দেবে।
+                        এই কাজটি আনডু করা যাবে না। এটি স্থায়ীভাবে ট্যাগটি ডিলিট করে দেবে এবং সকল আর্টিকেল থেকে সরিয়ে ফেলবে।
                         <br />
                         <strong className="mt-2 block">"{tag.name}"</strong>
                     </AlertDialogDescription>
@@ -106,8 +105,7 @@ export const columns: ColumnDef<Tag>[] = [
     accessorKey: "count",
     header: "পোস্ট সংখ্যা",
      cell: ({ row }) => {
-      // This is a placeholder. Real count would come from a db query.
-      return <div className="text-center">{Math.floor(Math.random() * 20)}</div>
+      return <div className="text-center">{new Intl.NumberFormat('bn-BD').format(row.original.count)}</div>
     }
   },
   {
@@ -131,11 +129,12 @@ export const columns: ColumnDef<Tag>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>অ্যাকশন</DropdownMenuLabel>
-            {hasPermission('edit_tag') && (
+            {/* Editing tag name is complex as it requires updating all articles. This is a future feature. */}
+            {/* {hasPermission('edit_tag') && (
                 <DropdownMenuItem asChild>
-                <Link href={`/admin/articles/tags/edit/${tag.id}`}>এডিট করুন</Link>
+                <Link href={`/admin/articles/tags/edit/${tag.id}`}>Edit</Link>
                 </DropdownMenuItem>
-            )}
+            )} */}
             <DeleteConfirmationDialog tag={tag} onDeleted={handleDeleted} />
           </DropdownMenuContent>
         </DropdownMenu>

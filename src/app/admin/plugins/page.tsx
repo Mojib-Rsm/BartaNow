@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, BarChartHorizontal, Smile } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import Link from 'next/link';
 
 type Plugin = {
   id: string;
@@ -15,6 +16,7 @@ type Plugin = {
   description: string;
   icon: LucideIcon;
   isActive: boolean;
+  settingsPath?: string;
 };
 
 const initialPlugins: Plugin[] = [
@@ -24,6 +26,7 @@ const initialPlugins: Plugin[] = [
     description: 'আর্টিকেলে ফ্যাক্ট-চেক মিটার যোগ করুন এবং ভুল তথ্যের বিরুদ্ধে রিপোর্ট করুন।',
     icon: ShieldCheck,
     isActive: true,
+    settingsPath: '/admin/articles?category=তথ্য-যাচাই',
   },
   {
     id: 'polls',
@@ -31,6 +34,7 @@ const initialPlugins: Plugin[] = [
     description: 'পাঠকদের জন্য মতামত জরিপ তৈরি করুন এবং হোমপেজে প্রদর্শন করুন।',
     icon: BarChartHorizontal,
     isActive: true,
+    settingsPath: '/admin/polls',
   },
   {
     id: 'meme-news',
@@ -38,6 +42,7 @@ const initialPlugins: Plugin[] = [
     description: 'মজার এবং ভাইরাল কন্টেন্টের জন্য মিম-ভিত্তিক নিউজ ফিচার চালু করুন।',
     icon: Smile,
     isActive: false,
+    settingsPath: '/admin/articles?category=মিম-নিউজ',
   },
 ];
 
@@ -82,7 +87,11 @@ export default function PluginsPage() {
                                     {plugin.isActive ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
                                 </Label>
                             </div>
-                            <Button variant="link" size="sm">সেটিংস</Button>
+                           {plugin.settingsPath && (
+                                <Button variant="link" size="sm" asChild>
+                                    <Link href={plugin.settingsPath}>সেটিংস</Link>
+                                </Button>
+                           )}
                         </CardFooter>
                     </Card>
                 ))}

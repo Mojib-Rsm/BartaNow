@@ -85,6 +85,10 @@ export const roles: Record<User['role'], Role> = {
       'delete_rss',
       'view_contact_messages',
       'delete_contact_message',
+      'manage_tags',
+      'create_tag',
+      'delete_tag',
+      'view_reports',
     ],
   },
   reporter: {

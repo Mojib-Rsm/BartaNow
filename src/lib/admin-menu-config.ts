@@ -95,6 +95,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin', 'editor'],
      children: [
         { path: '/admin/users', label: 'All Staff' },
+        { path: '/admin/users/create', label: 'Add New' },
     ],
   },
    {
@@ -150,7 +151,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin'],
   },
    {
-    path: '#report',
+    path: '/admin/reports',
     label: 'Report',
     icon: BarChart,
     roles: ['admin'],

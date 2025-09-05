@@ -2,8 +2,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem, createAd, updateAd, deleteAd, getSocialLinks, updateSocialLinks, createLocation, updateLocation, deleteLocation } from '@/lib/api';
-import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem, Ad, SocialLinks, Location } from '@/lib/types';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem, createAd, updateAd, deleteAd, getSocialLinks, updateSocialLinks, createLocation, updateLocation, deleteLocation, deleteTag, createTag } from '@/lib/api';
+import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem, Ad, SocialLinks, Location, Tag } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
@@ -1092,6 +1092,39 @@ export async function deleteCategoryAction(categoryId: string) {
     }
 }
 
+// --- TAG ACTIONS ---
+const tagSchema = z.object({
+  name: z.string().min(2, "ট্যাগের নাম কমপক্ষে ২ অক্ষরের হতে হবে।"),
+  slug: z.string().min(2, "Slug কমপক্ষে ২ অক্ষরের হতে হবে।").optional().or(z.literal('')),
+});
+
+type TagFormValues = z.infer<typeof tagSchema>;
+
+export async function createTagAction(data: TagFormValues) {
+    const validation = tagSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, message: 'প্রদত্ত তথ্য সঠিক নয়।', errors: validation.error.flatten().fieldErrors };
+    }
+    try {
+        const newTag = await createTag(data);
+        revalidatePath('/admin/articles/tags');
+        return { success: true, message: 'ট্যাগ সফলভাবে তৈরি হয়েছে।', tag: newTag };
+    } catch (e: any) {
+        return { success: false, message: e.message };
+    }
+}
+
+export async function deleteTagAction(tagName: string) {
+    try {
+        await deleteTag(tagName);
+        revalidatePath('/admin/articles/tags');
+        return { success: true, message: 'ট্যাগ সফলভাবে ডিলিট হয়েছে।' };
+    } catch (e: any) {
+        return { success: false, message: e.message };
+    }
+}
+
+
 
 // --- RSS FEED ACTIONS ---
 const rssFeedSchema = z.object({
@@ -1251,7 +1284,7 @@ export async function deleteContactMessageAction(messageId: string) {
         return { success: true, message: 'বার্তা সফলভাবে ডিলিট করা হয়েছে।' };
     } catch (error) {
         console.error("Delete Contact Message Error:", error);
-        return { success: false, message: 'বার্তা ডিলিট করতে সমস্যা হয়েছে।' };
+        return { success: false, message: errorMessage };
     }
 }
 
@@ -1478,5 +1511,7 @@ export async function deleteLocationAction(locationId: string) {
         return { success: false, message: errorMessage };
     }
 }
+
+    
 
     
