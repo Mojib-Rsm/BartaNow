@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -253,6 +252,7 @@ const articleSchema = z.object({
   englishTitle: z.string().optional(),
   focusKeywords: z.array(z.string()).optional(),
   badge: z.enum(['নতুন', 'জনপ্রিয়', '__none__']).optional(),
+  sponsored: z.boolean().optional(),
   authorId: z.string().optional(),
   status: z.enum(['Draft', 'Pending Review', 'Published', 'Scheduled']).optional(),
   location: z.string().optional(),
@@ -283,6 +283,7 @@ export async function updateArticleAction(data: z.infer<typeof articleSchema>) {
             englishTitle: data.englishTitle,
             focusKeywords: data.focusKeywords,
             badge: data.badge === '__none__' ? undefined : data.badge,
+            sponsored: data.sponsored,
             authorId: data.authorId,
             status: data.status,
             location: data.location === '__none__' ? undefined : data.location,
@@ -373,6 +374,7 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             focusKeywords: data.focusKeywords,
             isAiGenerated: data.isAiGenerated || false,
             badge: data.badge === '__none__' ? undefined : data.badge,
+            sponsored: data.sponsored,
             status: data.status || 'Draft',
             location: data.location === '__none__' ? undefined : data.location,
             metaTitle: data.metaTitle,
@@ -1476,3 +1478,5 @@ export async function deleteLocationAction(locationId: string) {
         return { success: false, message: errorMessage };
     }
 }
+
+    
