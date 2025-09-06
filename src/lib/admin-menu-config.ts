@@ -182,12 +182,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin'],
     children: [
       { path: '/admin/settings', label: 'Site Settings' },
-      { path: '/admin/settings/company', label: 'Company Info' },
-      { path: '/admin/settings/theme', label: 'Theme Settings' },
-      { path: '/admin/settings/theme-color', label: 'Theme Color' },
       { path: '/admin/notifications', label: 'Notifications' },
-      { path: '/admin/settings/system', label: 'System Settings' },
-      { path: '/admin/settings/login', label: 'Login Page Settings' },
     ]
   },
 ];
