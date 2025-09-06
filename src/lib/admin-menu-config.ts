@@ -181,7 +181,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     icon: Settings,
     roles: ['admin'],
     children: [
-      { path: '/admin/settings/site', label: 'Site Settings' },
+      { path: '/admin/settings', label: 'Site Settings' },
       { path: '/admin/settings/company', label: 'Company Info' },
       { path: '/admin/settings/theme', label: 'Theme Settings' },
       { path: '/admin/settings/theme-color', label: 'Theme Color' },
