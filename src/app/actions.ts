@@ -1,4 +1,3 @@
-
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -1284,6 +1283,7 @@ export async function deleteContactMessageAction(messageId: string) {
         return { success: true, message: 'বার্তা সফলভাবে ডিলিট করা হয়েছে।' };
     } catch (error) {
         console.error("Delete Contact Message Error:", error);
+        const errorMessage = error instanceof Error ? error.message : 'বার্তা ডিলিট করতে একটি সমস্যা হয়েছে।';
         return { success: false, message: errorMessage };
     }
 }

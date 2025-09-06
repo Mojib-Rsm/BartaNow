@@ -1,5 +1,4 @@
 
-
 import {
   LayoutGrid,
   Newspaper,
@@ -100,13 +99,10 @@ export const adminMenuConfig: AdminMenuItem[] = [
     ],
   },
    {
-    path: '#roles-permissions',
+    path: '/admin/roles',
     label: 'Roles & Permissions',
     icon: ShieldCheck,
     roles: ['admin'],
-    children: [
-        { path: '/admin/roles', label: 'All Roles' },
-    ]
   },
    {
     label: 'Media / Gallery',

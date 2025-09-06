@@ -1,5 +1,4 @@
 
-
 export function getNewCommentEmailHtml({ comment, article }) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com';
     const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL || "https://www.bartanow.com/log-heado.png";

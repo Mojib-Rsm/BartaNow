@@ -1,5 +1,4 @@
 
-
 import type { User, Role, Permission } from './types';
 
 // Define all available permissions in the system
