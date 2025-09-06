@@ -39,28 +39,9 @@ export default function RootLayout({
     const pathname = headersList.get('x-pathname') || '';
     const isSpecialRoute = pathname.startsWith('/admin') || pathname.startsWith('/login') || pathname.startsWith('/install');
 
-    if (isSpecialRoute) {
-        return (
-             <html lang="bn" dir="ltr" className="h-full" suppressHydrationWarning>
-                <body className="h-full bg-muted/40">
-                    <ThemeProvider
-                        attribute="class"
-                        defaultTheme="system"
-                        enableSystem
-                        disableTransitionOnChange
-                    >
-                         {children}
-                         <Toaster />
-                    </ThemeProvider>
-                </body>
-             </html>
-        )
-    }
-
     return (
         <html lang="bn" dir="ltr" className="h-full" suppressHydrationWarning>
         <head>
-            {/* The default title is set in metadata, but this is a fallback. */}
             <title>BartaNow | বার্তা নাও - আপনার প্রতিদিনের খবরের উৎস</title>
             <link rel="preconnect" href="https://fonts.googleapis.com" />
             <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -78,13 +59,19 @@ export default function RootLayout({
                 <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
             )}
             
-            <div className="font-body antialiased bg-background flex flex-col min-h-screen">
-                <Header />
-                <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+            {isSpecialRoute ? (
+                 <div className="h-full bg-muted/40">
                     {children}
-                </main>
-                <Footer />
-            </div>
+                 </div>
+            ) : (
+                <div className="font-body antialiased bg-background flex flex-col min-h-screen">
+                    <Header />
+                    <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+                        {children}
+                    </main>
+                    <Footer />
+                </div>
+            )}
 
             <Toaster />
             </ThemeProvider>
@@ -92,3 +79,5 @@ export default function RootLayout({
         </html>
     );
 }
+
+    
