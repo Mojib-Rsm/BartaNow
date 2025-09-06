@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, PlayCircle } from 'lucide-react';
+import { ArrowRight, PlayCircle, UserRound } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import PollSection from '@/components/poll-section';
 import LoadMore from '@/components/load-more';
@@ -34,6 +34,16 @@ const SectionHeader = ({ title, categorySlug }: { title: string, categorySlug: s
     </Button>
   </div>
 );
+
+const SectionHeaderSimple = ({ title }: { title: string }) => (
+  <div className="flex items-center justify-between border-b-2 border-primary mb-4 pb-2">
+    <h2 className="text-2xl font-bold font-headline text-primary flex items-center gap-2">
+      <UserRound className="h-6 w-6" />
+      {title}
+    </h2>
+  </div>
+);
+
 
 // A simple skeleton loader for the home page
 const HomePageSkeleton = () => (
@@ -225,7 +235,21 @@ export default function HomePageClient({
         </div>
       </section>
 
-      {user && <RecommendedForYou userId={user.id} />}
+      {user ? (
+        <RecommendedForYou userId={user.id} />
+      ) : (
+        editorsPicks.length > 0 && (
+            <section>
+                <SectionHeaderSimple title="সম্পাদকের পছন্দ" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                    {editorsPicks.map((article) => (
+                        <ArticleCard key={article.id} article={article} />
+                    ))}
+                </div>
+            </section>
+        )
+      )}
+
 
       {/* Video Gallery Section */}
       {videoArticles.length > 0 && (
