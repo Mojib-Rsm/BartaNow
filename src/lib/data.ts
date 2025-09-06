@@ -876,5 +876,3 @@ export const mockDb = {
   rssFeeds,
   socialLinks,
 };
-
-    
