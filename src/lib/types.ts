@@ -10,7 +10,8 @@ export type Permission =
   | 'manage_settings' | 'manage_ads' | 'send_notification' | 'manage_newsletter' | 'manage_rss' | 'create_rss' | 'edit_rss' | 'delete_rss'
   | 'login_as_user'
   | 'manage_tags' | 'create_tag' | 'edit_tag' | 'delete_tag'
-  | 'view_reports' | 'view_contact_messages' | 'delete_contact_message';
+  | 'view_reports' | 'view_contact_messages' | 'delete_contact_message'
+  | 'view_activity_log' | 'export_data';
 
 
 export interface Role {
@@ -248,4 +249,24 @@ export interface SocialLinks {
   youtube?: string;
   instagram?: string;
   entityType?: 'SETTINGS';
+}
+
+export type ActivityLogAction =
+  | 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'LOGOUT' | 'LOGIN_FAIL'
+  | 'EXPORT' | 'IMPORT' | 'BULK_UPDATE' | 'BULK_DELETE';
+
+export type EntityType =
+  | 'ARTICLE' | 'PAGE' | 'USER' | 'COMMENT' | 'MEDIA' | 'CATEGORY'
+  | 'TAG' | 'POLL' | 'AD' | 'MENU_ITEM' | 'RSS_FEED' | 'SETTINGS' | 'SYSTEM' | 'LOCATION';
+
+export interface ActivityLog {
+    id: string;
+    userId: string; // Who performed the action
+    userName: string;
+    action: ActivityLogAction; // What was done
+    entityType: EntityType; // What was it done to
+    entityId?: string; // The ID of the affected entity
+    details?: string; // e.g., "Updated title from 'A' to 'B'"
+    ipAddress?: string; // User's IP address
+    timestamp: string; // ISO date string
 }

@@ -34,6 +34,8 @@ import {
   History,
   Bot,
   PieChart,
+  Download,
+  ListOrdered,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -163,9 +165,16 @@ export const adminMenuConfig: AdminMenuItem[] = [
     path: '#tools',
     children: [
         { path: '/admin/import', label: 'Import' },
+        { path: '/admin/tools/export', label: 'Export / Backup' },
         { path: '/admin/plugins', label: 'Plugins' },
         { path: '/admin/seo-report', label: 'SEO Report' },
     ],
+  },
+  {
+    path: '/admin/activity-log',
+    label: 'Activity Log',
+    icon: History,
+    roles: ['admin'],
   },
   {
     path: '/admin/settings',

@@ -47,7 +47,9 @@ export const allPermissions: Record<Permission, string> = {
     'delete_tag': 'ট্যাগ ডিলিট',
     'view_reports': 'রিপোর্ট দেখা',
     'view_contact_messages': 'যোগাযোগ বার্তা দেখা',
-    'delete_contact_message': 'যোগাযোগ বার্তা ডিলিট'
+    'delete_contact_message': 'যোগাযোগ বার্তা ডিলিট',
+    'view_activity_log': 'অ্যাক্টিভিটি লগ দেখুন',
+    'export_data': 'ডেটা এক্সপোর্ট করুন'
 };
 
 
