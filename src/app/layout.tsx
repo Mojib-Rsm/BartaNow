@@ -7,6 +7,27 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import GoogleAnalytics from '@/components/google-analytics';
 import { headers } from 'next/headers';
+import { Noto_Sans_Bengali, Playfair_Display, PT_Sans } from 'next/font/google'
+
+const noto_sans_bengali = Noto_Sans_Bengali({
+  subsets: ['bengali'],
+  display: 'swap',
+  variable: '--font-noto-sans-bengali',
+})
+ 
+const playfair_display = Playfair_Display({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-playfair-display',
+})
+ 
+const pt_sans = PT_Sans({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+  variable: '--font-pt-sans',
+})
+
 
 export const metadata: Metadata = {
   title: {
@@ -40,12 +61,9 @@ export default function RootLayout({
     const isSpecialRoute = pathname.startsWith('/admin') || pathname.startsWith('/login') || pathname.startsWith('/install');
 
     return (
-        <html lang="bn" dir="ltr" className="h-full" suppressHydrationWarning>
+        <html lang="bn" dir="ltr" className={`${noto_sans_bengali.variable} ${playfair_display.variable} ${pt_sans.variable} h-full`} suppressHydrationWarning>
         <head>
             <title>BartaNow | বার্তা নাও - আপনার প্রতিদিনের খবরের উৎস</title>
-            <link rel="preconnect" href="https://fonts.googleapis.com" />
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-            <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&family=Playfair+Display:wght@700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
             <link rel="manifest" href="/manifest.json" />
         </head>
         <body className="h-full">
