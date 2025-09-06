@@ -136,13 +136,10 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin', 'editor'],
   },
    {
-    path: '#appearance',
+    path: '/admin/appearance/menu',
     label: 'Home Page Manages',
     icon: HomeIcon,
     roles: ['admin'],
-    children: [
-        { path: '/admin/appearance/menu', label: 'Menu' },
-    ]
   },
   {
     path: '/admin/ads',

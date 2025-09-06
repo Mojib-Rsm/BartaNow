@@ -151,13 +151,13 @@ function AdminLayoutContent({
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[260px_1fr]">
       <div className="hidden border-r bg-sidebar text-sidebar-foreground md:block">
-        <div className="flex h-full max-h-screen flex-col gap-2">
+        <div className="flex h-full max-h-screen flex-col">
           <div className="flex h-16 items-center border-b border-sidebar-border px-6">
             <Link href="/admin" className="flex items-center gap-2 font-semibold">
                <span className="text-xl font-bold text-white">BartaNow</span>
             </Link>
           </div>
-          <div className="overflow-y-auto">
+          <div className="flex-1 overflow-y-auto">
             <nav className="grid items-start px-4 text-sm font-medium">
               {renderNavLinks(pathname)}
             </nav>
