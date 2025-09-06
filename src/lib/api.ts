@@ -10,6 +10,7 @@ import { sendMail } from './mailer';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { getNewCommentEmailHtml } from './email-templates/new-comment-email';
 import { generateNonAiSlug } from './utils';
+import { Pool } from 'pg';
 
 const useFirestore = process.env.DATABASE_TYPE === 'firestore';
 
@@ -1324,6 +1325,40 @@ async function deleteFirestoreLocation(id: string): Promise<void> {
     await db.collection('locations').doc(id).delete();
 }
 
+// --- PostgreSQL IMPLEMENTATIONS ---
+
+const usePostgres = process.env.DATABASE_TYPE === 'postgresql';
+let pool: Pool | undefined;
+if (usePostgres) {
+    pool = new Pool({
+        host: process.env.DB_HOST,
+        database: process.env.DB_NAME,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        port: 5432,
+    });
+}
+
+async function createPostgresUser(user: Omit<User, 'id' | 'role'>): Promise<User> {
+    if (!pool) throw new Error('PostgreSQL pool is not initialized');
+    const newUser: User = {
+        id: `user-pg-${Date.now()}`,
+        role: 'user',
+        ...user
+    };
+    await pool.query(
+        'INSERT INTO users (id, name, email, password, role, "avatarUrl", bio) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+        [newUser.id, newUser.name, newUser.email, newUser.password, newUser.role, newUser.avatarUrl, newUser.bio]
+    );
+    return newUser;
+}
+
+async function getAllPostgresUsers(): Promise<User[]> {
+    if (!pool) throw new Error('PostgreSQL pool is not initialized');
+    const res = await pool.query('SELECT * FROM users');
+    return res.rows;
+}
+
 
 // --- PUBLIC API ---
 
@@ -1355,6 +1390,7 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
 }
 
 export async function getAllUsers(): Promise<User[]> {
+    if (usePostgres) return getAllPostgresUsers();
     if (!useFirestore || !db) return getMockAllUsers();
     return getFirestoreAllUsers();
 }
@@ -1370,7 +1406,14 @@ export async function getAllAuthors(): Promise<Author[]> {
 }
 
 export async function createUser(user: Omit<User, 'id' | 'role'>): Promise<User> {
-    const newUser = (!useFirestore || !db) ? await createMockUser(user) : await createFirestoreUser(user);
+    let newUser: User;
+    if (usePostgres) {
+        newUser = await createPostgresUser(user);
+    } else if (!useFirestore || !db) {
+        newUser = await createMockUser(user);
+    } else {
+        newUser = await createFirestoreUser(user);
+    }
     
     if (process.env.ADMIN_EMAIL) {
         try {

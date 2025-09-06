@@ -554,7 +554,7 @@ const locations: Location[] = [
 
 const pages: Page[] = [
     {
-        id: 'page-1',
+        id: 'page-1-about',
         title: 'আমাদের সম্পর্কে',
         slug: 'about-us',
         content: `
@@ -565,7 +565,7 @@ const pages: Page[] = [
         lastUpdatedAt: '2024-07-20T12:00:00Z',
     },
     {
-        id: 'page-2',
+        id: 'page-2-privacy',
         title: 'গোপনীয়তা নীতি',
         slug: 'privacy-policy',
         content: `
@@ -576,7 +576,7 @@ const pages: Page[] = [
         lastUpdatedAt: '2024-07-29T10:00:00Z',
     },
     {
-        id: 'page-3',
+        id: 'page-3-terms',
         title: 'ব্যবহারের শর্তাবলী',
         slug: 'terms-of-use',
         content: `
@@ -742,17 +742,17 @@ const polls: Poll[] = [
 ];
 
 const menuItems: MenuItem[] = [
-    { id: '1', name: 'সর্বশেষ', slug: 'সর্বশেষ', href: '/category/সর্বশেষ', order: 1, children: [] },
-    { id: '2', name: 'জাতীয়', slug: 'জাতীয়', href: '/category/জাতীয়', order: 2, children: [] },
-    { id: '3', name: 'রাজনীতি', slug: 'রাজনীতি', href: '/category/রাজনীতি', order: 3, children: [] },
-    { id: '4', name: 'খেলা', slug: 'খেলা', href: '/category/খেলা', order: 4, children: [] },
-    { id: '5', name: 'বিনোদন', slug: 'বিনোদন', href: '/category/বিনোদন', order: 5, children: [] },
-    { id: '6', name: 'প্রযুক্তি', slug: 'প্রযুক্তি', href: '/category/প্রযুক্তি', order: 6, children: [] },
-    { id: '7', name: 'আন্তর্জাতিক', slug: 'আন্তর্জাতিক', href: '/category/আন্তর্জাতিক', order: 7, children: [] },
-    { id: '8', name: 'ইসলামী জীবন', slug: 'ইসলামী-জীবন', href: '/category/ইসলামী-জীবন', order: 8, children: [] },
-    { id: '9', name: 'বিশেষ কভারেজ', slug: 'বিশেষ-কভারেজ', href: '/special-coverage', order: 9, children: [] },
-    { id: '10', name: 'ভিডিও', slug: 'videos', href: '/category/videos', order: 10, children: [] },
-    { id: '11', name: 'মিম নিউজ', slug: 'মিম-নিউজ', href: '/category/মিম-নিউজ', order: 11, children: [] },
+    { id: 'menu-item-1', name: 'সর্বশেষ', slug: 'সর্বশেষ', href: '/category/সর্বশেষ', order: 1, children: [] },
+    { id: 'menu-item-2', name: 'জাতীয়', slug: 'জাতীয়', href: '/category/জাতীয়', order: 2, children: [] },
+    { id: 'menu-item-3', name: 'রাজনীতি', slug: 'রাজনীতি', href: '/category/রাজনীতি', order: 3, children: [] },
+    { id: 'menu-item-4', name: 'খেলা', slug: 'খেলা', href: '/category/খেলা', order: 4, children: [] },
+    { id: 'menu-item-5', name: 'বিনোদন', slug: 'বিনোদন', href: '/category/বিনোদন', order: 5, children: [] },
+    { id: 'menu-item-6', name: 'প্রযুক্তি', slug: 'প্রযুক্তি', href: '/category/প্রযুক্তি', order: 6, children: [] },
+    { id: 'menu-item-7', name: 'আন্তর্জাতিক', slug: 'আন্তর্জাতিক', href: '/category/আন্তর্জাতিক', order: 7, children: [] },
+    { id: 'menu-item-8', name: 'ইসলামী জীবন', slug: 'ইসলামী-জীবন', href: '/category/ইসলামী-জীবন', order: 8, children: [] },
+    { id: 'menu-item-9', name: 'বিশেষ কভারেজ', slug: 'বিশেষ-কভারেজ', href: '/special-coverage', order: 9, children: [] },
+    { id: 'menu-item-10', name: 'ভিডিও', slug: 'videos', href: '/category/videos', order: 10, children: [] },
+    { id: 'menu-item-11', name: 'মিম নিউজ', slug: 'মিম-নিউজ', href: '/category/মিম-নিউজ', order: 11, children: [] },
 ];
 
 const subscribers: Subscriber[] = [
@@ -848,7 +848,7 @@ const rssFeeds: RssFeed[] = [
 ];
 
 const socialLinks: SocialLinks = {
-  id: 'social-links',
+  id: 'social-links-1',
   facebook: 'https://facebook.com/example',
   twitter: 'https://twitter.com/example',
   youtube: 'https://youtube.com/example',
