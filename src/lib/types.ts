@@ -119,6 +119,8 @@ export interface Article {
   focusKeywords?: string[];
   status: 'Published' | 'Draft' | 'Pending Review' | 'Scheduled';
   isAiGenerated?: boolean;
+  isReaderContribution?: boolean;
+  reporterName?: string;
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string[];

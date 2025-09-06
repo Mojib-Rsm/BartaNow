@@ -7,6 +7,7 @@ import { bn } from 'date-fns/locale';
 import { Badge } from './ui/badge';
 import { generateNonAiSlug, getCategoryColor } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import { UserCheck } from 'lucide-react';
 
 type ArticleCardProps = {
   article: Article;
@@ -30,10 +31,16 @@ export default function ArticleCard({ article }: ArticleCardProps) {
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             data-ai-hint={article.imageHint}
             />
-             <div className="absolute top-2 left-2">
+             <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-2">
                 <Badge style={{ backgroundColor: categoryColor, color: '#fff' }}>
                     {article.category}
                 </Badge>
+                 {article.isReaderContribution && (
+                    <Badge variant="outline" className="bg-background/80 backdrop-blur-sm border-blue-500 text-blue-500">
+                        <UserCheck className="mr-1 h-3 w-3" />
+                        পাঠকের লেখা
+                    </Badge>
+                )}
             </div>
             {article.sponsored && (
                  <Badge 

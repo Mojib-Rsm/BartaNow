@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu, X, User, LogOut, LayoutDashboard, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Image from 'next/image';
@@ -186,6 +186,12 @@ export default function Header() {
             )}
             <div className="flex items-center gap-2">
                 <SearchInput />
+                <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
+                    <Link href="/report-story">
+                        <Send className="mr-2 h-4 w-4" />
+                        খবর পাঠান
+                    </Link>
+                </Button>
                 <ThemeToggle />
                  {user ? (
                     <DropdownMenu>

@@ -2,7 +2,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Trash2, Clock } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Trash2, Clock, UserCheck } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -154,15 +154,24 @@ export const columns: ColumnDef<Article>[] = [
     },
     cell: ({ row }) => {
         const isScheduled = row.original.status === 'Scheduled' && isFuture(new Date(row.original.publishedAt));
+        const isReaderContribution = row.original.isReaderContribution;
         return (
             <div className="font-medium line-clamp-2">
                 {row.getValue("title")}
-                {isScheduled && (
-                    <Badge variant="secondary" className="ml-2 bg-amber-500 text-white">
-                        <Clock className="mr-1 h-3 w-3" />
-                        শিডিউলড
-                    </Badge>
-                )}
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                    {isScheduled && (
+                        <Badge variant="secondary" className="bg-amber-500 text-white">
+                            <Clock className="mr-1 h-3 w-3" />
+                            শিডিউলড
+                        </Badge>
+                    )}
+                    {isReaderContribution && (
+                        <Badge variant="outline" className="border-blue-500 text-blue-500">
+                             <UserCheck className="mr-1 h-3 w-3" />
+                             User Submission
+                        </Badge>
+                    )}
+                </div>
             </div>
         )
     },
@@ -193,6 +202,9 @@ export const columns: ColumnDef<Article>[] = [
   {
     accessorKey: "authorName",
     header: "লেখক",
+     cell: ({ row }) => (
+      <div>{row.original.isReaderContribution ? row.original.reporterName : row.original.authorName}</div>
+    ),
   },
    {
     accessorKey: "tags",
