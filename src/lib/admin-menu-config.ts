@@ -34,6 +34,7 @@ import {
   Plug,
   History,
   Bot,
+  PieChart,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -124,10 +125,10 @@ export const adminMenuConfig: AdminMenuItem[] = [
     roles: ['admin', 'editor'],
   },
   {
-    path: '/admin/seo-report',
-    label: 'SEO Report',
-    icon: LineChart,
-    roles: ['admin'],
+    path: '/admin/analytics',
+    label: 'Analytics',
+    icon: PieChart,
+    roles: ['admin', 'editor'],
   },
    {
     path: '/admin/contact-messages',
@@ -145,12 +146,6 @@ export const adminMenuConfig: AdminMenuItem[] = [
     path: '/admin/ads',
     label: 'Ad Spaces',
     icon: Megaphone,
-    roles: ['admin'],
-  },
-   {
-    path: '/admin/reports',
-    label: 'Report',
-    icon: BarChart,
     roles: ['admin'],
   },
    {
@@ -173,6 +168,7 @@ export const adminMenuConfig: AdminMenuItem[] = [
     children: [
         { path: '/admin/import', label: 'Import' },
         { path: '/admin/plugins', label: 'Plugins' },
+        { path: '/admin/seo-report', label: 'SEO Report' },
     ],
   },
   {
