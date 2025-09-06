@@ -176,13 +176,9 @@ export const adminMenuConfig: AdminMenuItem[] = [
     ],
   },
   {
-    path: '#settings',
+    path: '/admin/settings',
     label: 'Settings',
     icon: Settings,
     roles: ['admin'],
-    children: [
-      { path: '/admin/settings', label: 'Site Settings' },
-      { path: '/admin/notifications', label: 'Notifications' },
-    ]
   },
 ];
