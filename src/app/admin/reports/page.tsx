@@ -1,50 +1,124 @@
 
+'use client';
+
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { getArticles, getAllUsers } from "@/lib/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import type { Metadata } from 'next';
-import { Flame, UserCheck } from "lucide-react";
+import type { Article } from '@/lib/types';
+import { Flame, UserCheck, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export const metadata: Metadata = {
-  title: 'রিপোর্ট ও অ্যানালিটিক্স',
-  description: 'ওয়েবসাইটের পারফরম্যান্স এবং কন্টেন্ট সম্পর্কে বিস্তারিত রিপোর্ট দেখুন।',
-};
+type ReportStats = {
+    topArticles: (Article & { views: number })[];
+    topAuthors: { name: string, count: number }[];
+    categoryData: { name: string, posts: number }[];
+}
 
-export default async function ReportsPage() {
-    const [{ articles }, allUsers] = await Promise.all([
-        getArticles({ limit: 1000 }),
-        getAllUsers(),
-    ]);
+const ReportsSkeleton = () => (
+    <div className="w-full space-y-6">
+         <div>
+            <Skeleton className="h-9 w-1/3" />
+            <Skeleton className="h-5 w-2/3 mt-2" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-6 w-1/2" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-6 w-full" />)}
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                     <Skeleton className="h-6 w-1/2" />
+                </CardHeader>
+                 <CardContent className="space-y-4">
+                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-6 w-full" />)}
+                </CardContent>
+            </Card>
+        </div>
+         <Card>
+            <CardHeader>
+                <Skeleton className="h-6 w-1/3" />
+                <Skeleton className="h-4 w-1/2 mt-2" />
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-[400px] w-full" />
+            </CardContent>
+        </Card>
+    </div>
+);
 
-    // Top Viewed Articles (Simulated for demo)
-    const topArticles = articles
-        .map(a => ({ ...a, views: Math.floor(Math.random() * 5000) + 100 }))
-        .sort((a, b) => b.views - a.views)
-        .slice(0, 10);
 
-    // Top Authors by article count
-    const authorCounts = articles.reduce((acc, article) => {
-        acc[article.authorName] = (acc[article.authorName] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
+export default function ReportsPage() {
+    const [stats, setStats] = useState<ReportStats | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const topAuthors = Object.entries(authorCounts)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 5)
-        .map(([name, count]) => ({ name, count }));
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const [{ articles }, allUsers] = await Promise.all([
+                    getArticles({ limit: 1000 }),
+                    getAllUsers(),
+                ]);
 
-    // Category Distribution
-    const categoryCounts = articles.reduce((acc, article) => {
-        acc[article.category] = (acc[article.category] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
-    
-    const categoryData = Object.entries(categoryCounts)
-        .map(([name, posts]) => ({ name, posts }))
-        .sort((a,b) => b.posts - a.posts);
+                // Top Viewed Articles (Simulated for demo)
+                const topArticles = articles
+                    .map(a => ({ ...a, views: Math.floor(Math.random() * 5000) + 100 }))
+                    .sort((a, b) => b.views - a.views)
+                    .slice(0, 10);
+
+                // Top Authors by article count
+                const authorCounts = articles.reduce((acc, article) => {
+                    acc[article.authorName] = (acc[article.authorName] || 0) + 1;
+                    return acc;
+                }, {} as Record<string, number>);
+
+                const topAuthors = Object.entries(authorCounts)
+                    .sort(([, a], [, b]) => b - a)
+                    .slice(0, 5)
+                    .map(([name, count]) => ({ name, count }));
+
+                // Category Distribution
+                const categoryCounts = articles.reduce((acc, article) => {
+                    acc[article.category] = (acc[article.category] || 0) + 1;
+                    return acc;
+                }, {} as Record<string, number>);
+                
+                const categoryData = Object.entries(categoryCounts)
+                    .map(([name, posts]) => ({ name, posts }))
+                    .sort((a,b) => b.posts - a.posts);
+                
+                setStats({ topArticles, topAuthors, categoryData });
+
+            } catch (error) {
+                console.error("Failed to fetch report data", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchData();
+    }, []);
+
+    if (loading) {
+        return <ReportsSkeleton />;
+    }
+
+    if (!stats) {
+        return <div>রিপোর্ট লোড করা যায়নি।</div>
+    }
+
+    const { topArticles, topAuthors, categoryData } = stats;
 
 
   return (
+    <>
+    <head>
+        <title>রিপোর্ট ও অ্যানালিটিক্স</title>
+        <meta name="description" content="ওয়েবসাইটের পারফরম্যান্স এবং কন্টেন্ট সম্পর্কে বিস্তারিত রিপোর্ট দেখুন।" />
+    </head>
     <div className="w-full space-y-6">
         <div>
             <h1 className="text-3xl font-bold">রিপোর্ট ও অ্যানালিটিক্স</h1>
@@ -103,5 +177,6 @@ export default async function ReportsPage() {
             </CardContent>
         </Card>
     </div>
+    </>
   );
 }
