@@ -37,12 +37,12 @@ export default function RootLayout({
 }>) {
     const headersList = headers();
     const pathname = headersList.get('x-pathname') || '';
-    const isAdminRoute = pathname.startsWith('/admin');
+    const isSpecialRoute = pathname.startsWith('/admin') || pathname.startsWith('/login') || pathname.startsWith('/install');
 
-    if (isAdminRoute) {
+    if (isSpecialRoute) {
         return (
              <html lang="bn" dir="ltr" className="h-full" suppressHydrationWarning>
-                <body className="h-full">
+                <body className="h-full bg-muted/40">
                     <ThemeProvider
                         attribute="class"
                         defaultTheme="system"
