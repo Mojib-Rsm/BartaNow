@@ -157,7 +157,7 @@ function AdminLayoutContent({
                <span className="text-xl font-bold text-white">BartaNow</span>
             </Link>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="overflow-y-auto">
             <nav className="grid items-start px-4 text-sm font-medium">
               {renderNavLinks(pathname)}
             </nav>
