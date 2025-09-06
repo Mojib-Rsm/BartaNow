@@ -3,7 +3,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem, createAd, updateAd, deleteAd, getSocialLinks, updateSocialLinks, createLocation, updateLocation, deleteLocation, deleteTag, createTag, signupUser } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem, createAd, updateAd, deleteAd, getSocialLinks, updateSocialLinks, createLocation, updateLocation, deleteLocation, deleteTag, createTag, signupUser, getRecommendedArticles } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem, Ad, SocialLinks, Location, Tag } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -1514,6 +1514,29 @@ export async function deleteLocationAction(locationId: string) {
     }
 }
 
+export async function trackReadingHistoryAction(userId: string, articleId: string) {
+    try {
+        const user = await getUserById(userId);
+        if (!user) {
+            return { success: false, message: 'User not found' };
+        }
+        
+        const history = user.readingHistory || [];
+        // Prevent duplicates and limit history size
+        const newHistory = [articleId, ...history.filter(id => id !== articleId)].slice(0, 50);
+
+        await updateUser(userId, { readingHistory: newHistory });
+        return { success: true };
+    } catch(e) {
+        console.error("Track reading history error", e);
+        return { success: false, message: 'Failed to track reading history' };
+    }
+}
+
+export async function getRecommendedArticlesAction(userId: string): Promise<Article[]> {
+    return getRecommendedArticles(userId);
+}
     
 
     
+

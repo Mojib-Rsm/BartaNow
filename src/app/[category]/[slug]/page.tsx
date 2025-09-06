@@ -1,6 +1,6 @@
 
 
-import { getArticleBySlug, getArticles, getArticleById } from '@/lib/api';
+import { getArticleBySlug, getArticles, getArticleById, updateUser } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -19,6 +19,7 @@ import BookmarkButton from '@/components/bookmark-button';
 import { suggestRelatedArticles } from '@/ai/flows/suggest-related-articles';
 import { generateNonAiSlug } from '@/lib/utils';
 import type { Article } from '@/lib/types';
+import ReadingHistoryTracker from '@/components/reading-history-tracker';
  
 type Props = {
   params: { slug: string, category: string }
@@ -132,6 +133,7 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
 
   return (
     <>
+    <ReadingHistoryTracker articleId={article.id} />
     <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

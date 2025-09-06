@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import ArticleCard from '@/components/article-card';
@@ -15,12 +16,13 @@ import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carouse
 import TrendingSidebar from '@/components/trending-sidebar';
 import FactCheckSidebar from '@/components/fact-check-sidebar';
 import MemeCard from '@/components/meme-card';
-import type { Article, MemeNews } from '@/lib/types';
+import type { Article, MemeNews, User } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import Autoplay from "embla-carousel-autoplay";
 import SocialFollow from './social-follow';
 import { generateNonAiSlug } from '@/lib/utils';
 import VideoCard from './video-card';
+import RecommendedForYou from './recommended-for-you';
 
 const SectionHeader = ({ title, categorySlug }: { title: string, categorySlug: string }) => (
   <div className="flex items-center justify-between border-b-2 border-primary mb-4 pb-2">
@@ -112,6 +114,15 @@ export default function HomePageClient({
     heroGridArticles: Article[];
     heroSideArticles: Article[];
   } | null>(null);
+
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('bartaNowUser');
+    if (storedUser) {
+        setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   useEffect(() => {
       const { articles } = initialArticles;
@@ -213,6 +224,8 @@ export default function HomePageClient({
           })}
         </div>
       </section>
+
+      {user && <RecommendedForYou userId={user.id} />}
 
       {/* Video Gallery Section */}
       {videoArticles.length > 0 && (

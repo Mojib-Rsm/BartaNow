@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad, SocialLinks, Location } from './types';
@@ -659,6 +660,40 @@ async function mockSignupUser(data: Omit<User, 'id' | 'role' | 'savedArticles' |
     mockDb.users.push(newUser);
     return newUser;
 }
+
+async function getMockRecommendedArticles(userId: string): Promise<Article[]> {
+    const user = await getMockUserById(userId);
+    if (!user || !user.readingHistory || user.readingHistory.length === 0) {
+        return [];
+    }
+
+    const categoryCounts: Record<string, number> = {};
+    for (const articleId of user.readingHistory) {
+        const article = await getMockArticleById(articleId);
+        if (article) {
+            categoryCounts[article.category] = (categoryCounts[article.category] || 0) + 1;
+        }
+    }
+
+    const sortedCategories = Object.entries(categoryCounts)
+        .sort(([, a], [, b]) => b - a)
+        .map(([category]) => category);
+
+    const topCategories = sortedCategories.slice(0, 3);
+    if (topCategories.length === 0) {
+        return [];
+    }
+
+    const { articles: recommended } = await getMockArticles({ limit: 20 }); // Get a pool of recent articles
+
+    return recommended
+        .filter(article => 
+            !user.readingHistory?.includes(article.id) && 
+            topCategories.includes(article.category)
+        )
+        .slice(0, 4); // Return top 4
+}
+
 
 
 // --- FIRESTORE IMPLEMENTATIONS ---
@@ -1361,6 +1396,49 @@ async function firestoreSignupUser(data: Omit<User, 'id' | 'role' | 'savedArticl
   return newUser;
 }
 
+async function getFirestoreRecommendedArticles(userId: string): Promise<Article[]> {
+    const user = await getFirestoreUserById(userId);
+    if (!user || !user.readingHistory || user.readingHistory.length === 0) {
+        return [];
+    }
+
+    // This is inefficient on Firestore without a proper recommendation engine.
+    // For large scale, you'd use a separate service or a more complex query structure.
+    // Here's a simplified version:
+    
+    // 1. Fetch read articles to determine top categories
+    const readArticlesPromises = user.readingHistory.slice(0, 20).map(id => getFirestoreArticleById(id));
+    const readArticles = (await Promise.all(readArticlesPromises)).filter((a): a is Article => !!a);
+
+    if (readArticles.length === 0) return [];
+    
+    // 2. Count category occurrences
+    const categoryCounts: Record<string, number> = {};
+    for (const article of readArticles) {
+        categoryCounts[article.category] = (categoryCounts[article.category] || 0) + 1;
+    }
+
+    const sortedCategories = Object.entries(categoryCounts)
+        .sort(([, a], [, b]) => b - a)
+        .map(([category]) => category);
+
+    const topCategories = sortedCategories.slice(0, 3);
+    if (topCategories.length === 0) return [];
+    
+    // 3. Fetch recent articles from top categories
+    const recommendedSnapshot = await db.collection('articles')
+        .where('category', 'in', topCategories)
+        .orderBy('publishedAt', 'desc')
+        .limit(20) // Fetch a pool of potential recommendations
+        .get();
+        
+    const potentialRecommendations = recommendedSnapshot.docs.map(doc => doc.data() as Article);
+
+    // 4. Filter out already read articles
+    return potentialRecommendations.filter(article => !user.readingHistory?.includes(article.id)).slice(0, 4);
+}
+
+
 
 // --- PostgreSQL IMPLEMENTATIONS ---
 
@@ -1690,6 +1768,10 @@ export async function signupUser(data: Omit<User, 'id' | 'role' | 'savedArticles
     return firestoreSignupUser(data);
 }
 
+export async function getRecommendedArticles(userId: string): Promise<Article[]> {
+    if (!useFirestore || !db) return getMockRecommendedArticles(userId);
+    return getFirestoreRecommendedArticles(userId);
+}
 
 
 // --- NON-CRUD APIs ---
