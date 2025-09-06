@@ -14,6 +14,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { uploadImage } from '@/lib/imagekit';
 import { generateNonAiSlug } from '@/lib/utils';
+import { translateForSlug } from './translate-for-slug';
 
 const AutoGenerateArticleInputSchema = z.object({
   keyword: z.string().describe('The keyword or topic for the news article.'),
@@ -43,8 +44,11 @@ export async function autoGenerateArticle(input: AutoGenerateArticleInput): Prom
   if (!articleData) {
     throw new Error('Failed to generate article content.');
   }
+  
+  // 2. Generate a URL-friendly slug from the title
+  const { slug } = await translateForSlug(articleData.title);
 
-  // 2. Generate an image based on the article title
+  // 3. Generate an image based on the article title
   const imageGenResponse = await ai.generate({
     model: 'googleai/imagen-4.0-fast-generate-001',
     prompt: `A photorealistic, high-quality image for a news article titled: "${articleData.title}". The image should be suitable for a professional news website.`,
@@ -55,12 +59,13 @@ export async function autoGenerateArticle(input: AutoGenerateArticleInput): Prom
     throw new Error('Failed to generate an image for the article.');
   }
   
-  // 3. Upload the generated image to ImageKit
-  const uploadedImageUrl = await uploadImage(imageDataUri, `${articleData.slug}-featured-image.png`);
+  // 4. Upload the generated image to ImageKit
+  const uploadedImageUrl = await uploadImage(imageDataUri, `${slug}-featured-image.png`);
 
-  // 4. Return the complete article object
+  // 5. Return the complete article object
   return {
     ...articleData,
+    slug,
     imageUrl: uploadedImageUrl,
   };
 }
@@ -69,7 +74,7 @@ export async function autoGenerateArticle(input: AutoGenerateArticleInput): Prom
 const articleGenerationPrompt = ai.definePrompt({
   name: 'autoArticleGenerationPrompt',
   input: { schema: AutoGenerateArticleInputSchema },
-  output: { schema: AutoGenerateArticleOutputSchema.omit({ imageUrl: true }) }, // We generate image URL separately
+  output: { schema: AutoGenerateArticleOutputSchema.omit({ imageUrl: true, slug: true }) }, // We generate image URL and slug separately
   prompt: `You are an expert journalist for a professional news website called 'BartaNow'. Your task is to generate a complete, ready-to-publish news article based on the provided keyword and instructions.
 
 **Instructions:**
@@ -80,14 +85,12 @@ const articleGenerationPrompt = ai.definePrompt({
 
 **Your Task:**
 1.  **Generate a Title:** Create a compelling, SEO-friendly headline based on the keyword.
-2.  **Generate Content:** Write a well-structured news article with an introduction, body (multiple paragraphs), and conclusion. Format the content using HTML paragraphs (e.g., <p>paragraph one.</p><p>paragraph two.</p>). Do not use any other HTML tags. Do not invent facts or figures; write based on general knowledge.
+2.  **Generate Content:** Write a well-structured news article with an introduction, body (multiple paragraphs), and conclusion. Format the content using HTML paragraphs (e.g., <p>paragraph one.</p><p>paragraph two.</p>). Do not use any other HTML tags like <h2> or <ul>. Do not invent facts or figures; write based on general knowledge.
 3.  **Generate Summary:** Write a concise, engaging summary of the article (under 160 characters) suitable for a meta description.
 4.  **Generate Tags & Keywords:**
     -   Suggest 3-5 relevant, general tags.
     -   Suggest 1-2 specific focus keywords for SEO.
-5.  **Generate Slug:** Create a URL-friendly slug from the generated title. It must be in lowercase, with words separated by hyphens.
 
 Ensure all generated text fields respect the specified language.
 `,
 });
-

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,7 +18,7 @@ export default function AutoPostPage() {
       </div>
 
       <Tabs defaultValue="settings" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
           <TabsTrigger value="settings">সেটিংস</TabsTrigger>
           <TabsTrigger value="queue">প্রকাশের অপেক্ষায় (Queue)</TabsTrigger>
           <TabsTrigger value="history">ইতিহাস</TabsTrigger>
