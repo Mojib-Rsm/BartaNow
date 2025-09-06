@@ -46,7 +46,8 @@ export default function Header() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-    window.addEventListener('scroll', handleScroll);
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
     
     const storedUser = localStorage.getItem('bartaNowUser');
     if (storedUser) {
