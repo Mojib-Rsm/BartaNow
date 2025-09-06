@@ -34,6 +34,7 @@ import {
   History,
   Bot,
   PieChart,
+  Clock, // Added for Timeline
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -155,6 +156,12 @@ export const adminMenuConfig: AdminMenuItem[] = [
     label: 'Location',
     icon: MapPin,
     roles: ['admin'],
+  },
+  {
+    path: '/admin/timeline',
+    label: 'Timeline',
+    icon: Clock,
+    roles: ['admin', 'editor'],
   },
    {
     label: 'Tools',

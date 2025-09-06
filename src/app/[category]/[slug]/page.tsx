@@ -17,7 +17,7 @@ import AudioPlayer from '@/components/audio-player';
 import FactCheckMeter from '@/components/fact-check-meter';
 import BookmarkButton from '@/components/bookmark-button';
 import { suggestRelatedArticles } from '@/ai/flows/suggest-related-articles';
-import { generateNonAiSlug } from '@/lib/utils';
+import { generateNonAiSlug, getCategoryColor } from '@/lib/utils';
 import type { Article } from '@/lib/types';
 import ReadingHistoryTracker from '@/components/reading-history-tracker';
  
@@ -103,6 +103,8 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
     month: 'long',
     day: 'numeric',
   });
+  
+  const categoryColor = getCategoryColor(article.category);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -143,7 +145,9 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
             <AdSpot placement="before_post" className="h-24 mb-8" />
             <article className="bg-card p-6 sm:p-8 rounded-lg shadow-lg">
                 <header className="mb-8">
-                    <Badge variant="default" className="mb-4">{article.category}</Badge>
+                    <Badge variant="default" className="mb-4" style={{backgroundColor: categoryColor}}>
+                        {article.category}
+                    </Badge>
                     <h1 className="text-3xl md:text-5xl font-bold font-headline text-primary mb-4">
                     {article.title}
                     </h1>

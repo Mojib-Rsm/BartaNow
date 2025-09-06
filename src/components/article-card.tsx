@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { Badge } from './ui/badge';
-import { generateNonAiSlug } from '@/lib/utils';
+import { generateNonAiSlug, getCategoryColor } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 type ArticleCardProps = {
   article: Article;
@@ -16,6 +17,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
   const categorySlug = generateNonAiSlug(article.category || "uncategorized");
   const articleSlug = article.slug || generateNonAiSlug(article.title);
   const articleUrl = `/${categorySlug}/${articleSlug}`;
+  const categoryColor = getCategoryColor(article.category);
 
   return (
     <Card className="flex flex-col overflow-hidden bg-card rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 group border">
@@ -28,6 +30,11 @@ export default function ArticleCard({ article }: ArticleCardProps) {
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             data-ai-hint={article.imageHint}
             />
+             <div className="absolute top-2 left-2">
+                <Badge style={{ backgroundColor: categoryColor, color: '#fff' }}>
+                    {article.category}
+                </Badge>
+            </div>
             {article.sponsored && (
                  <Badge 
                     variant="destructive" 
