@@ -376,7 +376,7 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             isAiGenerated: data.isAiGenerated || false,
             badge: data.badge === '__none__' ? undefined : data.badge,
             sponsored: data.sponsored ?? false,
-            status: data.status || 'Draft',
+            status: data.isAiGenerated ? 'Published' : (data.status || 'Draft'),
             location: data.location === '__none__' ? undefined : data.location,
             metaTitle: data.metaTitle,
             metaDescription: data.metaDescription,
@@ -1195,51 +1195,6 @@ export async function getArticlesByMediaUrlAction(url: string) {
     return getArticlesByMediaUrl(url);
 }
 
-export async function deleteMultipleArticlesAction(articleIds: string[]) {
-    try {
-        await deleteMultipleArticles(articleIds);
-        revalidatePath('/admin/articles');
-        revalidatePath('/');
-        return { success: true, message: `${articleIds.length} টি আর্টিকেল সফলভাবে ডিলিট হয়েছে।` };
-    } catch (error) {
-        console.error("Delete Multiple Articles Error:", error);
-        const errorMessage = error instanceof Error ? error.message : 'আর্টিকেলগুলো ডিলিট করতে একটি সমস্যা হয়েছে।';
-        return { success: false, message: errorMessage };
-    }
-}
-
-const bulkUpdateSchema = z.object({
-  status: z.enum(['Published', 'Draft', '__no_change__']).optional(),
-  category: z.string().optional(),
-  tags: z.string().optional(),
-});
-
-export async function updateMultipleArticlesAction(articleIds: string[], data: z.infer<typeof bulkUpdateSchema>) {
-    try {
-        const updateData: Partial<Pick<Article, 'status' | 'category' | 'tags'>> = {};
-        
-        if (data.status && data.status !== '__no_change__') {
-            updateData.status = data.status as 'Published' | 'Draft';
-        }
-        if (data.category && data.category !== '__no_change__') {
-            updateData.category = data.category;
-        }
-
-        const tagArray = data.tags?.split(',').map(tag => tag.trim()).filter(Boolean);
-        
-        await updateMultipleArticles(articleIds, updateData, tagArray);
-
-        revalidatePath('/admin/articles');
-        revalidatePath('/');
-
-        return { success: true, message: `${articleIds.length} টি আর্টিকেল সফলভাবে আপডেট হয়েছে।` };
-    } catch (error) {
-        console.error("Bulk Update Articles Error:", error);
-        const errorMessage = error instanceof Error ? error.message : 'আর্টিকেলগুলো আপডেট করতে একটি সমস্যা হয়েছে।';
-        return { success: false, message: errorMessage };
-    }
-}
-
 // --- CONTACT MESSAGE ACTIONS ---
 const contactMessageSchema = z.object({
   name: z.string().min(3, "নাম কমপক্ষে ৩ অক্ষরের হতে হবে।"),
@@ -1539,4 +1494,5 @@ export async function getRecommendedArticlesAction(userId: string): Promise<Arti
     
 
     
+
 
