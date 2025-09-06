@@ -646,6 +646,20 @@ async function deleteMockLocation(id: string): Promise<void> {
     if (index > -1) mockDb.locations.splice(index, 1);
 }
 
+async function mockSignupUser(data: Omit<User, 'id' | 'role' | 'savedArticles' | 'readingHistory'>): Promise<User> {
+    const existingUser = await getMockUserByEmail(data.email);
+    if (existingUser) {
+        throw new Error('User already exists');
+    }
+    const newUser: User = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        ...data,
+    };
+    mockDb.users.push(newUser);
+    return newUser;
+}
+
 
 // --- FIRESTORE IMPLEMENTATIONS ---
 
@@ -1331,6 +1345,23 @@ async function deleteFirestoreLocation(id: string): Promise<void> {
     await db.collection('locations').doc(id).delete();
 }
 
+async function firestoreSignupUser(data: Omit<User, 'id' | 'role' | 'savedArticles' | 'readingHistory'>): Promise<User> {
+  const existingUser = await getFirestoreUserByEmail(data.email);
+  if (existingUser) {
+    throw new Error('A user with this email already exists.');
+  }
+
+  const docRef = db.collection('users').doc();
+  const newUser: User = {
+    id: docRef.id,
+    role: 'user',
+    ...data,
+  };
+  await docRef.set(newUser);
+  return newUser;
+}
+
+
 // --- PostgreSQL IMPLEMENTATIONS ---
 
 const usePostgres = process.env.DATABASE_TYPE === 'postgresql';
@@ -1652,6 +1683,11 @@ export async function updateLocation(id: string, data: Partial<Location>): Promi
 export async function deleteLocation(id: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockLocation(id);
     return deleteFirestoreLocation(id);
+}
+
+export async function signupUser(data: Omit<User, 'id' | 'role' | 'savedArticles' | 'readingHistory'>): Promise<User> {
+    if (!useFirestore || !db) return mockSignupUser(data);
+    return firestoreSignupUser(data);
 }
 
 

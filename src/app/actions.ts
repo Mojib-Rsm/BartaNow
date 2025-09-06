@@ -1,7 +1,9 @@
+
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem, createAd, updateAd, deleteAd, getSocialLinks, updateSocialLinks, createLocation, updateLocation, deleteLocation, deleteTag, createTag } from '@/lib/api';
+import { getArticleById, getArticles, getUserByEmail, createUser, updateUser, getAuthorById, updateArticle, createArticle, deleteArticle, deleteUser, getUserById, createMedia, updateComment, deleteComment, createPage, updatePage, deletePage, createPoll, updatePoll, deletePoll, createSubscriber, getAllSubscribers, deleteSubscriber, getArticleBySlug, getAllRssFeeds, createRssFeed, updateRssFeed, deleteRssFeed, getCategories, updateCategory, deleteCategory, updateMedia, getArticlesByMediaUrl, createCategory, deleteMultipleMedia, assignCategoryToMedia, deleteMultipleArticles, updateMultipleArticles, getMediaByFileName, updateCommentStatus, createComment, createContactMessage, updateContactMessage, deleteContactMessage, getMediaById, createMenuItem, updateMenuItem, deleteMenuItem, createAd, updateAd, deleteAd, getSocialLinks, updateSocialLinks, createLocation, updateLocation, deleteLocation, deleteTag, createTag, signupUser } from '@/lib/api';
 import type { Article, User, Page, Poll, PollOption, RssFeed, Category, Media, Comment, ContactMessage, MenuItem, Ad, SocialLinks, Location, Tag } from '@/lib/types';
 import { textToSpeech } from '@/ai/flows/text-to-speech.ts';
 import { z } from 'zod';
@@ -98,7 +100,7 @@ export async function signupAction(data: SignupFormValues) {
     }
 
     try {
-        const newUser = await createUser({
+        const newUser = await signupUser({
             name: data.name,
             email: data.email,
             password: data.password, // In a real app, hash this password before saving
@@ -282,7 +284,7 @@ export async function updateArticleAction(data: z.infer<typeof articleSchema>) {
             englishTitle: data.englishTitle,
             focusKeywords: data.focusKeywords,
             badge: data.badge === '__none__' ? undefined : data.badge,
-            sponsored: data.sponsored,
+            sponsored: data.sponsored ?? false,
             authorId: data.authorId,
             status: data.status,
             location: data.location === '__none__' ? undefined : data.location,
@@ -373,7 +375,7 @@ export async function createArticleAction(data: CreateArticleFormValues) {
             focusKeywords: data.focusKeywords,
             isAiGenerated: data.isAiGenerated || false,
             badge: data.badge === '__none__' ? undefined : data.badge,
-            sponsored: data.sponsored,
+            sponsored: data.sponsored ?? false,
             status: data.status || 'Draft',
             location: data.location === '__none__' ? undefined : data.location,
             metaTitle: data.metaTitle,

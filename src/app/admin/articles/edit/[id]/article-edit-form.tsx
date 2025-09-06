@@ -44,6 +44,7 @@ const formSchema = z.object({
   authorId: z.string(),
   status: z.enum(['Draft', 'Pending Review', 'Published', 'Scheduled']),
   badge: z.enum(['নতুন', 'জনপ্রিয়', '__none__']).optional(),
+  sponsored: z.boolean().optional(),
   location: z.string().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
@@ -105,6 +106,7 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
       authorId: article.authorId,
       status: article.status,
       badge: article.badge || '__none__',
+      sponsored: article.sponsored ?? false,
       location: article.location || '__none__',
       metaTitle: article.metaTitle || '',
       metaDescription: article.metaDescription || '',
@@ -414,6 +416,21 @@ export default function ArticleEditForm({ article }: ArticleEditFormProps) {
                 />
             </div>
           )}
+
+            <div className="flex items-center space-x-2">
+                <Controller
+                    control={form.control}
+                    name="sponsored"
+                    render={({ field }) => (
+                        <Checkbox
+                            id="sponsored"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                        />
+                    )}
+                />
+                <Label htmlFor="sponsored" className="cursor-pointer">এটি একটি স্পনসরড পোস্ট</Label>
+            </div>
           
            <Card className="bg-muted/30">
                 <CardHeader>
