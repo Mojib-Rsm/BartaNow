@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,19 +18,31 @@ import { Textarea } from '@/components/ui/textarea';
 import type { Category } from '@/lib/types';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
 import { useDebouncedCallback } from 'use-debounce';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getAllCategories } from '@/lib/api';
 
 const formSchema = z.object({
   name: z.string().min(2, "ক্যাটাগরির নাম কমপক্ষে ২ অক্ষরের হতে হবে।"),
   slug: z.string().min(2, "Slug কমপক্ষে ২ অক্ষরের হতে হবে।").optional().or(z.literal('')),
   description: z.string().optional(),
+  parentId: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 export default function CategoryCreateForm() {
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchCategories() {
+        const allCategories = await getAllCategories();
+        setCategories(allCategories);
+    }
+    fetchCategories();
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -38,14 +50,15 @@ export default function CategoryCreateForm() {
       name: '',
       slug: '',
       description: '',
+      parentId: '__none__',
     },
   });
 
   const debouncedSlugGeneration = useDebouncedCallback(async (name: string) => {
     if (name && !form.formState.dirtyFields.slug) {
         try {
-            const generatedSlug = await translateForSlug(name);
-            form.setValue('slug', generatedSlug);
+            const { slug } = await translateForSlug(name);
+            form.setValue('slug', slug, { shouldValidate: true });
         } catch (e) {
             console.error("Slug generation failed", e);
              form.setValue('slug', name.toLowerCase().replace(/\s+/g, '-'));
@@ -65,7 +78,11 @@ export default function CategoryCreateForm() {
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
-    const result = await createCategoryAction(data);
+    const finalData = {
+        ...data,
+        parentId: data.parentId === '__none__' ? undefined : data.parentId,
+    };
+    const result = await createCategoryAction(finalData);
     setLoading(false);
 
     if (result.success) {
@@ -108,6 +125,21 @@ export default function CategoryCreateForm() {
             {form.formState.errors.slug && (
               <p className="text-xs text-destructive">{form.formState.errors.slug.message}</p>
             )}
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="parentId">মূল ক্যাটাগরি (Parent)</Label>
+             <Select onValueChange={(value) => form.setValue('parentId', value)} defaultValue={form.getValues('parentId')}>
+                <SelectTrigger id="parentId">
+                    <SelectValue placeholder="মূল ক্যাটাগরি নির্বাচন করুন" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="__none__">কোনোটিই নয় (এটি মূল ক্যাটাগরি)</SelectItem>
+                    {categories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
           </div>
           
            <div className="grid gap-2">

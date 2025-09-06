@@ -16,13 +16,15 @@ import { updateCategoryAction } from '@/app/actions';
 import Link from 'next/link';
 import { Textarea } from '@/components/ui/textarea';
 import type { Category } from '@/lib/types';
-import { getCategoryById } from '@/lib/api';
+import { getCategoryById, getAllCategories } from '@/lib/api';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
   id: z.string(),
   name: z.string().min(2, "ক্যাটাগরির নাম কমপক্ষে ২ অক্ষরের হতে হবে।"),
   slug: z.string().min(2, "Slug কমপক্ষে ২ অক্ষরের হতে হবে।"),
   description: z.string().optional(),
+  parentId: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -34,6 +36,7 @@ type PageProps = {
 export default function CategoryEditForm({ params }: PageProps) {
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState<Category | null>(null);
+  const [allCategories, setAllCategories] = useState<Category[]>([]);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -44,27 +47,40 @@ export default function CategoryEditForm({ params }: PageProps) {
       name: '',
       slug: '',
       description: '',
+      parentId: '__none__',
     },
   });
 
   useEffect(() => {
-    async function fetchCategory(id: string) {
-        const data = await getCategoryById(id);
+    async function fetchData(id: string) {
+        const [data, allCats] = await Promise.all([
+            getCategoryById(id),
+            getAllCategories()
+        ]);
+        
         if (data) {
             setCategory(data);
-            form.reset(data);
+            setAllCategories(allCats.filter(c => c.id !== data.id)); // Prevent self-parenting
+            form.reset({
+                ...data,
+                parentId: data.parentId || '__none__',
+            });
         } else {
             toast({ variant: 'destructive', title: 'ত্রুটি', description: 'ক্যাটাগরিটি খুঁজে পাওয়া যায়নি।' });
             router.push('/admin/articles/categories');
         }
     }
-    fetchCategory(params.id);
+    fetchData(params.id);
   }, [params.id, form, router, toast]);
 
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
-    const result = await updateCategoryAction(data);
+     const finalData = {
+        ...data,
+        parentId: data.parentId === '__none__' ? undefined : data.parentId,
+    };
+    const result = await updateCategoryAction(finalData);
     setLoading(false);
 
     if (result.success) {
@@ -111,6 +127,21 @@ export default function CategoryEditForm({ params }: PageProps) {
             {form.formState.errors.slug && (
               <p className="text-xs text-destructive">{form.formState.errors.slug.message}</p>
             )}
+          </div>
+          
+           <div className="grid gap-2">
+            <Label htmlFor="parentId">মূল ক্যাটাগরি (Parent)</Label>
+             <Select onValueChange={(value) => form.setValue('parentId', value)} defaultValue={form.getValues('parentId')}>
+                <SelectTrigger id="parentId">
+                    <SelectValue placeholder="মূল ক্যাটাগরি নির্বাচন করুন" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="__none__">কোনোটিই নয় (এটি মূল ক্যাটাগরি)</SelectItem>
+                    {allCategories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
           </div>
           
            <div className="grid gap-2">

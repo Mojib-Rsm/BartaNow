@@ -71,6 +71,8 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
+  parentId?: string | null;
+  order?: number;
   entityType?: 'CATEGORY';
 }
 

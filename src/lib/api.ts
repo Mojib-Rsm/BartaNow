@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import type { Article, Author, Poll, MemeNews, User, Notification, Media, Comment, Page, MenuItem, Subscriber, RssFeed, Category, Tag, ContactMessage, Ad, SocialLinks, Location } from './types';
@@ -8,7 +7,7 @@ import { mockDb } from './data';
 import { summarizeArticle } from '@/ai/flows/summarize-article';
 import { sendMail } from './mailer';
 import { translateForSlug } from '@/ai/flows/translate-for-slug';
-import { getNewCommentEmailHtml } from './email-templates/new-comment-email';
+import { getNewCommentEmailHtml } from '@/lib/email-templates/new-comment-email';
 import { generateNonAiSlug } from './utils';
 import { Pool } from 'pg';
 
@@ -446,16 +445,18 @@ async function deleteMockRssFeed(feedId: string): Promise<void> {
 }
 
 async function getMockAllCategories(): Promise<Category[]> {
-    return [...mockDb.categories];
+    return [...mockDb.categories].sort((a,b) => (a.order || 0) - (b.order || 0));
 }
 
 async function getMockCategoryById(id: string): Promise<Category | undefined> {
     return mockDb.categories.find(c => c.id === id);
 }
 
-async function createMockCategory(data: Omit<Category, 'id'>): Promise<Category> {
+async function createMockCategory(data: Omit<Category, 'id' | 'order'>): Promise<Category> {
+    const highestOrder = mockDb.categories.reduce((max, item) => Math.max(max, item.order || 0), -1);
     const newCategory: Category = {
         id: `cat-${Date.now()}`,
+        order: highestOrder + 1,
         ...data,
     };
     mockDb.categories.unshift(newCategory);
@@ -1097,7 +1098,7 @@ async function deleteFirestoreRssFeed(feedId: string): Promise<void> {
 }
 
 async function getFirestoreAllCategories(): Promise<Category[]> {
-    const snapshot = await db.collection('categories').get();
+    const snapshot = await db.collection('categories').orderBy('order').get();
     return snapshot.docs.map(doc => doc.data() as Category);
 }
 
@@ -1106,14 +1107,19 @@ async function getFirestoreCategoryById(id: string): Promise<Category | undefine
     return doc.exists ? doc.data() as Category : undefined;
 }
 
-async function createFirestoreCategory(data: Omit<Category, 'id'>): Promise<Category> {
-    const slug = data.slug || await translateForSlug(data.name);
+async function createFirestoreCategory(data: Omit<Category, 'id' | 'order'>): Promise<Category> {
+    const slug = data.slug || (await translateForSlug(data.name)).slug;
+    const collectionRef = db.collection('categories');
+    const snapshot = await collectionRef.orderBy('order', 'desc').limit(1).get();
+    const highestOrder = snapshot.empty ? -1 : snapshot.docs[0].data().order;
+
     const newCategory: Category = {
         id: `cat-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         ...data,
-        slug: slug.slug,
+        slug,
+        order: highestOrder + 1,
     };
-    await db.collection('categories').doc(newCategory.id).set(newCategory);
+    await collectionRef.doc(newCategory.id).set(newCategory);
     return newCategory;
 }
 
@@ -1598,7 +1604,7 @@ export async function getCategoryById(id: string): Promise<Category | undefined>
     return getFirestoreCategoryById(id);
 }
 
-export async function createCategory(data: Omit<Category, 'id'>): Promise<Category> {
+export async function createCategory(data: Omit<Category, 'id' | 'order'>): Promise<Category> {
     if (!useFirestore || !db) return createMockCategory(data);
     return createFirestoreCategory(data);
 }
@@ -1799,5 +1805,3 @@ export async function deleteAd(adId: string): Promise<void> {
     if (!useFirestore || !db) return deleteMockAd(adId);
     return deleteFirestoreAd(adId);
 }
-
-    
