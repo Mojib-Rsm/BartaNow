@@ -108,7 +108,7 @@ async function getMockArticleById(id: string) {
 
 async function getMockArticleBySlug(slug: string): Promise<Article | undefined> {
     const normalizedSlug = slug.toLowerCase().replace(/^-+|-+$/g, '');
-    const article = mockDb.articles.find((article) => article.slug.toLowerCase().replace(/^-+|-+$/g, '') === normalizedSlug);
+    const article = mockDb.articles.find((article) => article.slug === normalizedSlug);
     if(article) return article;
     return undefined;
 }

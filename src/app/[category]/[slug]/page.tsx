@@ -37,7 +37,7 @@ export async function generateMetadata(
   }
 
   const siteName = 'BartaNow | বার্তা নাও';
-  const articleUrl = `/${generateNonAiSlug(article.category)}/${article.slug}`;
+  const articleUrl = `/${encodeURIComponent(generateNonAiSlug(article.category))}/${encodeURIComponent(article.slug)}`;
   const seoTitle = article.metaTitle || `${article.title} | ${siteName}`;
   const description = article.metaDescription || article.aiSummary || article.content.substring(0, 160);
   const keywords = article.metaKeywords || [...(article.tags || []), ...(article.focusKeywords || [])];
@@ -126,7 +126,7 @@ export default async function ArticlePage({ params }: { params: { slug: string, 
     description: article.metaDescription || article.aiSummary,
     mainEntityOfPage: {
         '@type': 'WebPage',
-        '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com'}/${generateNonAiSlug(article.category)}/${article.slug}`
+        '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com'}/${encodeURIComponent(generateNonAiSlug(article.category))}/${encodeURIComponent(article.slug)}`
     }
   };
 
