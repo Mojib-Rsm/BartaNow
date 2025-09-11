@@ -1,19 +1,34 @@
 
-import { getArticles, getAllPages, getAllAuthors, getAllCategories } from '@/lib/api';
+import { getArticles, getAllPages, getAllAuthors, getAllCategories, getAllTags } from '@/lib/api';
 import { generateNonAiSlug } from '@/lib/utils';
-import type { Article, Author, Page, Category } from '@/lib/types';
+import type { Article, Author, Page, Category, Tag } from '@/lib/types';
 import { NextResponse } from 'next/server';
 
 const URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bartanow.com';
+
+function escapeXml(unsafe: string | undefined) {
+    if (!unsafe) return '';
+    return unsafe.replace(/[<>&'"]/g, (c) => {
+      switch (c) {
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '&': return '&amp;';
+        case '\'': return '&apos;';
+        case '"': return '&quot;';
+        default: return c;
+      }
+    });
+}
 
 function generateSiteMap(
     articles: Article[], 
     pages: Page[], 
     authors: Author[],
-    categories: Category[]
+    categories: Category[],
+    tags: Tag[]
     ) {
   let xml = `<?xml version="1.0" encoding="UTF-8"?>`;
-  xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+  xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
 
   // Add homepage
   xml += `
@@ -62,6 +77,11 @@ function generateSiteMap(
         <loc>${`${URL}/${categorySlug}/${article.slug}`}</loc>
         <lastmod>${new Date(article.publishedAt).toISOString()}</lastmod>
         <priority>0.90</priority>
+        <image:image>
+            <image:loc>${escapeXml(article.imageUrl)}</image:loc>
+            <image:title>${escapeXml(article.title)}</image:title>
+            <image:caption>${escapeXml(article.aiSummary)}</image:caption>
+        </image:image>
       </url>
     `;
   });
@@ -72,6 +92,16 @@ function generateSiteMap(
         <url>
             <loc>${`${URL}/category/${generateNonAiSlug(category.name)}`}</loc>
             <priority>0.80</priority>
+        </url>
+    `;
+  });
+
+  // Add tags
+  tags.forEach((tag) => {
+    xml += `
+        <url>
+            <loc>${`${URL}/tag/${tag.slug}`}</loc>
+            <priority>0.70</priority>
         </url>
     `;
   });
@@ -95,15 +125,17 @@ export async function GET() {
         { articles },
         pages,
         authors,
-        categories
+        categories,
+        tags
     ] = await Promise.all([
         getArticles({ limit: 10000 }), // get all articles
         getAllPages(),
         getAllAuthors(),
-        getAllCategories()
+        getAllCategories(),
+        getAllTags()
     ]);
 
-    const body = generateSiteMap(articles, pages, authors, categories);
+    const body = generateSiteMap(articles, pages, authors, categories, tags);
 
     return new NextResponse(body, {
         status: 200,
